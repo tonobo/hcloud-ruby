@@ -15,7 +15,9 @@ module Hcloud
         when nil
           self.send("#{attribute}=", resource[attribute.to_s])
         when :time
-          self.send("#{attribute}=", Time.parse(resource[attribute.to_s]))
+          unless resource[attribute.to_s].nil?
+            self.send("#{attribute}=", Time.parse(resource[attribute.to_s]))
+          end
         else 
           if value.is_a?(Class) and value.include?(EntryLoader)
             self.send("#{attribute}=", value.new(resource[attribute.to_s]))
