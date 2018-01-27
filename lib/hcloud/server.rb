@@ -20,5 +20,28 @@ module Hcloud
 
     include EntryLoader
 
+    def update(name:) 
+      Server.new(
+        Oj.load(request(base_path, j: {name: name}, method: :put).run.body)["server"],
+        parent,
+        client
+      )
+    end
+
+    def destroy
+      Action.new(
+        Oj.load(request(base_path, method: :delete).run.body)["action"],
+        parent,
+        client
+      )
+    end
+
+    private
+
+    def base_path
+      return "servers/#{id}" unless id.nil?
+      raise ResourcePathError, "Unable to build resource path. Id is nil." 
+    end
+
   end
 end
