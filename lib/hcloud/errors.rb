@@ -11,5 +11,7 @@ module Hcloud
     class ServiceError < Error; end
     class UniquenessError < Error; end
     class UnknownError < Error; end
+    class UnexpectedError < Error; end
+    class ResourcePathError < Error; end
   end
 end
