@@ -6,7 +6,7 @@ module Hcloud
       status: nil,
       created: :time,
       public_net: nil,
-      server_type: nil,
+      server_type: ServerType,
       datacenter: nil,
       image: nil,
       iso: nil,

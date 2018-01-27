@@ -7,4 +7,5 @@ module Hcloud
   autoload :ServerResource, 'hcloud/server_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
   autoload :Server, 'hcloud/server'
+  autoload :ServerType, 'hcloud/server_type'
 end
