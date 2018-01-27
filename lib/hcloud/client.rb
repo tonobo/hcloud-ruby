@@ -20,20 +20,28 @@ module Hcloud
     end
 
     def request(path, **options)
+      code = options.delete(:code)
+      if x = options.delete(:j)
+        options[:body] = Oj.dump(x, mode: :compat)
+        options[:method] ||= :post
+      end
       r = Typhoeus::Request.new(
         "https://api.hetzner.cloud/v1/#{path}",
         {
           headers: { 
-            "Authorization" => "Bearer #{token}"
+            "Authorization" => "Bearer #{token}",
+            "Content-Type" => "application/json",
           },
         }.merge(options)
       )
       r.on_complete do |response|
         case response.code
+        when code
+          raise Error::UnexpectedError, response.body
         when 401
           raise Error::Unauthorized
         when 0
-          raise Error::ServerError
+          raise Error::ServerError, "Connection error: #{response.return_code}"
         when 400...600
           j = Oj.load(response.body)
           code = j.dig("error", "code")
