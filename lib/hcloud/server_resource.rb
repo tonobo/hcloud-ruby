@@ -4,7 +4,7 @@ module Hcloud
 
     def all
       Oj.load(request("servers").run.body)["servers"].map do |x|
-        Server.new(x)
+        Server.new(x, self, client)
       end
     end
 
