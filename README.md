@@ -1,8 +1,9 @@
 # Hcloud
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/hcloud`. To experiment with that code, run `bin/console` for an interactive prompt.
+This is an unoffical ruby client for HetznerCloud Api service.
 
-TODO: Delete this and the text above, and describe your gem
+**Its currently in development and lacking a lot of feature. 
+The bindings are also not considered stable.**
 
 ## Installation
 
@@ -22,14 +23,45 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Client
 
-## Development
+* Create a client instance.
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+```ruby
+c = Hcloud::Client.new(token: "<your project token>")
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+### Server Resource
 
-## Contributing
+* List servers
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/hcloud.
+```
+c.servers.each do |server|
+  server.datacenter.location.id #=> 1
+end
+```
+
+* Create a server
+
+```
+c.servers.create(name: "moo5", server_type: "cx11", image: "ubuntu-16.04")
+#=> #<Hcloud::Server>
+```
+
+* Update servers' name
+
+```
+c.servers.count
+#=> 2
+c.servers.first.update(name: "moo")
+#=> #<Hcloud::Server>
+c.servers.each{|x| x.update(name: "moo") }
+Hcloud::Error::UniquenessError: server name is already used
+```
+
+* Delete a server
+
+```
+c.servers.first.delete
+#=> #<Hcloud::Action>
+```
