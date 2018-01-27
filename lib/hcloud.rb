@@ -1,5 +1,6 @@
 require "hcloud/version"
 
 module Hcloud
-  # Your code goes here...
+  autoload :Error, 'hcloud/errors'
+  autoload :Client, 'hcloud/client'
 end
