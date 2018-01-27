@@ -15,6 +15,10 @@ module Hcloud
       false
     end
 
+    def servers
+      ServerResource.new(client: self)
+    end
+
     def request(path, **options)
       r = Typhoeus::Request.new(
         "https://api.hetzner.cloud/v1/#{path}",
