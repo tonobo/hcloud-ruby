@@ -35,11 +35,25 @@ module Hcloud
         client
       )
     end
+   
+    %w(poweron poweroff shutdown reboot reset disable_rescue).each do |action|
+      define_method(action) do
+        Action.new(
+          Oj.load(request(base_path("actions/#{action}"), method: :post).run.body)["action"],
+          parent,
+          client
+        )
+      end
+    end
+
+    def actions
+      ActionResource.new(client: client, parent: self, base_path: base_path)
+    end
 
     private
 
-    def base_path
-      return "servers/#{id}" unless id.nil?
+    def base_path(ext=nil)
+      return ["servers/#{id}",ext].compact.join("/") unless id.nil?
       raise ResourcePathError, "Unable to build resource path. Id is nil." 
     end
 

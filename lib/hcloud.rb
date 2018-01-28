@@ -13,4 +13,5 @@ module Hcloud
   autoload :Location, 'hcloud/location'
   autoload :Image, 'hcloud/image'
   autoload :Action, 'hcloud/action'
+  autoload :ActionResource, 'hcloud/action_resource'
 end

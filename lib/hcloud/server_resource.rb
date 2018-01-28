@@ -26,12 +26,5 @@ module Hcloud
         Server.new(x, self, client)
       end
     end
-
-    def each(&block)
-      all.each do |member|
-        block.call(member)
-      end
-    end
-    
   end
 end
