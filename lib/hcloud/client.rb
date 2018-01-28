@@ -25,6 +25,9 @@ module Hcloud
         options[:body] = Oj.dump(x, mode: :compat)
         options[:method] ||= :post
       end
+      if x = options.delete(:q)
+        path << "?"+x.to_param
+      end
       r = Typhoeus::Request.new(
         "https://api.hetzner.cloud/v1/#{path}",
         {

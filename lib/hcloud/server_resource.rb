@@ -26,5 +26,31 @@ module Hcloud
         Server.new(x, self, client)
       end
     end
+
+    def find(id)
+      Server.new(
+        Oj.load(request("servers/#{id.to_i}").run.body)["server"], self, client
+      )
+    end
+
+    def [](arg)
+      case arg
+      when Integer
+       begin
+         find(arg)
+       rescue Error::NotFound
+       end
+      when String
+        find_by(name: arg)
+      end
+    end
+    
+    def find_by(name:)
+      x = Oj.load(request("servers", q: {name: name}).run.body)["servers"]
+      return nil if x.none?
+      x.each do |s|
+        return Server.new(s, self, client)
+      end
+    end
   end
 end
