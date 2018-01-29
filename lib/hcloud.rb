@@ -14,4 +14,6 @@ module Hcloud
   autoload :Image, 'hcloud/image'
   autoload :Action, 'hcloud/action'
   autoload :ActionResource, 'hcloud/action_resource'
+  autoload :Iso, 'hcloud/iso'
+  autoload :IsoResource, 'hcloud/iso_resource'
 end
