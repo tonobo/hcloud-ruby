@@ -31,6 +31,10 @@ module Hcloud
       ImageResource.new(client: self)
     end
 
+    def datacenters
+      DatacenterResource.new(client: self)
+    end
+
     def request(path, **options)
       code = options.delete(:code)
       if x = options.delete(:j)

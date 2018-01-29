@@ -10,6 +10,7 @@ module Hcloud
   autoload :Server, 'hcloud/server'
   autoload :ServerType, 'hcloud/server_type'
   autoload :Datacenter, 'hcloud/datacenter'
+  autoload :DatacenterResource, 'hcloud/datacenter_resource'
   autoload :Location, 'hcloud/location'
   autoload :Image, 'hcloud/image'
   autoload :ImageResource, 'hcloud/image_resource'

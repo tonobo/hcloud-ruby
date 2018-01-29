@@ -5,6 +5,7 @@ module Hcloud
       name: nil,
       description: nil,
       location: Location,
+      server_types: nil,
     }
 
     include EntryLoader
