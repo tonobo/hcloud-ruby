@@ -9,7 +9,23 @@ module Hcloud
     end
 
     def [](arg)
-      find_by(name: arg)
+      case arg
+      when Integer
+        begin
+          find(arg)
+        rescue Error::NotFound
+        end
+      when String
+        find_by(name: arg)
+      end
+    end
+
+    def find(id)
+      Iso.new(
+        Oj.load(request("isos/#{id.to_i}").run.body)["iso"],
+        self,
+        client
+      )
     end
 
     def find_by(name:)
