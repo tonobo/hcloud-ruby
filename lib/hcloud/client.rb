@@ -27,6 +27,10 @@ module Hcloud
       IsoResource.new(client: self)
     end
 
+    def images
+      ImageResource.new(client: self)
+    end
+
     def request(path, **options)
       code = options.delete(:code)
       if x = options.delete(:j)
