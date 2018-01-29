@@ -45,7 +45,7 @@ end
 
 ```ruby
 c.servers.create(name: "moo5", server_type: "cx11", image: "ubuntu-16.04")
-#=> #<Hcloud::Server>
+#=> [#<Hcloud::Action>, <#Hcloud::Server>, "root_password"]
 ```
 
 * Update servers' name
