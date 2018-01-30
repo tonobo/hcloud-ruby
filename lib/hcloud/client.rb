@@ -47,6 +47,10 @@ module Hcloud
       SSHKeyResource.new(client: self)
     end
 
+    def floating_ips
+      FloatingIPResource.new(client: self)
+    end
+
     def request(path, **options)
       code = options.delete(:code)
       if x = options.delete(:j)

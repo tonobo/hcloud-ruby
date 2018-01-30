@@ -7,6 +7,8 @@ module Hcloud
   autoload :AbstractResource, 'hcloud/abstract_resource'
   autoload :ServerResource, 'hcloud/server_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
+  autoload :FloatingIP, 'hcloud/floating_ip'
+  autoload :FloatingIPResource, 'hcloud/floating_ip_resource'
   autoload :SSHKey, 'hcloud/ssh_key'
   autoload :SSHKeyResource, 'hcloud/ssh_key_resource'
   autoload :Server, 'hcloud/server'
