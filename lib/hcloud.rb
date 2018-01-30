@@ -9,6 +9,7 @@ module Hcloud
   autoload :EntryLoader, 'hcloud/entry_loader'
   autoload :Server, 'hcloud/server'
   autoload :ServerType, 'hcloud/server_type'
+  autoload :ServerTypeResource, 'hcloud/server_type_resource'
   autoload :Datacenter, 'hcloud/datacenter'
   autoload :DatacenterResource, 'hcloud/datacenter_resource'
   autoload :Location, 'hcloud/location'
