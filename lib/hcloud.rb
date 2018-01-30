@@ -7,6 +7,8 @@ module Hcloud
   autoload :AbstractResource, 'hcloud/abstract_resource'
   autoload :ServerResource, 'hcloud/server_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
+  autoload :SSHKey, 'hcloud/ssh_key'
+  autoload :SSHKeyResource, 'hcloud/ssh_key_resource'
   autoload :Server, 'hcloud/server'
   autoload :ServerType, 'hcloud/server_type'
   autoload :ServerTypeResource, 'hcloud/server_type_resource'

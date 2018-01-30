@@ -43,6 +43,10 @@ module Hcloud
       ServerTypeResource.new(client: self)
     end
 
+    def ssh_keys
+      SSHKeyResource.new(client: self)
+    end
+
     def request(path, **options)
       code = options.delete(:code)
       if x = options.delete(:j)
