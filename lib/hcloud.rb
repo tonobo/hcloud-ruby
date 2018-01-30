@@ -12,6 +12,7 @@ module Hcloud
   autoload :Datacenter, 'hcloud/datacenter'
   autoload :DatacenterResource, 'hcloud/datacenter_resource'
   autoload :Location, 'hcloud/location'
+  autoload :LocationResource, 'hcloud/location_resource'
   autoload :Image, 'hcloud/image'
   autoload :ImageResource, 'hcloud/image_resource'
   autoload :Action, 'hcloud/action'
