@@ -1,4 +1,5 @@
 require 'grape'
+require 'active_support/all'
 
 require_relative './fake_service/datacenter'
 require_relative './fake_service/base'
