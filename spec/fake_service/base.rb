@@ -13,6 +13,8 @@ module Hcloud
       end
 
       mount Datacenter
+      mount Location
+      mount SSHKey
     end
   end
 end
