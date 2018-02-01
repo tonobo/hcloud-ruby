@@ -9,7 +9,7 @@ module Hcloud
 
     def create(name:, public_key:)
       j = Oj.load(request("ssh_keys", j: {name: name, public_key: public_key}).run.body)
-      SSHKey.new(j, self, client)
+      SSHKey.new(j["ssh_key"], self, client)
     end
 
     def find(id)
