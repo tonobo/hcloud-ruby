@@ -12,11 +12,13 @@ module Hcloud
         error!('Unauthorized', 401)
       end
 
+      require_relative './image'
       require_relative './server_type'
       require_relative './ssh_key'
       require_relative './location'
       require_relative './datacenter'
 
+      mount Image
       mount ServerType
       mount Datacenter
       mount Location
