@@ -44,7 +44,7 @@ describe "Image" do
 
   it "#update(description:) - handle nil" do
     expect{client.images[3454].update(description: nil)}.not_to(
-      raise_error(Hcloud::Error::InvalidInput)
+      raise_error
     )
   end
   
@@ -62,7 +62,7 @@ describe "Image" do
   
   it "#update(type:) - handle nil" do
     expect{client.images.first.update(type: nil)}.not_to(
-      raise_error(Hcloud::Error::InvalidInput)
+      raise_error
     )
   end
   
