@@ -34,7 +34,7 @@ module Hcloud
       )
     end
 
-    def destory
+    def destroy
       request("images/#{id.to_i}", method: :delete).run
       true
     end
