@@ -1,6 +1,12 @@
 require 'grape'
 require 'active_support/all'
 
+require 'simplecov'
+SimpleCov.start
+
+require 'codecov'
+SimpleCov.formatter = SimpleCov::Formatter::Codecov
+
 require_relative './fake_service/base'
 
 require 'rspec'
