@@ -1,5 +1,7 @@
 # Hcloud
 
+[![Build Status](https://travis-ci.org/tonobo/hcloud-ruby.svg?branch=master)](https://travis-ci.org/tonobo/hcloud-ruby)
+
 This is an unoffical ruby client for HetznerCloud Api service.
 
 **Its currently in development and lacking a lot of feature. 
