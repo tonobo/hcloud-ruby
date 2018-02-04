@@ -198,4 +198,69 @@ describe "Server" do
     expect(client.servers[0]).to be nil
   end
   
+  it "#update(name:)" do
+    expect(client.servers.find(1).name).to eq("moo")
+    server = nil
+    expect{server = client.servers[1].update(name: "foo")}.to(
+      raise_error(Hcloud::Error::UniquenessError)
+    )
+    expect{server = client.servers[1].update(name: "hui")}.not_to raise_error
+    expect(server.name).to eq("hui")
+    expect(client.servers.find(1).name).to eq("hui")
+  end
+  
+  it "#destroy" do
+    action = nil
+    expect{action = client.servers[1].destroy}.not_to raise_error
+    expect(action.status).to eq("success")
+    expect(client.servers[1]).to be nil
+  end
+
+  it "check server actions" do
+    id = nil
+    expect(client.servers[2].actions.count).to eq(1)
+    expect(id = client.servers[2].actions.first.id).to be_a Integer 
+    expect(client.servers[2].actions[id].id).to eq(id)
+  end
+  
+  it "#poweroff" do
+    expect(client.servers[2].poweroff).to be_a Hcloud::Action
+    expect(client.servers[2].actions.count{|x| x.command == "stop_server"}).to eq(1)
+  end
+  
+  it "#poweron" do
+    expect{client.servers[2].poweron}.to raise_error(Hcloud::Error::Locked)
+    sleep(0.5)
+    expect(client.servers[2].status).to eq("off")
+    expect(client.servers[2].poweron).to be_a Hcloud::Action
+    expect(client.servers[2].actions.count{|x| x.command == "start_server"}).to eq(1)
+  end
+  
+  it "#reset_password" do
+    expect{client.servers[2].reset_password}.to raise_error(Hcloud::Error::Locked)
+    sleep(0.5)
+    action, pass = nil
+    expect{action, pass = client.servers[2].reset_password}.not_to raise_error
+    expect(action).to be_a Hcloud::Action
+    expect(action.command).to eq("reset_password")
+    expect(action.status).to eq("running")
+    expect(pass).to eq("test123")
+  end
+
+  it "#enable_rescue" do
+    expect{client.servers[2].enable_rescue(type: "moo")}.to(
+      raise_error(Hcloud::Error::InvalidInput)
+    )
+    expect{client.servers[2].enable_rescue}.to(
+      raise_error(Hcloud::Error::Locked)
+    )
+    sleep(0.5)
+    action, pass = nil
+    expect{action, pass = client.servers[2].enable_rescue(type: "linux32")}.not_to raise_error
+    expect(action).to be_a Hcloud::Action
+    expect(action.command).to eq("enable_rescue")
+    expect(action.status).to eq("running")
+    expect(pass).to eq("test123")
+  end
+  
 end

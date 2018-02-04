@@ -29,6 +29,109 @@ module Hcloud
           get do
             { server: @x }
           end
+
+          group :actions do
+            params do
+              requires :aid, type: Integer
+            end
+            route_param :aid do
+              before_validation do
+                @a = $ACTIONS["actions"].find do |x| 
+                  x["id"].to_s == params[:aid].to_s and
+                    (x["resources"].to_a.any? do |y| 
+                      y.to_h["type"] == "server" and y.to_h["id"] == @x["id"]
+                    end)
+                end
+                error!({error: {code: :not_found}}, 404) if @x.nil?
+              end
+              get do
+                { action: @a }
+              end
+            end
+
+            params do
+              optional :status, type: String
+            end
+            get do
+              dc = $ACTIONS.deep_dup
+              dc["actions"].select! do |x|
+                x["resources"].to_a.any? do |y| 
+                  y.to_h["type"] == "server" and y.to_h["id"].to_s == @x["id"].to_s
+                end
+              end
+              if !params[:status].nil?
+                dc["actions"].select! do |x| 
+                  x["status"].to_s == params[:status].to_s
+                end 
+              end
+              dc
+            end
+
+            helpers do
+              def locked?
+                a = $ACTIONS["actions"].select do |x| 
+                  x["resources"].to_a.any? do |y| 
+                    y.to_h["type"] == "server" and y.to_h["id"] == @x["id"]
+                  end
+                end
+                a.to_a.any?{|x| x["status"] == "running"}
+              end
+            end
+
+            post :poweron do
+              error!({error: {code: :locked}}, 400) if locked?
+              a = Action.add(command: "start_server", status: "running", 
+                             resources: [{id: @x["id"], type: "server"}])
+              Thread.new do 
+                sleep(0.5)
+                @x["status"] = "running"
+                $ACTIONS["actions"].find{|x| x["id"].to_s == a["id"].to_s}["status"] = "success"
+              end
+              { action: a }
+            end
+            
+            post :poweroff do
+              error!({error: {code: :locked}}, 400) if locked?
+              a = Action.add(command: "stop_server", status: "running", 
+                             resources: [{id: @x["id"], type: "server"}])
+              Thread.new do 
+                sleep(0.5)
+                @x["status"] = "off"
+                $ACTIONS["actions"].find{|x| x["id"].to_s == a["id"].to_s}["status"] = "success"
+              end
+              { action: a }
+            end
+            
+            post :reset_password do
+              error!({error: {code: :locked}}, 400) if locked?
+              a = Action.add(command: "reset_password", status: "running", 
+                             resources: [{id: @x["id"], type: "server"}])
+              Thread.new do 
+                sleep(0.5)
+                $ACTIONS["actions"].find{|x| x["id"].to_s == a["id"].to_s}["status"] = "success"
+              end
+              { action: a, root_password: "test123" }
+            end
+           
+            params do
+              optional :type, type: String
+              optional :ssh_keys, type: Array[Integer]
+            end
+            post :enable_rescue do
+              t = params[:type] || 'linux64'
+              unless %w(linux64 linux32 freebsd64).include?(t)
+                error!({error: {code: :invalid_input}}, 400)
+              end
+              error!({error: {code: :locked}}, 400) if locked?
+              a = Action.add(command: "enable_rescue",  status: "running", 
+                             resources: [{id: @x["id"], type: "server"}])
+              Thread.new do 
+                sleep(0.5)
+                $ACTIONS["actions"].find{|x| x["id"].to_s == a["id"].to_s}["status"] = "success"
+              end
+              { action: a, root_password: "test123" }
+            end
+          end
         
           params do
             optional :name, type: String
@@ -37,13 +140,16 @@ module Hcloud
             if params[:name].nil?
               error!({error: {code: :invalid_input}}, 400)
             end
+            if $SERVERS["servers"].any?{|x| x["name"] == params[:name]}
+              error!({error: {code: :uniqueness_error}}, 400)
+            end
             @x["name"] = params[:name]
             { server: @x }
           end
           
           delete do 
             $SERVERS["servers"].delete(@x)
-            Action.add(status: "success", command: "delete_server")
+            {action: Action.add(status: "success", command: "delete_server")}
           end
         end
 
@@ -124,7 +230,7 @@ module Hcloud
             action: Action.add(
               status: "running",
               command: "create_server",
-              resources: [{id: id, type: :server}]
+              resources: [{id: id, type: "server"}]
             ),
             root_password: "test123"
           }.deep_stringify_keys
