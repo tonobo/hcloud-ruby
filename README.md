@@ -46,9 +46,27 @@ end
 
 * Create a server
 
+Nonblocking:
+
 ```ruby
 c.servers.create(name: "moo5", server_type: "cx11", image: "ubuntu-16.04")
 #=> [#<Hcloud::Action>, <#Hcloud::Server>, "root_password"]
+```
+
+Wating for finish:
+
+```ruby
+action,server = c.servers.create(name: "moo5", server_type: "cx11", image: "ubuntu-16.04")
+
+while action.status == "running"
+  puts "Waiting for Action #{action.id} to complete ..."
+  action = c.actions.find(action.id)
+  server = c.servers.find(server.id)
+  puts "Action Status: #{action.status}"
+  puts "Server Status: #{server.status}"
+  puts "Server IP Config: #{server.public_net["ipv4"]}"
+  sleep 5
+end
 ```
 
 * Update servers' name
