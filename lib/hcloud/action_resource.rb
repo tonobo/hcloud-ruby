@@ -3,12 +3,12 @@ module Hcloud
   class ActionResource < AbstractResource
     include Enumerable
 
-    def all(sort: nil)
-      Oj.load(request(base_path("actions"), q: {sort: sort}).run.body)["actions"].map do |x|
-        Action.new(x, self, client)
+    def all
+      mj(base_path("actions")) do |j|
+        j["actions"].map{ |x| Action.new(x, self, client) }
       end
     end
-    
+
     def find(id)
       Action.new(
         Oj.load(request(base_path("actions/#{id.to_i}")).run.body)["action"], 
@@ -22,12 +22,9 @@ module Hcloud
     rescue Error::NotFound
     end
 
-    def where(status: nil, sort: nil)
-      Oj.load(
-        request(base_path("actions"), 
-                q: {status: status, sort: sort}).run.body
-      )["actions"].map do |x|
-        Action.new(x, self, client)
+    def where(status: nil)
+      mj(base_path("actions"), q: {status: status}) do |j|
+        j["actions"].map{ |x| Action.new(x, self, client) }
       end
     end
 

@@ -5,6 +5,7 @@ module Hcloud
   autoload :Error, 'hcloud/errors'
   autoload :Client, 'hcloud/client'
   autoload :AbstractResource, 'hcloud/abstract_resource'
+  autoload :MultiReply, 'hcloud/multi_reply'
   autoload :ServerResource, 'hcloud/server_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
   autoload :FloatingIP, 'hcloud/floating_ip'
@@ -24,4 +25,5 @@ module Hcloud
   autoload :ActionResource, 'hcloud/action_resource'
   autoload :Iso, 'hcloud/iso'
   autoload :IsoResource, 'hcloud/iso_resource'
+  autoload :Pagination, 'hcloud/pagination'
 end
