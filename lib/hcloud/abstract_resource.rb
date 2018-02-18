@@ -35,7 +35,24 @@ module Hcloud
     end
     
     def mj(path, **o, &block)
-      m = MultiReply.new(j: Oj.load(request(path, o.merge(ep: ep)).run.body))
+      if !client.nil? and client.auto_pagination
+        a = Oj.load(request(path, o.merge(ep: ep(per_page: 1, page: 1))).run.body).
+          dig("meta", "pagination", "total_entries").to_i
+        r = a / Client::MAX_ENTRIES_PER_PAGE + (a % Client::MAX_ENTRIES_PER_PAGE)
+        requests = r.times.map do |i|
+          req = request(path, o.merge(ep: ep(per_page: Client::MAX_ENTRIES_PER_PAGE, page: i+1)))
+          client.hydra.queue req
+          req
+        end
+        client.hydra.run
+        j = requests.map do |x|
+          Oj.load(x.response.body)
+        end
+        m = MultiReply.new(j: j, pagination: :auto)
+        m.cb = block
+        return m
+      end
+      m = MultiReply.new(j: [Oj.load(request(path, o.merge(ep: ep)).run.body)])
       m.cb = block
       m
     end
@@ -48,17 +65,17 @@ module Hcloud
 
     protected
 
-    def page_params
-      { per_page: @per_page, page: @page }.to_param
+    def page_params(per_page: nil, page: nil)
+      { per_page: per_page || @per_page, page: page || @page }.to_param
     end
 
     def sort_params
       @order.to_a.map{|x| "sort=#{x}" }.join("&")
     end
 
-    def ep
+    def ep(per_page: nil, page: nil)
       r = []
-      (x = page_params).empty? ? nil : r << x 
+      (x = page_params(per_page: per_page, page: page)).empty? ? nil : r << x 
       (x = sort_params).empty? ? nil : r << x
       r.compact.join("&")
     end

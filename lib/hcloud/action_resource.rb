@@ -5,7 +5,7 @@ module Hcloud
 
     def all
       mj(base_path("actions")) do |j|
-        j["actions"].map{ |x| Action.new(x, self, client) }
+        j.flat_map{|x| x["actions"].map{ |x| Action.new(x, self, client) } }
       end
     end
 
@@ -24,7 +24,7 @@ module Hcloud
 
     def where(status: nil)
       mj(base_path("actions"), q: {status: status}) do |j|
-        j["actions"].map{ |x| Action.new(x, self, client) }
+        j.flat_map{|x| x["actions"].map{ |x| Action.new(x, self, client) }}
       end
     end
 

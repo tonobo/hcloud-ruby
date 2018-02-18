@@ -3,9 +3,14 @@ autoload :Oj, "oj"
 
 module Hcloud
   class Client
-    attr_reader :token
-    def initialize(token:)
+    MAX_ENTRIES_PER_PAGE = 50
+
+    attr_reader :token, :auto_pagination, :hydra
+    def initialize(token:, auto_pagination: false, concurrency: 20)
       @token = token
+      @auto_pagination = auto_pagination
+      @concurrency = concurrency
+      @hydra = Typhoeus::Hydra.new(max_concurrency: concurrency)
     end
 
     def authorized?
@@ -62,6 +67,7 @@ module Hcloud
       if x = options.delete(:q)
         q << x.to_param
       end
+      path = path.dup
       path << "?"+q.join("&")
       r = Typhoeus::Request.new(
         "https://api.hetzner.cloud/v1/#{path}",
