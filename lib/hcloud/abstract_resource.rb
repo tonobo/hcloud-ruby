@@ -21,6 +21,11 @@ module Hcloud
       self
     end
 
+    def limit(limit)
+      @limit = limit
+      self
+    end
+
     def order(*sort)
       @order = sort.flat_map do |s|
         case s
@@ -36,13 +41,11 @@ module Hcloud
     
     def mj(path, **o, &block)
       if !client.nil? and client.auto_pagination
-        a = Oj.load(request(path, o.merge(ep: ep(per_page: 1, page: 1))).run.body).
-          dig("meta", "pagination", "total_entries").to_i
-        r = a / Client::MAX_ENTRIES_PER_PAGE + (a % Client::MAX_ENTRIES_PER_PAGE)
-        requests = r.times.map do |i|
-          req = request(path, o.merge(ep: ep(per_page: Client::MAX_ENTRIES_PER_PAGE, page: i+1)))
-          client.hydra.queue req
-          req
+        requests = __entries__(path, **o)
+        if requests.all?{|x| x.is_a? Hash }
+          m = MultiReply.new(j: requests, pagination: :auto)
+          m.cb = block
+          return m
         end
         client.hydra.run
         j = requests.map do |x|
@@ -82,6 +85,27 @@ module Hcloud
 
     def request(*args)
       client.request(*args)
+    end
+
+    def __entries__(path, **o)
+      ret = Oj.load(request(path, o.merge(ep: ep(per_page: 1, page: 1))).run.body)
+      a = ret.dig("meta", "pagination", "total_entries").to_i
+      if a <= 1
+        return [ret]
+      end
+      unless @limit.nil?
+        a = @limit if a > @limit
+      end
+      r = a / Client::MAX_ENTRIES_PER_PAGE + (a % Client::MAX_ENTRIES_PER_PAGE)
+      requests = r.times.map do |i|
+        per_page = Client::MAX_ENTRIES_PER_PAGE
+        if !@limit.nil? and r == (i+1) and a % per_page != 0
+          per_page = a % per_page
+        end
+        req = request(path, o.merge(ep: ep(per_page: per_page, page: i+1)))
+        client.hydra.queue req
+        req
+      end
     end
   end
 end
