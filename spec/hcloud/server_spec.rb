@@ -69,6 +69,7 @@ describe "Server" do
       action, server, pass = client.servers.create(name: "moo", server_type: "cx11", image: 1)
     end.not_to(raise_error)
     expect(client.actions.per_page(1).page(1).count).to eq(1)
+    expect(aclient.actions.count).to eq(1)
     expect(client.actions.per_page(1).page(2).count).to eq(0)
     expect(server.id).to be_a Integer
     expect(server.name).to eq("moo")
@@ -141,6 +142,8 @@ describe "Server" do
     expect(client.actions.per_page(10).page(3).count).to eq(0)
     expect(aclient.actions.count).to eq(3)
     expect(aclient.actions.limit(2).count).to eq(2)
+    expect(aclient.actions.limit(3).count).to eq(3)
+    expect(aclient.actions.limit(4).count).to eq(3)
     expect(aclient.actions.all.pagination).to eq(:auto)
     sleep(0.6)
     expect(client.servers.none?{|x| x.status == "initalizing"}).to be true
