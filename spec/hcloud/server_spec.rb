@@ -68,6 +68,8 @@ describe "Server" do
     expect do
       action, server, pass = client.servers.create(name: "moo", server_type: "cx11", image: 1)
     end.not_to(raise_error)
+    expect(client.actions.per_page(1).page(1).count).to eq(1)
+    expect(client.actions.per_page(1).page(2).count).to eq(0)
     expect(server.id).to be_a Integer
     expect(server.name).to eq("moo")
     expect(server.rescue_enabled).to be false
@@ -125,6 +127,9 @@ describe "Server" do
     expect(client.actions.per_page(2).page(2).where(status: "running").count).to eq(1)
     expect(client.actions.per_page(2).page(2).count).to eq(1)
     expect(client.actions.per_page(2).page(1).count).to eq(2)
+    expect(client.actions.order(:id).map(&:id)).to eq([1,2,3])
+    expect(client.actions.order(id: :asc).map(&:id)).to eq([1,2,3])
+    expect(client.actions.order(id: :desc).map(&:id)).to eq([3,2,1])
     expect(client.actions.per_page(1).page(1).all.pagination.total_entries).to eq(3)
     expect(client.actions.per_page(1).page(1).all.pagination.last_page).to eq(3)
     expect(client.actions.per_page(1).page(1).all.pagination.next_page).to eq(2)

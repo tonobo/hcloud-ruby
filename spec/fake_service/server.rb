@@ -51,6 +51,7 @@ module Hcloud
 
             params do
               optional :status, type: String
+              optional :sort, type: String
             end
             get do
               dc = $ACTIONS.deep_dup
@@ -58,6 +59,11 @@ module Hcloud
                 x["resources"].to_a.any? do |y| 
                   y.to_h["type"] == "server" and y.to_h["id"].to_s == @x["id"].to_s
                 end
+              end
+              dc["actions"].shuffle!
+              if !params[:sort].nil?
+                dc["actions"].sort_by!{|x| x[params[:sort].split(":")[0]] }
+                dc["actions"].reverse! if params[:sort].end_with?(":desc")
               end
               if !params[:status].nil?
                 dc["actions"].select! do |x| 
