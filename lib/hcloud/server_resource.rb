@@ -1,7 +1,5 @@
 module Hcloud
   class ServerResource < AbstractResource
-    include Enumerable
-
     def create(name:,
                server_type:,
                datacenter: nil,
@@ -23,8 +21,8 @@ module Hcloud
     end
 
     def all
-      Oj.load(request("servers").run.body)["servers"].map do |x|
-        Server.new(x, self, client)
+      mj("servers") do |j|
+        j.flat_map{|x| x["servers"].map{ |x| Server.new(x, self, client) } }
       end
     end
 
