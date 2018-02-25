@@ -10,6 +10,12 @@ describe "Server" do
     Hcloud::Client.const_set(:MAX_ENTRIES_PER_PAGE, 1)
     Hcloud::Client.new(token: "secure", auto_pagination: true)
   end
+  
+  let :bclient do
+    Hcloud::Client.send(:remove_const, :MAX_ENTRIES_PER_PAGE)
+    Hcloud::Client.const_set(:MAX_ENTRIES_PER_PAGE, 2)
+    Hcloud::Client.new(token: "secure", auto_pagination: true)
+  end
 
   it "fetch server" do
     expect(client.servers.count).to eq(0)
@@ -97,6 +103,7 @@ describe "Server" do
         name: "foo", server_type: "cx11", image: 1, datacenter: 2,
       )
     end.not_to(raise_error)
+    expect(bclient.actions.count).to eq(2)
     expect(server.id).to be_a Integer
     expect(server.datacenter.id).to eq(2)
     expect(action.status).to eq("running")
