@@ -55,6 +55,7 @@ c = Hcloud::Client.new(
 c.servers.page(2).per_page(40).each do |server|
   server.datacenter.location.id #=> 1
 end
+```
 
 * List servers (auto pagination client)
 
@@ -63,7 +64,6 @@ end
 c.servers.limit(80).each do |server|
   server.datacenter.location.id #=> 1
 end
-```
 ```
 
 * Create a server
