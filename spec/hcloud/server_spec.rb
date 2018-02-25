@@ -131,6 +131,7 @@ describe "Server" do
     expect(client.actions.order(:id).map(&:id)).to eq([1,2,3])
     expect(client.actions.order(id: :asc).map(&:id)).to eq([1,2,3])
     expect(client.actions.order(id: :desc).map(&:id)).to eq([3,2,1])
+    expect{client.actions.order(1).map(&:id)}.to raise_error(ArgumentError)
     expect(client.actions.per_page(1).page(1).all.pagination.total_entries).to eq(3)
     expect(client.actions.per_page(1).page(1).all.pagination.last_page).to eq(3)
     expect(client.actions.per_page(1).page(1).all.pagination.next_page).to eq(2)
