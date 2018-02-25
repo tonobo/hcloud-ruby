@@ -1,10 +1,9 @@
 module Hcloud
   class SSHKeyResource < AbstractResource
-    include Enumerable
-
     def all
-      j = Oj.load(request("ssh_keys").run.body)
-      j["ssh_keys"].map{|x| SSHKey.new(x, self, client) }
+      mj("ssh_keys") do |j|
+        j.flat_map{|x| x["ssh_keys"].map{ |x| SSHKey.new(x, self, client) } }
+      end
     end
 
     def create(name:, public_key:)
