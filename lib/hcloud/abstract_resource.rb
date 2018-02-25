@@ -1,5 +1,7 @@
 module Hcloud
   class AbstractResource
+    include Enumerable
+
     attr_reader :client, :parent, :base_path
 
     def initialize(client:, parent: nil, base_path: "")

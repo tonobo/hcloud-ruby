@@ -1,8 +1,6 @@
 
 module Hcloud
   class ActionResource < AbstractResource
-    include Enumerable
-
     def all
       mj(base_path("actions")) do |j|
         j.flat_map{|x| x["actions"].map{ |x| Action.new(x, self, client) } }
