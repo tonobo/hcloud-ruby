@@ -99,11 +99,12 @@ describe "Server" do
   it "create new server, custom datacenter" do
     action, server, pass = nil
     expect do
-      action, server, pass = client.servers.create(
+      action, server, pass = bclient.servers.create(
         name: "foo", server_type: "cx11", image: 1, datacenter: 2,
       )
     end.not_to(raise_error)
     expect(bclient.actions.count).to eq(2)
+    expect(server.actions.count).to eq(1)
     expect(server.id).to be_a Integer
     expect(server.datacenter.id).to eq(2)
     expect(action.status).to eq("running")
