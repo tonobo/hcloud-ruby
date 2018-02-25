@@ -1,7 +1,5 @@
 module Hcloud
   class ImageResource < AbstractResource
-    include Enumerable
-
     def all
       mj("images") do |j|
         j.flat_map{|x| x["images"].map{ |x| Image.new(x, self, client) } }
