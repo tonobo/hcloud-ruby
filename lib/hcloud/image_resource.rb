@@ -1,10 +1,8 @@
 module Hcloud
   class ImageResource < AbstractResource
-    include Enumerable
-
     def all
-      Oj.load(request("images").run.body)["images"].map do |x|
-        Image.new(x, self, client)
+      mj("images") do |j|
+        j.flat_map{|x| x["images"].map{ |x| Image.new(x, self, client) } }
       end
     end
     
@@ -33,10 +31,8 @@ module Hcloud
       method(:where).parameters.inject(query) do |r,x| 
         (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
       end
-      Oj.load(
-        request("images", q: query).run.body
-      )["images"].map do |x|
-        Image.new(x, self, client)
+      mj("images", q: query) do |j|
+        j.flat_map{|x| x["images"].map{ |x| Image.new(x, self, client) } }
       end
     end
 

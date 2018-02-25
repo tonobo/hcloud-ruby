@@ -4,6 +4,19 @@ describe "Server" do
   let :client do
     Hcloud::Client.new(token: "secure")
   end
+  
+  let :aclient do
+    Hcloud::Client.send(:remove_const, :MAX_ENTRIES_PER_PAGE)
+    Hcloud::Client.const_set(:MAX_ENTRIES_PER_PAGE, 1)
+    Hcloud::Client.new(token: "secure", auto_pagination: true)
+  end
+  
+  let :bclient do
+    Hcloud::Client.send(:remove_const, :MAX_ENTRIES_PER_PAGE)
+    Hcloud::Client.const_set(:MAX_ENTRIES_PER_PAGE, 2)
+    Hcloud::Client.new(token: "secure", auto_pagination: true)
+  end
+
   it "fetch server" do
     expect(client.servers.count).to eq(0)
   end
@@ -61,6 +74,9 @@ describe "Server" do
     expect do
       action, server, pass = client.servers.create(name: "moo", server_type: "cx11", image: 1)
     end.not_to(raise_error)
+    expect(client.actions.per_page(1).page(1).count).to eq(1)
+    expect(aclient.actions.count).to eq(1)
+    expect(client.actions.per_page(1).page(2).count).to eq(0)
     expect(server.id).to be_a Integer
     expect(server.name).to eq("moo")
     expect(server.rescue_enabled).to be false
@@ -83,10 +99,12 @@ describe "Server" do
   it "create new server, custom datacenter" do
     action, server, pass = nil
     expect do
-      action, server, pass = client.servers.create(
+      action, server, pass = bclient.servers.create(
         name: "foo", server_type: "cx11", image: 1, datacenter: 2,
       )
     end.not_to(raise_error)
+    expect(bclient.actions.count).to eq(2)
+    expect(server.actions.count).to eq(1)
     expect(server.id).to be_a Integer
     expect(server.datacenter.id).to eq(2)
     expect(action.status).to eq("running")
@@ -113,6 +131,29 @@ describe "Server" do
     expect(client.servers.all?{|x| x.status == "initalizing"}).to be true
     expect(client.actions.where(status: "running").
            select{|x| x.resources.first["type"] == "server"}.size).to eq(3)
+    expect(client.actions.per_page(1).where(status: "running").count).to eq(1)
+    expect(client.actions.per_page(2).where(status: "running").count).to eq(2)
+    expect(client.actions.per_page(2).page(2).where(status: "running").count).to eq(1)
+    expect(client.actions.per_page(2).page(2).count).to eq(1)
+    expect(client.actions.per_page(2).page(1).count).to eq(2)
+    expect(client.actions.order(:id).map(&:id)).to eq([1,2,3])
+    expect(client.actions.order(id: :asc).map(&:id)).to eq([1,2,3])
+    expect(client.actions.order(id: :desc).map(&:id)).to eq([3,2,1])
+    expect{client.actions.order(1).map(&:id)}.to raise_error(ArgumentError)
+    expect(client.actions.per_page(1).page(1).all.pagination.total_entries).to eq(3)
+    expect(client.actions.per_page(1).page(1).all.pagination.last_page).to eq(3)
+    expect(client.actions.per_page(1).page(1).all.pagination.next_page).to eq(2)
+    expect(client.actions.per_page(1).page(1).all.pagination.previous_page).to be nil
+    expect(client.actions.per_page(1).page(2).all.pagination.next_page).to eq(3)
+    expect(client.actions.per_page(1).page(2).all.pagination.previous_page).to eq(1)
+    expect(client.actions.per_page(1).page(3).all.pagination.next_page).to be nil
+    expect(client.actions.per_page(1).page(3).all.pagination.previous_page).to eq(2)
+    expect(client.actions.per_page(10).page(3).count).to eq(0)
+    expect(aclient.actions.count).to eq(3)
+    expect(aclient.actions.limit(2).count).to eq(2)
+    expect(aclient.actions.limit(3).count).to eq(3)
+    expect(aclient.actions.limit(4).count).to eq(3)
+    expect(aclient.actions.all.pagination).to eq(:auto)
     sleep(0.6)
     expect(client.servers.none?{|x| x.status == "initalizing"}).to be true
     expect(client.servers.group_by{|x| x.status}.map{|k,v| [k,v.size]}.to_h).to(

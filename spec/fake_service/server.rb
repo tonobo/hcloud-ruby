@@ -51,6 +51,7 @@ module Hcloud
 
             params do
               optional :status, type: String
+              optional :sort, type: String
             end
             get do
               dc = $ACTIONS.deep_dup

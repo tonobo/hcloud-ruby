@@ -1,10 +1,8 @@
 module Hcloud
   class IsoResource < AbstractResource
-    include Enumerable
-
     def all
-      Oj.load(request("isos").run.body)["isos"].map do |x|
-        Iso.new(x, self, client)
+      mj("isos") do |j|
+        j.flat_map{|x| x["isos"].map{ |x| Iso.new(x, self, client) } }
       end
     end
 

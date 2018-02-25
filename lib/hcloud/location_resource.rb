@@ -1,10 +1,9 @@
 module Hcloud
   class LocationResource < AbstractResource
-    include Enumerable
-
     def all
-      j = Oj.load(request("locations").run.body)
-      j["locations"].map{|x| Location.new(x, self, client) }
+      mj("locations") do |j|
+        j.flat_map{|x| x["locations"].map{ |x| Location.new(x, self, client) } }
+      end
     end
 
     def find(id)

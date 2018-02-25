@@ -48,11 +48,19 @@ module Hcloud
         
         params do
           optional :status, type: String
+          optional :per_page, type: Integer
+          optional :page, type: Integer
+          optional :sort, type: String
         end
         get do
           dc = $ACTIONS.deep_dup
           dc["actions"].select!{|x| x["status"].to_s == params[:status].to_s } if !params[:status].nil?
-          dc
+          dc["actions"].shuffle!
+          if !params[:sort].nil?
+            dc["actions"].sort_by!{|x| x[params[:sort].split(":")[0]] }
+            dc["actions"].reverse! if params[:sort].end_with?(":desc")
+          end
+          FakeService.pagination_wrapper(dc, "actions", params[:per_page], params[:page])
         end
       end
     end
