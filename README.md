@@ -34,14 +34,35 @@ Or install it yourself as:
 c = Hcloud::Client.new(token: "<your project token>")
 ```
 
-### Server Resource
-
-* List servers
+* Create a client instance which fully handles concurrent pagination
 
 ```ruby
-c.servers.each do |server|
+c = Hcloud::Client.new(
+  token: "<your project token>", 
+  auto_pagination: true,
+  concurrency: 50 # default 20
+)
+```
+
+### Server Resource
+
+* List servers (basic client)
+
+```ruby
+# default page(1)
+# default per_page(50)
+c.servers.page(2).per_page(40).each do |server|
   server.datacenter.location.id #=> 1
 end
+
+* List servers (auto pagination client)
+
+```ruby
+# default nolimit
+c.servers.limit(80).each do |server|
+  server.datacenter.location.id #=> 1
+end
+```
 ```
 
 * Create a server
