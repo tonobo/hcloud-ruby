@@ -6,6 +6,7 @@ module Hcloud
       ip: nil,
       type: nil,
       dns_ptr: nil,
+      server: nil,
       home_location: Location,
       blocked: nil,
     }
