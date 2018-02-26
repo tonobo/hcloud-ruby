@@ -98,7 +98,8 @@ module Hcloud
       unless @limit.nil?
         a = @limit if a > @limit
       end
-      r = a / Client::MAX_ENTRIES_PER_PAGE + (a % Client::MAX_ENTRIES_PER_PAGE)
+      r = a / Client::MAX_ENTRIES_PER_PAGE 
+      r+=1 if a % Client::MAX_ENTRIES_PER_PAGE > 0
       requests = r.times.map do |i|
         per_page = Client::MAX_ENTRIES_PER_PAGE
         if !@limit.nil? and r == (i+1) and a % per_page != 0

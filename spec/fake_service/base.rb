@@ -39,7 +39,9 @@ module Hcloud
       require_relative './action'
       require_relative './server'
       require_relative './image'
+      require_relative './iso'
       require_relative './server_type'
+      require_relative './floating_ip'
       require_relative './ssh_key'
       require_relative './location'
       require_relative './datacenter'
@@ -47,7 +49,9 @@ module Hcloud
       mount Action
       mount Server
       mount Image
+      mount ISO
       mount ServerType
+      mount FloatingIP
       mount Datacenter
       mount Location
       mount SSHKey

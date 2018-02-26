@@ -150,6 +150,7 @@ describe "Server" do
     expect(client.actions.per_page(1).page(3).all.pagination.previous_page).to eq(2)
     expect(client.actions.per_page(10).page(3).count).to eq(0)
     expect(aclient.actions.count).to eq(3)
+    expect(bclient.actions.limit(3).count).to eq(3)
     expect(aclient.actions.limit(2).count).to eq(2)
     expect(aclient.actions.limit(3).count).to eq(3)
     expect(aclient.actions.limit(4).count).to eq(3)

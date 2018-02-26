@@ -43,7 +43,8 @@ module Hcloud
           
           delete do 
             $SSH_KEYS["ssh_keys"].delete(@x)
-            nil
+            @body = nil
+            status 204
           end
         end
         

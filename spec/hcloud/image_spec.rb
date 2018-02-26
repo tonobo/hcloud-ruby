@@ -72,6 +72,11 @@ describe "Image" do
     )
   end
   
+  it "#to_snapshot" do
+    expect(client.images[3454].description).to eq("test123")
+    expect(client.images[3454].to_snapshot).to be_a Hcloud::Image
+  end
+  
   it "#where(name:)" do
     expect(client.images.where(name: "moo").count).to eq(0)
     expect(client.images.where(name: "ubuntu-16.04").count).to eq(1)

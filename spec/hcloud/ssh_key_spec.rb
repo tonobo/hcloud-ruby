@@ -92,4 +92,21 @@ describe "SSHKey" do
   it "#[] -> filter by name, handle nonexistent" do
     expect(client.ssh_keys["mooo"]).to be nil
   end
+  
+  it "#update" do
+    expect(client.ssh_keys.first).to be_a Hcloud::SSHKey
+    id = client.ssh_keys.first.id
+    expect(id).to be_a Integer
+    expect(client.ssh_keys.find(id).name).to eq("moo")
+    expect(client.ssh_keys.find(id).update(name: "hui").name).to eq("hui")
+    expect(client.ssh_keys.find(id).name).to eq("hui")
+  end
+  
+  it "#destroy" do
+    expect(client.ssh_keys.first).to be_a Hcloud::SSHKey
+    id = client.ssh_keys.first.id
+    expect(id).to be_a Integer
+    expect(client.ssh_keys.find(id).destroy).to be true
+    expect(client.ssh_keys[id]).to be nil
+  end
 end
