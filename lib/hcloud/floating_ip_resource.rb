@@ -14,7 +14,7 @@ module Hcloud
       end
       j = Oj.load(request("floating_ips", j: query, code: 200).run.body)
       [
-        Action.new(j["action"], self, client),
+        j.key?("action") ? Action.new(j["action"], self, client) : nil,
         FloatingIP.new(j["floating_ip"], self, client),
       ]
     end
