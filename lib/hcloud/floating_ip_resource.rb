@@ -3,8 +3,9 @@ module Hcloud
     include Enumerable
 
     def all
-      j = Oj.load(request("floating_ips").run.body)
-      j["floating_ips"].map{|x| FloatingIP.new(x, self, client) }
+      mj("floating_ips") do |j|
+        j.flat_map{|x| x["floating_ips"].map{ |x| FloatingIP.new(x, self, client) } }
+      end
     end
 
     def create(type:, server: nil, home_location: nil, description: nil)
