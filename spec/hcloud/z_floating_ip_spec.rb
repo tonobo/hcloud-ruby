@@ -1,0 +1,114 @@
+require 'spec_helper'
+
+describe "FloatingIP" do
+  let :client do
+    Hcloud::Client.new(token: "secure")
+  end
+
+  it "fetch floating ips" do
+    expect(client.floating_ips.count).to eq(1)
+  end
+
+  it "#[] -> find by id" do
+    expect(client.floating_ips.first).to be_a Hcloud::FloatingIP
+    id = client.floating_ips.first.id
+    expect(id).to be_a Integer
+    expect(client.floating_ips[id]).to be_a Hcloud::FloatingIP
+    expect(client.floating_ips[id].description).to be_a String
+    expect(client.floating_ips[id].type).to be_a String
+    expect(client.floating_ips[id].ip).to be_a String
+    expect(client.floating_ips[id].server).to be nil
+    expect(client.floating_ips[id].blocked).to be false
+    expect(client.floating_ips[id].home_location.id).to eq(2)
+  end
+
+  it "#create -> invalid type" do
+    expect{
+      client.floating_ips.create(type: "moo", home_location: "nbg1")
+    }.to raise_error(Hcloud::Error::InvalidInput)
+    expect{
+      client.floating_ips.create(type: "moo", home_location: "nbg1", server: 1)
+    }.to raise_error(Hcloud::Error::InvalidInput)
+  end
+  
+  it "#create -> invalid home_location" do
+    expect{
+      client.floating_ips.create(type: "ipv4", home_location: "nbg2")
+    }.to raise_error(Hcloud::Error::InvalidInput)
+    expect{
+      client.floating_ips.create(type: "ipv4", home_location: "nbg2", server: 1)
+    }.to raise_error(Hcloud::Error::InvalidInput)
+  end
+  
+  it "#create -> invalid server" do
+    expect{
+      client.floating_ips.create(type: "ipv4", home_location: "nbg1", server: "hui")
+    }.to raise_error(Hcloud::Error::InvalidInput)
+  end
+  
+  it "#create(type: ipv4, server: 1)" do
+    a, f = nil
+    expect{
+      a, f = client.floating_ips.create(type: "ipv4", server: 1)
+    }.not_to raise_error
+    expect(a).to be_a Hcloud::Action
+    expect(a.status).to eq("running")
+    expect(a.command).to eq("assign_floating_ip")
+    expect(f).to be_a Hcloud::FloatingIP
+    expect(f.ip).to eq("127.0.0.2")
+    expect(f.blocked).to be false
+    expect(f.home_location.name).to eq("nbg1")
+    expect(f.actions.count).to eq(1)
+    expect(f.actions.first.command).to eq("assign_floating_ip")
+  end
+  
+  it "#create(type: ipv4, server: 1, home_location: 'fsn1')" do
+    a, f = nil
+    expect{
+      a, f = client.floating_ips.create(type: "ipv4", home_location: "fsn1", server: 1)
+    }.not_to raise_error
+    expect(a).to be_a Hcloud::Action
+    expect(a.status).to eq("running")
+    expect(a.command).to eq("assign_floating_ip")
+    expect(f).to be_a Hcloud::FloatingIP
+    expect(f.ip).to eq("127.0.0.2")
+    expect(f.blocked).to be false
+    expect(f.home_location.name).to eq("fsn1")
+  end
+  
+  it "#create(type: ipv4)" do
+    a, f = nil
+    expect{
+      a, f = client.floating_ips.create(type: "ipv4")
+    }.not_to raise_error
+    expect(a).to be nil
+    expect(f).to be_a Hcloud::FloatingIP
+    expect(f.ip).to eq("127.0.0.2")
+    expect(f.blocked).to be false
+    expect(f.home_location.name).to eq("nbg1")
+  end
+  
+  it "#update(description: 'moo')" do
+    expect(client.floating_ips.find(1).description).to be nil
+    expect{client.floating_ips.find(1).update(description: "moo")}.not_to raise_error
+    expect(client.floating_ips.find(1).description).to eq("moo")
+  end
+  
+  it "#assign(server: 999)" do
+    expect(client.floating_ips.find(3).server).to be nil
+    expect(client.floating_ips.find(3).assign(server: 999)).to be_a Hcloud::Action
+    expect(client.floating_ips.find(3).server).to eq(999)
+  end
+  
+  it "#unassign()" do
+    expect(client.floating_ips.find(3).server).to eq(999)
+    expect(client.floating_ips.find(3).unassign).to be_a Hcloud::Action
+    expect(client.floating_ips.find(3).server).to be nil
+  end
+
+  it "#destroy()" do
+    expect(client.floating_ips.count).to eq(4)
+    expect{client.floating_ips.find(595).destroy}.not_to raise_error
+    expect(client.floating_ips.count).to eq(3)
+  end
+end
