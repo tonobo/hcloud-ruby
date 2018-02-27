@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.1.2](https://github.com/tonobo/hcloud-ruby/tree/v0.1.2) (2018-02-27)
+[Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v0.1.1...v0.1.2)
+
+**Closed issues:**
+
+- Add rubocop [\#7](https://github.com/tonobo/hcloud-ruby/issues/7)
+- Unnecessary pagination calls  [\#6](https://github.com/tonobo/hcloud-ruby/issues/6)
+
+**Merged pull requests:**
+
+- Introduce rubocop [\#8](https://github.com/tonobo/hcloud-ruby/pull/8) ([tonobo](https://github.com/tonobo))
+- Enhance test suite [\#5](https://github.com/tonobo/hcloud-ruby/pull/5) ([tonobo](https://github.com/tonobo))
+
 ## [v0.1.1](https://github.com/tonobo/hcloud-ruby/tree/v0.1.1) (2018-02-26)
 [Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v0.1.0...v0.1.1)
 
