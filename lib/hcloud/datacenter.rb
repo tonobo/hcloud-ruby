@@ -5,10 +5,9 @@ module Hcloud
       name: nil,
       description: nil,
       location: Location,
-      server_types: nil,
-    }
+      server_types: nil
+    }.freeze
 
     include EntryLoader
-
   end
 end

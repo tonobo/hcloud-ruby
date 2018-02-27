@@ -2,15 +2,15 @@
 module Hcloud
   class ActionResource < AbstractResource
     def all
-      mj(base_path("actions")) do |j|
-        j.flat_map{|x| x["actions"].map{ |x| Action.new(x, self, client) } }
+      mj(base_path('actions')) do |j|
+        j.flat_map { |x| x['actions'].map { |x| Action.new(x, self, client) } }
       end
     end
 
     def find(id)
       Action.new(
-        Oj.load(request(base_path("actions/#{id.to_i}")).run.body)["action"], 
-        self, 
+        Oj.load(request(base_path("actions/#{id.to_i}")).run.body)['action'],
+        self,
         client
       )
     end
@@ -21,8 +21,8 @@ module Hcloud
     end
 
     def where(status: nil)
-      mj(base_path("actions"), q: {status: status}) do |j|
-        j.flat_map{|x| x["actions"].map{ |x| Action.new(x, self, client) }}
+      mj(base_path('actions'), q: { status: status }) do |j|
+        j.flat_map { |x| x['actions'].map { |x| Action.new(x, self, client) } }
       end
     end
 
@@ -31,6 +31,5 @@ module Hcloud
     def base_path(ext)
       [@base_path, ext].reject(&:empty?).join('/')
     end
-
   end
 end

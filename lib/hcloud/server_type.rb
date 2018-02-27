@@ -8,10 +8,9 @@ module Hcloud
       memory: nil,
       disk: nil,
       prices: nil,
-      storage_type: nil,
-    }
+      storage_type: nil
+    }.freeze
 
     include EntryLoader
-
   end
 end

@@ -1,4 +1,4 @@
-require "hcloud/version"
+require 'hcloud/version'
 require 'active_support/core_ext/object/to_query'
 
 module Hcloud

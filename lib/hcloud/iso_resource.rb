@@ -1,8 +1,8 @@
 module Hcloud
   class IsoResource < AbstractResource
     def all
-      mj("isos") do |j|
-        j.flat_map{|x| x["isos"].map{ |x| Iso.new(x, self, client) } }
+      mj('isos') do |j|
+        j.flat_map { |x| x['isos'].map { |x| Iso.new(x, self, client) } }
       end
     end
 
@@ -20,19 +20,18 @@ module Hcloud
 
     def find(id)
       Iso.new(
-        Oj.load(request("isos/#{id.to_i}").run.body)["iso"],
+        Oj.load(request("isos/#{id.to_i}").run.body)['iso'],
         self,
         client
       )
     end
 
     def find_by(name:)
-      j = Oj.load(request("isos", q: {name: name}).run.body)["isos"]
+      j = Oj.load(request('isos', q: { name: name }).run.body)['isos']
       return if j.none?
       j.each do |x|
         return Iso.new(x, self, client)
       end
     end
-
   end
 end

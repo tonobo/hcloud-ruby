@@ -7,10 +7,9 @@ module Hcloud
       country: nil,
       city: nil,
       longitude: nil,
-      latitude: nil,
-    }
+      latitude: nil
+    }.freeze
 
     include EntryLoader
-
   end
 end

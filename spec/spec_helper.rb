@@ -18,5 +18,3 @@ RSpec.configure do |c|
     stub_request(:any, /api.hetzner.cloud/).to_rack(Hcloud::FakeService::Base)
   end
 end
-
-

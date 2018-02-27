@@ -4,19 +4,18 @@ module Hcloud
     attr_accessor :cb
 
     def initialize(j:, pagination: nil)
-       @j = j
-       @pagination = pagination
+      @j = j
+      @pagination = pagination
     end
 
     def pagination
-      @pagination || Pagination.new(@j.first.to_h["meta"].to_h["pagination"], nil, nil)
+      @pagination || Pagination.new(@j.first.to_h['meta'].to_h['pagination'], nil, nil)
     end
 
-    def each(&block)
+    def each
       @cb.call(@j).each do |member|
-        block.call(member)
+        yield(member)
       end
     end
-
   end
 end
