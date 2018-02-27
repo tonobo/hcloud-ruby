@@ -1,0 +1,24 @@
+inherit_from: .rubocop_todo.yml
+
+Style/GlobalVars:
+  Exclude:
+    - 'spec/**/*.rb'
+
+Style/Documentation:
+  Enabled: false
+
+Naming/ConstantName:
+  Enabled: false
+
+Lint/HandleExceptions:
+  Exclude:
+    - 'lib/hcloud/action_resource.rb'
+    - 'lib/hcloud/datacenter_resource.rb'
+    - 'lib/hcloud/floating_ip_resource.rb'
+    - 'lib/hcloud/image_resource.rb'
+    - 'lib/hcloud/iso_resource.rb'
+    - 'lib/hcloud/location_resource.rb'
+    - 'lib/hcloud/server_resource.rb'
+    - 'lib/hcloud/server_type_resource.rb'
+    - 'lib/hcloud/ssh_key_resource.rb'
+

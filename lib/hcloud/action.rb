@@ -8,9 +8,9 @@ module Hcloud
       started: :time,
       finished: :time,
       resources: nil,
-      error: nil,
-    }
-    
+      error: nil
+    }.freeze
+
     include EntryLoader
   end
 end

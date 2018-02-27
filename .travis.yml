@@ -1,5 +1,7 @@
 language: ruby
-script: "bundle exec rspec"
+script: 
+  - "bundle exec rspec"
+  - "bundle exec rubocop"
 sudo: false
 rvm:
   - 2.3

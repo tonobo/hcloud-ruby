@@ -1,5 +1,5 @@
-autoload :Typhoeus, "typhoeus"
-autoload :Oj, "oj"
+autoload :Typhoeus, 'typhoeus'
+autoload :Oj, 'oj'
 
 module Hcloud
   class Client
@@ -14,7 +14,7 @@ module Hcloud
     end
 
     def authorized?
-      request("server_types").run
+      request('server_types').run
       true
     rescue Error::Unauthorized
       false
@@ -68,14 +68,14 @@ module Hcloud
         q << x.to_param
       end
       path = path.dup
-      path << "?"+q.join("&")
+      path << '?' + q.join('&')
       r = Typhoeus::Request.new(
         "https://api.hetzner.cloud/v1/#{path}",
         {
-          headers: { 
-            "Authorization" => "Bearer #{token}",
-            "Content-Type" => "application/json",
-          },
+          headers: {
+            'Authorization' => "Bearer #{token}",
+            'Content-Type' => 'application/json'
+          }
         }.merge(options)
       )
       r.on_complete do |response|
@@ -88,20 +88,20 @@ module Hcloud
           raise Error::ServerError, "Connection error: #{response.return_code}"
         when 400...600
           j = Oj.load(response.body)
-          code = j.dig("error", "code")
+          code = j.dig('error', 'code')
           error_class = case code
-                        when "invalid_input" then Error::InvalidInput
-                        when "forbidden" then Error::Forbidden
-                        when "locked" then Error::Locked
-                        when "not_found" then Error::NotFound
-                        when "rate_limit_exceeded" then Error::RateLimitExceeded
-                        when "resource_unavailable" then Error::ResourceUnavilable
-                        when "service_error" then Error::ServiceError
-                        when "uniqueness_error" then Error::UniquenessError
+                        when 'invalid_input' then Error::InvalidInput
+                        when 'forbidden' then Error::Forbidden
+                        when 'locked' then Error::Locked
+                        when 'not_found' then Error::NotFound
+                        when 'rate_limit_exceeded' then Error::RateLimitExceeded
+                        when 'resource_unavailable' then Error::ResourceUnavilable
+                        when 'service_error' then Error::ServiceError
+                        when 'uniqueness_error' then Error::UniquenessError
                         else
                           Error::ServerError
                         end
-          raise error_class, j.dig("error", "message")
+          raise error_class, j.dig('error', 'message')
         end
       end
       r

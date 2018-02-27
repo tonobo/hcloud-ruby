@@ -5,8 +5,8 @@ module Hcloud
       name: nil,
       description: nil,
       type: nil
-    }
-    
+    }.freeze
+
     include EntryLoader
   end
 end

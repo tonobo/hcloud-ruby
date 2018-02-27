@@ -6,9 +6,9 @@ module Hcloud
       previous_page: nil,
       next_page: nil,
       last_page: nil,
-      total_entries: nil,
-    }
-    
+      total_entries: nil
+    }.freeze
+
     include EntryLoader
   end
 end
