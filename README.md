@@ -106,6 +106,6 @@ Hcloud::Error::UniquenessError: server name is already used
 * Delete a server
 
 ```ruby
-c.servers.first.delete
+c.servers.first.destroy
 #=> #<Hcloud::Action>
 ```
