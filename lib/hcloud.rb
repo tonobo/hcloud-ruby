@@ -4,6 +4,7 @@ require 'active_support/core_ext/object/to_query'
 module Hcloud
   autoload :Error, 'hcloud/errors'
   autoload :Client, 'hcloud/client'
+  autoload :Future, 'hcloud/future'
   autoload :AbstractResource, 'hcloud/abstract_resource'
   autoload :MultiReply, 'hcloud/multi_reply'
   autoload :ServerResource, 'hcloud/server_resource'

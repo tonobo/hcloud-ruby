@@ -56,6 +56,28 @@ module Hcloud
       FloatingIPResource.new(client: self)
     end
 
+    def multi
+      @multi = true
+      yield
+    ensure
+      @multi = false
+    end
+
+    def response(request, json: true, &block)
+      raise "No block given" unless block_given?
+      if @multi
+        hydra.queue request
+        while request.response.nil?
+          # wait
+        end
+      else
+        request.run
+      end
+      ret = request.response.body
+      ret = Oj.load(ret) if json
+      instance_exec(ret, &block)
+    end
+
     def request(path, **options)
       code = options.delete(:code)
       if x = options.delete(:j)

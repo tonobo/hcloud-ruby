@@ -88,6 +88,10 @@ module Hcloud
     def request(*args)
       client.request(*args)
     end
+    
+    def response(*args)
+      client.response(*args)
+    end
 
     def __entries__(path, **o)
       ret = Oj.load(request(path, o.merge(ep: ep(per_page: 1, page: 1))).run.body)

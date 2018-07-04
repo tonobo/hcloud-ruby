@@ -12,12 +12,16 @@ module Hcloud
       method(:create).parameters.inject(query) do |r, x|
         (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
       end
-      j = Oj.load(request('servers', j: query, code: 200).run.body)
-      [
-        Action.new(j['action'], self, client),
-        Server.new(j['server'], self, client),
-        j['root_password']
-      ]
+      response(
+        request('servers', j: query, code: 200), 
+        future: [Future[Action], Future[Server], Future[String]]
+      ) do |ret|
+        [
+          Action.new(j['action'], self, client),
+          Server.new(j['server'], self, client),
+          j['root_password']
+        ]
+      end
     end
 
     def all
