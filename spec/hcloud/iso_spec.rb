@@ -10,7 +10,11 @@ describe 'ISO' do
   end
 
   it '#[] -> find by id' do
-    expect(client.isos[26].id).to eq(26)
+    expect(client.isos.first).to be_a Hcloud::Iso
+    id = client.isos.first.id
+    expect(id).to be_a Integer
+    expect(client.isos[id]).to be_a Hcloud::Iso
+    expect(client.isos[id].id).to eq(id)
   end
 
   it '#[] -> find by id, handle nonexistent' do
@@ -18,7 +22,11 @@ describe 'ISO' do
   end
 
   it '#find -> find by id' do
-    expect(client.isos.find(26).id).to eq(26)
+    expect(client.isos.first).to be_a Hcloud::Iso
+    id = client.isos.first.id
+    expect(id).to be_a Integer
+    expect(client.isos.find(id)).to be_a Hcloud::Iso
+    expect(client.isos.find(id).id).to eq(id)
   end
 
   it '#find -> find by id, handle nonexistent' do
@@ -26,10 +34,26 @@ describe 'ISO' do
   end
 
   it '#[] -> filter by name' do
-    expect(client.isos['virtio-win-0.1.141.iso'].name).to eq('virtio-win-0.1.141.iso')
+    expect(client.isos.first).to be_a Hcloud::Iso
+    name = client.isos.first.name
+    expect(name).to be_a String
+    expect(client.isos[name]).to be_a Hcloud::Iso
+    expect(client.isos[name].name).to eq(name)
   end
 
   it '#[] -> filter by name, handle nonexistent' do
     expect(client.isos['mooo']).to be nil
+  end
+
+  it '#find_by -> filter by name' do
+    expect(client.isos.first).to be_a Hcloud::Iso
+    name = client.isos.first.name
+    expect(name).to be_a String
+    expect(client.isos.find_by(name: name)).to be_a Hcloud::Iso
+    expect(client.isos.find_by(name: name).name).to eq(name)
+  end
+
+  it '#find_by -> filter by name, handle nonexistent' do
+    expect(client.isos.find_by(name: 'moo')).to be nil
   end
 end
