@@ -4,7 +4,8 @@ module Hcloud
       id: nil,
       name: nil,
       description: nil,
-      type: nil
+      type: nil,
+      deprecated: :time
     }.freeze
 
     include EntryLoader
