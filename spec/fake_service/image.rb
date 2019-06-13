@@ -15,7 +15,8 @@ module Hcloud
           'bound_to' => nil,
           'os_flavor' => 'ubuntu',
           'os_version' => '16.04',
-          'rapid_deploy' => true
+          'rapid_deploy' => true,
+          'deprecated' => '2018-02-28T00:00:00+00:00'
         },
         {
           'id' => 3454,
@@ -30,7 +31,8 @@ module Hcloud
           'bound_to' => nil,
           'os_flavor' => 'ubuntu',
           'os_version' => nil,
-          'rapid_deploy' => false
+          'rapid_deploy' => false,
+          'deprecated' => nil
         }
       ],
       'meta' => {
