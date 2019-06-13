@@ -13,7 +13,8 @@ module Hcloud
       bound_to: nil,
       os_flavor: nil,
       os_version: nil,
-      rapid_deploy: nil
+      rapid_deploy: nil,
+      deprecated: :time
     }.freeze
 
     include EntryLoader
