@@ -15,7 +15,8 @@ module Hcloud
       backup_window: nil,
       outgoing_traffic: nil,
       ingoing_traffic: nil,
-      included_traffic: nil
+      included_traffic: nil,
+      protection: nil
     }.freeze
 
     include EntryLoader
@@ -85,6 +86,13 @@ module Hcloud
       define_method(action) do
         action(request(base_path("actions/#{action}"), method: :post))[0]
       end
+    end
+
+    def change_protection(delete: nil, rebuild: nil)
+      query = {}
+      query['delete'] = delete unless delete.nil?
+      query['rebuild'] = rebuild unless rebuild.nil?
+      action(request(base_path('actions/change_protection'), j: query))[0]
     end
 
     def actions

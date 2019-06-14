@@ -9,7 +9,8 @@ module Hcloud
       server: nil,
       home_location: Location,
       blocked: nil,
-      created: :time
+      created: :time,
+      protection: nil
     }.freeze
     include EntryLoader
 
@@ -32,6 +33,12 @@ module Hcloud
     def change_dns_ptr(ip:, dns_ptr:)
       action(request(base_path('actions/change_dns_ptr'),
                      j: { ip: ip, dns_ptr: dns_ptr }))[0]
+    end
+
+    def change_protection(delete: nil)
+      query = {}
+      query['delete'] = delete unless delete.nil?
+      action(request(base_path('actions/change_protection'), j: query))[0]
     end
 
     def actions
