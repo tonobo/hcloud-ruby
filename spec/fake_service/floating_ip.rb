@@ -99,6 +99,17 @@ module Hcloud
               @x['server'] = nil
               a
             end
+
+            params do
+              requires :ip, type: String
+              requires :dns_ptr, type: String
+            end
+            post :change_dns_ptr do
+              a = { 'action' => Action.add(command: 'change_dns_ptr', status: 'running',
+                                           resources: [{ id: @x['id'].to_i, type: 'floating_ip' }]) }
+              @x['dns_ptr'].select {|i| i['dns_ptr'] = params[:dns_ptr] if i['ip'] == params[:ip]}
+              a
+            end
           end
 
           delete do

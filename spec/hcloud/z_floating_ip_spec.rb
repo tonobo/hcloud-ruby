@@ -106,6 +106,19 @@ describe 'FloatingIP' do
     expect(client.floating_ips.find(3).server).to be nil
   end
 
+  it '#change_dns_ptr' do
+    expect(client.floating_ips.first).to be_a Hcloud::FloatingIP
+    expect(client.floating_ips.first.dns_ptr.count).to eq(1)
+    expect(client.floating_ips.first.dns_ptr[0]['ip']).to eq('127.0.0.1')
+    expect(client.floating_ips.first.dns_ptr[0]['dns_ptr']).to eq('static.1.0.0.127.clients.your-server.de')
+
+    expect(client.floating_ips.first.change_dns_ptr(ip: '127.0.0.1', dns_ptr: 'moo')).to be_a Hcloud::Action
+
+    expect(client.floating_ips.first.dns_ptr.count).to eq(1)
+    expect(client.floating_ips.first.dns_ptr[0]['ip']).to eq('127.0.0.1')
+    expect(client.floating_ips.first.dns_ptr[0]['dns_ptr']).to eq('moo')
+  end
+
   it '#destroy()' do
     expect(client.floating_ips.count).to eq(4)
     expect { client.floating_ips.find(595).destroy }.not_to raise_error
