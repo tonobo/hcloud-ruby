@@ -145,6 +145,22 @@ describe 'Image' do
     expect(client.images['mooo']).to be nil
   end
 
+  it '#change_protection' do
+    expect(client.images.first).to be_a Hcloud::Image
+    expect(client.images.first.protection).to be_a Hash
+    expect(client.images.first.protection['delete']).to be false
+
+    expect(client.images.first.change_protection()).to be_a Hcloud::Action
+
+    expect(client.images.first.protection).to be_a Hash
+    expect(client.images.first.protection['delete']).to be false
+
+    expect(client.images.first.change_protection(delete: true)).to be_a Hcloud::Action
+
+    expect(client.images.first.protection).to be_a Hash
+    expect(client.images.first.protection['delete']).to be true
+  end
+
   it '#destroy()' do
     expect(client.images.count).to eq(2)
     expect { client.images[3454].destroy }.not_to raise_error

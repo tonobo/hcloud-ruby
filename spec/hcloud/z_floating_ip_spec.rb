@@ -120,6 +120,22 @@ describe 'FloatingIP' do
     expect(client.floating_ips.first.dns_ptr[0]['dns_ptr']).to eq('moo')
   end
 
+  it '#change_protection' do
+    expect(client.floating_ips.first).to be_a Hcloud::FloatingIP
+    expect(client.floating_ips.first.protection).to be_a Hash
+    expect(client.floating_ips.first.protection['delete']).to be false
+
+    expect(client.floating_ips.first.change_protection()).to be_a Hcloud::Action
+
+    expect(client.floating_ips.first.protection).to be_a Hash
+    expect(client.floating_ips.first.protection['delete']).to be false
+
+    expect(client.floating_ips.first.change_protection(delete: true)).to be_a Hcloud::Action
+
+    expect(client.floating_ips.first.protection).to be_a Hash
+    expect(client.floating_ips.first.protection['delete']).to be true
+  end
+
   it '#destroy()' do
     expect(client.floating_ips.count).to eq(4)
     expect { client.floating_ips.find(595).destroy }.not_to raise_error

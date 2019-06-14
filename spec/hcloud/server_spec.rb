@@ -304,4 +304,21 @@ describe 'Server' do
     expect(action.status).to eq('running')
     expect(pass).to eq('test123')
   end
+
+  it '#change_protection' do
+    expect(client.servers[2]).to be_a Hcloud::Server
+    expect(client.servers[2].protection).to be_a Hash
+    expect(client.servers[2].protection['delete']).to be false
+    expect(client.servers[2].protection['rebuild']).to be false
+
+    expect(client.servers[2].change_protection()).to be_a Hcloud::Action
+
+    expect(client.servers[2].protection).to be_a Hash
+    expect(client.servers[2].protection['delete']).to be false
+
+    expect(client.servers[2].change_protection(delete: true)).to be_a Hcloud::Action
+
+    expect(client.servers[2].protection).to be_a Hash
+    expect(client.servers[2].protection['delete']).to be true
+  end
 end

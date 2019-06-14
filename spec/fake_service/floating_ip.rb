@@ -25,7 +25,10 @@ module Hcloud
             'longitude' => 11.076665
           },
           'blocked' => false,
-          'created' => '2016-01-30T23:50:00+00:00'
+          'created' => '2016-01-30T23:50:00+00:00',
+          'protection' => {
+            'delete' => false
+          }
         }
       ],
       'meta' => {
@@ -111,6 +114,16 @@ module Hcloud
               @x['dns_ptr'].select {|i| i['dns_ptr'] = params[:dns_ptr] if i['ip'] == params[:ip]}
               a
             end
+
+            params do
+              optional :delete, type: Boolean
+            end
+            post :change_protection do
+              a = { 'action' => Action.add(command: 'change_protection', status: 'running',
+                                           resources: [{ id: @x['id'].to_i, type: 'floating_ip' }]) }
+              @x['protection']['delete'] = params[:delete] unless params[:delete].nil?
+              a
+            end
           end
 
           delete do
@@ -156,6 +169,9 @@ module Hcloud
               }
             ],
             'created' => Time.now.to_s,
+            'protection' => {
+              'delete' => false
+            },
             'home_location' => $LOCATIONS['locations'].find { |x| x['name'] == params[:home_location] }
           }
           $FLOATING_IPS['floating_ips'] << f

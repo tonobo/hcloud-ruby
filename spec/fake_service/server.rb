@@ -133,6 +133,18 @@ module Hcloud
               end
               { action: a, root_password: 'test123' }
             end
+
+            params do
+              optional :delete, type: Boolean
+              optional :rebuild, type: Boolean
+            end
+            post :change_protection do
+              a = { 'action' => Action.add(command: 'change_protection', status: 'running',
+                                           resources: [{ id: @x['id'].to_i, type: 'server' }]) }
+              @x['protection']['delete'] = params[:delete] unless params[:delete].nil?
+              @x['protection']['rebuild'] = params[:rebuild] unless params[:rebuild].nil?
+              a
+            end
           end
 
           params do
@@ -214,6 +226,10 @@ module Hcloud
               iso: nil,
               status: 'initalizing',
               created: Time.now.iso8601,
+              protection: {
+                delete: false,
+                rebuild: false
+              },
               public_net: {
                 ipv4: {
                   ip: '1.2.3.4',
