@@ -8,7 +8,8 @@ module Hcloud
       dns_ptr: nil,
       server: nil,
       home_location: Location,
-      blocked: nil
+      blocked: nil,
+      created: :time
     }.freeze
     include EntryLoader
 
