@@ -24,7 +24,8 @@ module Hcloud
             'latitude' => 49.452102,
             'longitude' => 11.076665
           },
-          'blocked' => false
+          'blocked' => false,
+          'created' => '2016-01-30T23:50:00+00:00'
         }
       ],
       'meta' => {
@@ -154,6 +155,7 @@ module Hcloud
                 'dns_ptr' => 'static.2.0.0.127.clients.your-server.de'
               }
             ],
+            'created' => Time.now.to_s,
             'home_location' => $LOCATIONS['locations'].find { |x| x['name'] == params[:home_location] }
           }
           $FLOATING_IPS['floating_ips'] << f

@@ -20,6 +20,7 @@ describe 'FloatingIP' do
     expect(client.floating_ips[id].server).to be nil
     expect(client.floating_ips[id].blocked).to be false
     expect(client.floating_ips[id].home_location.id).to eq(2)
+    expect(client.floating_ips[id].created).to be_a Time
   end
 
   it '#create -> invalid type' do
