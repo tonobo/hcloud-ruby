@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class ImageResource < AbstractResource
     def all
@@ -39,6 +41,7 @@ module Hcloud
     def find_by(name:)
       j = Oj.load(request('images', q: { name: name }).run.body)['images']
       return if j.none?
+
       j.each do |x|
         return Image.new(x, self, client)
       end

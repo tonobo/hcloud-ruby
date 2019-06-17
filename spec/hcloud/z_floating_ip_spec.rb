@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'FloatingIP' do
@@ -125,7 +127,7 @@ describe 'FloatingIP' do
     expect(client.floating_ips.first.protection).to be_a Hash
     expect(client.floating_ips.first.protection['delete']).to be false
 
-    expect(client.floating_ips.first.change_protection()).to be_a Hcloud::Action
+    expect(client.floating_ips.first.change_protection).to be_a Hcloud::Action
 
     expect(client.floating_ips.first.protection).to be_a Hash
     expect(client.floating_ips.first.protection['delete']).to be false

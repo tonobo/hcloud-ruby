@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   module FakeService
     $FLOATING_IPS_IDS = 0
@@ -111,7 +113,7 @@ module Hcloud
             post :change_dns_ptr do
               a = { 'action' => Action.add(command: 'change_dns_ptr', status: 'success',
                                            resources: [{ id: @x['id'].to_i, type: 'floating_ip' }]) }
-              @x['dns_ptr'].select {|i| i['dns_ptr'] = params[:dns_ptr] if i['ip'] == params[:ip]}
+              @x['dns_ptr'].select { |i| i['dns_ptr'] = params[:dns_ptr] if i['ip'] == params[:ip] }
               a
             end
 

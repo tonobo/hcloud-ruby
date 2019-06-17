@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class ServerResource < AbstractResource
     def create(name:,
@@ -47,6 +49,7 @@ module Hcloud
     def find_by(name:)
       x = Oj.load(request('servers', q: { name: name }).run.body)['servers']
       return nil if x.none?
+
       x.each do |s|
         return Server.new(s, self, client)
       end

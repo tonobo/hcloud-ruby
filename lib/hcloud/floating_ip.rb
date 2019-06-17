@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class FloatingIP
     Attributes = {
@@ -62,6 +64,7 @@ module Hcloud
 
     def base_path(ext = nil)
       return ["floating_ips/#{id}", ext].compact.join('/') unless id.nil?
+
       raise ResourcePathError, 'Unable to build resource path. Id is nil.'
     end
   end

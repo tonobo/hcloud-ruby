@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'Image' do
@@ -150,7 +152,7 @@ describe 'Image' do
     expect(client.images.first.protection).to be_a Hash
     expect(client.images.first.protection['delete']).to be false
 
-    expect(client.images.first.change_protection()).to be_a Hcloud::Action
+    expect(client.images.first.change_protection).to be_a Hcloud::Action
 
     expect(client.images.first.protection).to be_a Hash
     expect(client.images.first.protection['delete']).to be false

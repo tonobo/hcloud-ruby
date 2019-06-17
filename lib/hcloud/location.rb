@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class Location
     Attributes = {

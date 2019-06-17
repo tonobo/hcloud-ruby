@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class DatacenterResource < AbstractResource
     include Enumerable
@@ -25,6 +27,7 @@ module Hcloud
     def find_by(name:)
       x = Oj.load(request('datacenters', q: { name: name }).run.body)['datacenters']
       return nil if x.none?
+
       x.each do |s|
         return Datacenter.new(s, self, client)
       end

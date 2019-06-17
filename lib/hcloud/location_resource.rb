@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class LocationResource < AbstractResource
     def all
@@ -17,6 +19,7 @@ module Hcloud
     def find_by(name:)
       x = Oj.load(request('locations', q: { name: name }).run.body)['locations']
       return nil if x.none?
+
       x.each do |s|
         return Location.new(s, self, client)
       end

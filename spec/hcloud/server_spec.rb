@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'Server' do
@@ -311,7 +313,7 @@ describe 'Server' do
     expect(client.servers[2].protection['delete']).to be false
     expect(client.servers[2].protection['rebuild']).to be false
 
-    expect(client.servers[2].change_protection()).to be_a Hcloud::Action
+    expect(client.servers[2].change_protection).to be_a Hcloud::Action
 
     expect(client.servers[2].protection).to be_a Hash
     expect(client.servers[2].protection['delete']).to be false

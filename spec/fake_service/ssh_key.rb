@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   module FakeService
     $SSH_KEY_ID = 0

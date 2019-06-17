@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   module FakeService
 
@@ -163,7 +165,8 @@ module Hcloud
 
           delete do
             $SERVERS['servers'].delete(@x)
-            { action: Action.add(status: 'success', command: 'delete_server', resources: [{ id: @x['id'], type: 'server' }]) }
+            { action: Action.add(status: 'success', command: 'delete_server',
+                                 resources: [{ id: @x['id'], type: 'server' }]) }
           end
         end
 

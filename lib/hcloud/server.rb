@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class Server
     Attributes = {
@@ -111,6 +113,7 @@ module Hcloud
 
     def base_path(ext = nil)
       return ["servers/#{id}", ext].compact.join('/') unless id.nil?
+
       raise ResourcePathError, 'Unable to build resource path. Id is nil.'
     end
   end
