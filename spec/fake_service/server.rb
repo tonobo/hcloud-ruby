@@ -163,7 +163,7 @@ module Hcloud
 
           delete do
             $SERVERS['servers'].delete(@x)
-            { action: Action.add(status: 'success', command: 'delete_server') }
+            { action: Action.add(status: 'success', command: 'delete_server', resources: [{ id: @x['id'], type: 'server' }]) }
           end
         end
 

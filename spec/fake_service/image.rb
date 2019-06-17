@@ -117,7 +117,7 @@ module Hcloud
               optional :delete, type: Boolean
             end
             post :change_protection do
-              a = { 'action' => Action.add(command: 'change_protection', status: 'running',
+              a = { 'action' => Action.add(command: 'change_protection', status: 'success',
                                            resources: [{ id: @x['id'].to_i, type: 'image' }]) }
               @x['protection']['delete'] = params[:delete] unless params[:delete].nil?
               a
