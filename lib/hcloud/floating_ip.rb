@@ -38,8 +38,7 @@ module Hcloud
     end
 
     def change_protection(delete: nil)
-      query = {}
-      query['delete'] = delete unless delete.nil?
+      query = COLLECT_ARGS.call(__method__, binding)
       action(request(base_path('actions/change_protection'), j: query))[0]
     end
 

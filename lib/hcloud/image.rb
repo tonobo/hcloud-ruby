@@ -27,10 +27,7 @@ module Hcloud
     end
 
     def update(description: nil, type: nil)
-      query = {}
-      method(:update).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       Image.new(
         Oj.load(request("images/#{id.to_i}", j: query, method: :put).run.body)['image'],
         parent,
@@ -39,8 +36,7 @@ module Hcloud
     end
 
     def change_protection(delete: nil)
-      query = {}
-      query['delete'] = delete unless delete.nil?
+      query = COLLECT_ARGS.call(__method__, binding)
       action(request(base_path('actions/change_protection'), j: query))[0]
     end
 

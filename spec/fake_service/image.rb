@@ -139,8 +139,8 @@ module Hcloud
         end
         get do
           dc = $IMAGES.deep_dup
-          dc['images'].select! { |x| x['name'] == params[:name] } unless params[:name].nil?
-          dc['images'].select! { |x| x['type'] == params[:type] } unless params[:type].nil?
+          dc['images'].select! { |x| x['name'] == params[:name] } if params[:name]&.size&.positive?
+          dc['images'].select! { |x| x['type'] == params[:type] } if params[:type]&.size&.positive?
           unless params[:bound_to].nil?
             dc['images'].select! { |x| x['bound_to'].to_s == params[:bound_to].to_s }
           end

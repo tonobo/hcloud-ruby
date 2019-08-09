@@ -21,4 +21,6 @@ Lint/HandleExceptions:
     - 'lib/hcloud/server_resource.rb'
     - 'lib/hcloud/server_type_resource.rb'
     - 'lib/hcloud/ssh_key_resource.rb'
+    - 'lib/hcloud/network_resource.rb'
+    - 'lib/hcloud/volume_resource.rb'
 

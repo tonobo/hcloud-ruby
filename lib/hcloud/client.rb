@@ -58,6 +58,14 @@ module Hcloud
       FloatingIPResource.new(client: self)
     end
 
+    def networks
+      NetworkResource.new(client: self)
+    end
+
+    def volumes
+      VolumeResource.new(client: self)
+    end
+
     def request(path, **options)
       code = options.delete(:code)
       if x = options.delete(:j)
@@ -82,8 +90,6 @@ module Hcloud
       )
       r.on_complete do |response|
         case response.code
-        when code
-          raise Error::UnexpectedError, response.body
         when 401
           raise Error::Unauthorized
         when 0
@@ -97,13 +103,18 @@ module Hcloud
                         when 'locked' then Error::Locked
                         when 'not_found' then Error::NotFound
                         when 'rate_limit_exceeded' then Error::RateLimitExceeded
-                        when 'resource_unavailable' then Error::ResourceUnavilable
+                        when 'resource_unavailable' then Error::ResourceUnavailable
                         when 'service_error' then Error::ServiceError
                         when 'uniqueness_error' then Error::UniquenessError
                         else
                           Error::ServerError
                         end
           raise error_class, j.dig('error', 'message')
+        end
+        if code
+          raise Error::UnexpectedError, response.body unless code == response.code
+
+          next
         end
       end
       r

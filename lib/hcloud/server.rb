@@ -36,10 +36,7 @@ module Hcloud
     end
 
     def enable_rescue(type: 'linux64', ssh_keys: [])
-      query = {}
-      method(:enable_rescue).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       a, j = action(request(base_path('actions/enable_rescue'), j: query))
       [a, j['root_password']]
     end
@@ -50,10 +47,7 @@ module Hcloud
     end
 
     def create_image(description: nil, type: nil)
-      query = {}
-      method(:create_image).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       a, j = action(request(base_path('actions/create_image'), j: query))
       [a, Image.new(j['image'], parent, client)]
     end
@@ -64,10 +58,7 @@ module Hcloud
     end
 
     def change_type(server_type:, upgrade_disk: nil)
-      query = {}
-      method(:change_type).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       action(request(base_path('actions/change_type'), j: query))[0]
     end
 
@@ -82,6 +73,16 @@ module Hcloud
                      j: { iso: iso }))[0]
     end
 
+    def attach_to_network(network:, ip: nil, alias_ips: nil)
+      query = COLLECT_ARGS.call(__method__, binding)
+      action(request(base_path('actions/attach_to_network'), j: query))[0]
+    end
+
+    def detach_from_network(network:)
+      action(request(base_path('actions/detach_from_network'),
+                     j: { network: network }))[0]
+    end
+
     %w[
       poweron poweroff shutdown reboot reset
       disable_rescue disable_backup detach_iso
@@ -93,9 +94,7 @@ module Hcloud
     end
 
     def change_protection(delete: nil, rebuild: nil)
-      query = {}
-      query['delete'] = delete unless delete.nil?
-      query['rebuild'] = rebuild unless rebuild.nil?
+      query = COLLECT_ARGS.call(__method__, binding)
       action(request(base_path('actions/change_protection'), j: query))[0]
     end
 

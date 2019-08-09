@@ -23,9 +23,20 @@ module Hcloud
   autoload :LocationResource, 'hcloud/location_resource'
   autoload :Image, 'hcloud/image'
   autoload :ImageResource, 'hcloud/image_resource'
+  autoload :Network, 'hcloud/network'
+  autoload :NetworkResource, 'hcloud/network_resource'
+  autoload :Volume, 'hcloud/volume'
+  autoload :VolumeResource, 'hcloud/volume_resource'
   autoload :Action, 'hcloud/action'
   autoload :ActionResource, 'hcloud/action_resource'
   autoload :Iso, 'hcloud/iso'
   autoload :IsoResource, 'hcloud/iso_resource'
   autoload :Pagination, 'hcloud/pagination'
+
+  COLLECT_ARGS = proc do |method_name, bind|
+    query = bind.receiver.method(method_name).parameters.inject({}) do |hash, (_type, name)|
+      hash.merge(name => bind.local_variable_get(name))
+    end
+    query.delete_if { |_, v| v.nil? }
+  end
 end

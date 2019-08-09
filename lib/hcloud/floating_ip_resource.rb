@@ -11,11 +11,8 @@ module Hcloud
     end
 
     def create(type:, server: nil, home_location: nil, description: nil)
-      query = {}
-      method(:create).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
-      j = Oj.load(request('floating_ips', j: query, code: 200).run.body)
+      query = COLLECT_ARGS.call(__method__, binding)
+      j = Oj.load(request('floating_ips', j: query, code: 201).run.body)
       [
         j.key?('action') ? Action.new(j['action'], self, client) : nil,
         FloatingIP.new(j['floating_ip'], self, client)
