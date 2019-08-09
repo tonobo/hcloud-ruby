@@ -117,6 +117,21 @@ module Hcloud
               { action: a, root_password: 'test123' }
             end
 
+            post :request_console do
+              error!({ error: { code: :locked } }, 400) if locked?
+              a = Action.add(command: 'request_console', status: 'running',
+                             resources: [{ id: @x['id'], type: 'server' }])
+              Thread.new do
+                sleep(0.5)
+                $ACTIONS['actions'].find { |x| x['id'].to_s == a['id'].to_s }['status'] = 'success'
+              end
+              {
+                action: a,
+                wss_url: "wss://web-console.hetzner.cloud/?server_id=#{@x['id']}&token=token",
+                password: 'test123'
+              }
+            end
+
             params do
               optional :type, type: String
               optional :ssh_keys, type: Array[Integer]

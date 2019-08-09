@@ -291,6 +291,18 @@ describe 'Server' do
     expect(pass).to eq('test123')
   end
 
+  it '#request_console' do
+    expect { client.servers[2].request_console }.to raise_error(Hcloud::Error::Locked)
+    sleep(0.5)
+    action, url, pass = nil
+    expect { action, url, pass = client.servers[2].request_console }.not_to raise_error
+    expect(action).to be_a Hcloud::Action
+    expect(action.command).to eq('request_console')
+    expect(action.status).to eq('running')
+    expect(url).to eq("wss://web-console.hetzner.cloud/?server_id=#{client.servers[2].id}&token=token")
+    expect(pass).to eq('test123')
+  end
+
   it '#enable_rescue' do
     expect { client.servers[2].enable_rescue(type: 'moo') }.to(
       raise_error(Hcloud::Error::InvalidInput)

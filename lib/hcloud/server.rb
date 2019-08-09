@@ -85,6 +85,7 @@ module Hcloud
     %w[
       poweron poweroff shutdown reboot reset
       disable_rescue disable_backup detach_iso
+      request_console
     ].each do |action|
       define_method(action) do
         action(request(base_path("actions/#{action}"), method: :post))[0]
@@ -96,6 +97,11 @@ module Hcloud
       query['delete'] = delete unless delete.nil?
       query['rebuild'] = rebuild unless rebuild.nil?
       action(request(base_path('actions/change_protection'), j: query))[0]
+    end
+
+    def request_console
+      a, j = action(request(base_path('actions/request_console'), method: :post))
+      [a, j['wss_url'], j['password']]
     end
 
     def actions
