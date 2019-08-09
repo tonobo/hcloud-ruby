@@ -71,6 +71,12 @@ module Hcloud
       action(request(base_path('actions/change_type'), j: query))[0]
     end
 
+    # Specifying a backup window is not supported anymore. We keep this method
+    # to ensure backwards compatibility, but ignore the argument if provided.
+    def enable_backup(**kwargs)
+      action(request(base_path('actions/enable_backup'), method: :post))[0]
+    end
+
     def attach_iso(iso:)
       action(request(base_path('actions/attach_iso'),
                      j: { iso: iso }))[0]
@@ -78,8 +84,7 @@ module Hcloud
 
     %w[
       poweron poweroff shutdown reboot reset
-      disable_rescue enable_backup disable_backup
-      detach_iso
+      disable_rescue disable_backup detach_iso
     ].each do |action|
       define_method(action) do
         action(request(base_path("actions/#{action}"), method: :post))[0]
