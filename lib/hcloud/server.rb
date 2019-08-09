@@ -71,11 +71,6 @@ module Hcloud
       action(request(base_path('actions/change_type'), j: query))[0]
     end
 
-    def enable_backup(backup_window:)
-      action(request(base_path('actions/enable_backup'),
-                     j: { backup_window: backup_window }))[0]
-    end
-
     def attach_iso(iso:)
       action(request(base_path('actions/attach_iso'),
                      j: { iso: iso }))[0]
@@ -83,7 +78,8 @@ module Hcloud
 
     %w[
       poweron poweroff shutdown reboot reset
-      disable_rescue disable_backup detach_iso
+      disable_rescue enable_backup disable_backup
+      detach_iso
     ].each do |action|
       define_method(action) do
         action(request(base_path("actions/#{action}"), method: :post))[0]
