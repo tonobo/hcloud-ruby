@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   module FakeService
 
@@ -115,6 +117,21 @@ module Hcloud
               { action: a, root_password: 'test123' }
             end
 
+            post :request_console do
+              error!({ error: { code: :locked } }, 400) if locked?
+              a = Action.add(command: 'request_console', status: 'running',
+                             resources: [{ id: @x['id'], type: 'server' }])
+              Thread.new do
+                sleep(0.5)
+                $ACTIONS['actions'].find { |x| x['id'].to_s == a['id'].to_s }['status'] = 'success'
+              end
+              {
+                action: a,
+                wss_url: "wss://web-console.hetzner.cloud/?server_id=#{@x['id']}&token=token",
+                password: 'test123'
+              }
+            end
+
             params do
               optional :type, type: String
               optional :ssh_keys, type: Array[Integer]
@@ -132,6 +149,18 @@ module Hcloud
                 $ACTIONS['actions'].find { |x| x['id'].to_s == a['id'].to_s }['status'] = 'success'
               end
               { action: a, root_password: 'test123' }
+            end
+
+            params do
+              optional :delete, type: Boolean
+              optional :rebuild, type: Boolean
+            end
+            post :change_protection do
+              a = { 'action' => Action.add(command: 'change_protection', status: 'running',
+                                           resources: [{ id: @x['id'].to_i, type: 'server' }]) }
+              @x['protection']['delete'] = params[:delete] unless params[:delete].nil?
+              @x['protection']['rebuild'] = params[:rebuild] unless params[:rebuild].nil?
+              a
             end
           end
 
@@ -151,7 +180,8 @@ module Hcloud
 
           delete do
             $SERVERS['servers'].delete(@x)
-            { action: Action.add(status: 'success', command: 'delete_server') }
+            { action: Action.add(status: 'success', command: 'delete_server',
+                                 resources: [{ id: @x['id'], type: 'server' }]) }
           end
         end
 
@@ -214,6 +244,10 @@ module Hcloud
               iso: nil,
               status: 'initalizing',
               created: Time.now.iso8601,
+              protection: {
+                delete: false,
+                rebuild: false
+              },
               public_net: {
                 ipv4: {
                   ip: '1.2.3.4',

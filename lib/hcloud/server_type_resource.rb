@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class ServerTypeResource < AbstractResource
     include Enumerable
@@ -18,6 +20,7 @@ module Hcloud
     def find_by(name:)
       x = Oj.load(request('server_types', q: { name: name }).run.body)['server_types']
       return nil if x.none?
+
       x.each do |s|
         return ServerType.new(s, self, client)
       end

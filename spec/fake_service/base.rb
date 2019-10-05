@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape'
 
 module Hcloud
@@ -32,6 +34,7 @@ module Hcloud
 
       before do
         next if headers['Authorization'] == 'Bearer secure'
+
         error!('Unauthorized', 401)
       end
 

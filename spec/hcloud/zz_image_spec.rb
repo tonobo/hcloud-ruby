@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'Image' do
@@ -25,6 +27,7 @@ describe 'Image' do
     expect(client.images[id].os_flavor).to be_a String
     expect(client.images[id].os_version).to be_a String
     expect(client.images[id].rapid_deploy).to be true
+    expect(client.images[id].deprecated).to be_a Time
   end
 
   it '#[] -> find by id (snapshot image)' do
@@ -40,6 +43,7 @@ describe 'Image' do
     expect(client.images[3454].os_flavor).to be_a String
     expect(client.images[3454].os_version).to be nil
     expect(client.images[3454].rapid_deploy).to be false
+    expect(client.images[3454].deprecated).to be nil
   end
 
   it '#update(description:) - handle nil' do
@@ -93,6 +97,7 @@ describe 'Image' do
     expect(x.os_flavor).to be_a String
     expect(x.os_version).to be_a String
     expect(x.rapid_deploy).to be true
+    expect(x.deprecated).to be_a Time
   end
 
   it '#[] -> find by id, handle nonexistent' do
@@ -115,6 +120,7 @@ describe 'Image' do
     expect(client.images.find(id).os_flavor).to be_a String
     expect(client.images.find(id).os_version).to be_a String
     expect(client.images.find(id).rapid_deploy).to be true
+    expect(client.images.find(id).deprecated).to be_a Time
   end
 
   it '#find -> find by id, handle nonexistent' do
@@ -134,10 +140,27 @@ describe 'Image' do
     expect(client.images['ubuntu-16.04'].os_flavor).to be_a String
     expect(client.images['ubuntu-16.04'].os_version).to be_a String
     expect(client.images['ubuntu-16.04'].rapid_deploy).to be true
+    expect(client.images['ubuntu-16.04'].deprecated).to be_a Time
   end
 
   it '#[] -> filter by name, handle nonexistent' do
     expect(client.images['mooo']).to be nil
+  end
+
+  it '#change_protection' do
+    expect(client.images.first).to be_a Hcloud::Image
+    expect(client.images.first.protection).to be_a Hash
+    expect(client.images.first.protection['delete']).to be false
+
+    expect(client.images.first.change_protection).to be_a Hcloud::Action
+
+    expect(client.images.first.protection).to be_a Hash
+    expect(client.images.first.protection['delete']).to be false
+
+    expect(client.images.first.change_protection(delete: true)).to be_a Hcloud::Action
+
+    expect(client.images.first.protection).to be_a Hash
+    expect(client.images.first.protection['delete']).to be true
   end
 
   it '#destroy()' do

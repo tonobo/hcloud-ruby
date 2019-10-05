@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class Server
     Attributes = {
@@ -15,7 +17,8 @@ module Hcloud
       backup_window: nil,
       outgoing_traffic: nil,
       ingoing_traffic: nil,
-      included_traffic: nil
+      included_traffic: nil,
+      protection: nil
     }.freeze
 
     include EntryLoader
@@ -33,10 +36,7 @@ module Hcloud
     end
 
     def enable_rescue(type: 'linux64', ssh_keys: [])
-      query = {}
-      method(:enable_rescue).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       a, j = action(request(base_path('actions/enable_rescue'), j: query))
       [a, j['root_password']]
     end
@@ -47,10 +47,7 @@ module Hcloud
     end
 
     def create_image(description: nil, type: nil)
-      query = {}
-      method(:create_image).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       a, j = action(request(base_path('actions/create_image'), j: query))
       [a, Image.new(j['image'], parent, client)]
     end
@@ -61,16 +58,14 @@ module Hcloud
     end
 
     def change_type(server_type:, upgrade_disk: nil)
-      query = {}
-      method(:change_type).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       action(request(base_path('actions/change_type'), j: query))[0]
     end
 
-    def enable_backup(backup_window:)
-      action(request(base_path('actions/enable_backup'),
-                     j: { backup_window: backup_window }))[0]
+    # Specifying a backup window is not supported anymore. We keep this method
+    # to ensure backwards compatibility, but ignore the argument if provided.
+    def enable_backup(**kwargs)
+      action(request(base_path('actions/enable_backup'), method: :post))[0]
     end
 
     def attach_iso(iso:)
@@ -78,13 +73,34 @@ module Hcloud
                      j: { iso: iso }))[0]
     end
 
+    def attach_to_network(network:, ip: nil, alias_ips: nil)
+      query = COLLECT_ARGS.call(__method__, binding)
+      action(request(base_path('actions/attach_to_network'), j: query))[0]
+    end
+
+    def detach_from_network(network:)
+      action(request(base_path('actions/detach_from_network'),
+                     j: { network: network }))[0]
+    end
+
     %w[
       poweron poweroff shutdown reboot reset
       disable_rescue disable_backup detach_iso
+      request_console
     ].each do |action|
       define_method(action) do
         action(request(base_path("actions/#{action}"), method: :post))[0]
       end
+    end
+
+    def change_protection(delete: nil, rebuild: nil)
+      query = COLLECT_ARGS.call(__method__, binding)
+      action(request(base_path('actions/change_protection'), j: query))[0]
+    end
+
+    def request_console
+      a, j = action(request(base_path('actions/request_console'), method: :post))
+      [a, j['wss_url'], j['password']]
     end
 
     def actions
@@ -103,6 +119,7 @@ module Hcloud
 
     def base_path(ext = nil)
       return ["servers/#{id}", ext].compact.join('/') unless id.nil?
+
       raise ResourcePathError, 'Unable to build resource path. Id is nil.'
     end
   end

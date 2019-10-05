@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class Error < StandardError
     class Unauthorized < Error; end

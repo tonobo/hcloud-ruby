@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 REAL_KEY = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILh8GH'\
-  'JkJRgf3wuuUUQYG3UfqtVK56+FEXAOFaNZ659C m@x.com'.freeze
+  'JkJRgf3wuuUUQYG3UfqtVK56+FEXAOFaNZ659C m@x.com'
 
 describe 'SSHKey' do
   let :client do

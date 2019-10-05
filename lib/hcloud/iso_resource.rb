@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class IsoResource < AbstractResource
     def all
@@ -29,6 +31,7 @@ module Hcloud
     def find_by(name:)
       j = Oj.load(request('isos', q: { name: name }).run.body)['isos']
       return if j.none?
+
       j.each do |x|
         return Iso.new(x, self, client)
       end

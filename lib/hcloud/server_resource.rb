@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class ServerResource < AbstractResource
     def create(name:,
@@ -7,12 +9,10 @@ module Hcloud
                start_after_create: nil,
                image:,
                ssh_keys: [],
+               networks: [],
                user_data: nil)
-      query = {}
-      method(:create).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
-      j = Oj.load(request('servers', j: query, code: 200).run.body)
+      query = COLLECT_ARGS.call(__method__, binding)
+      j = Oj.load(request('servers', j: query, code: 201).run.body)
       [
         Action.new(j['action'], self, client),
         Server.new(j['server'], self, client),
@@ -47,6 +47,7 @@ module Hcloud
     def find_by(name:)
       x = Oj.load(request('servers', q: { name: name }).run.body)['servers']
       return nil if x.none?
+
       x.each do |s|
         return Server.new(s, self, client)
       end

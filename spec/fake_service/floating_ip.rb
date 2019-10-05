@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   module FakeService
     $FLOATING_IPS_IDS = 0
@@ -24,7 +26,11 @@ module Hcloud
             'latitude' => 49.452102,
             'longitude' => 11.076665
           },
-          'blocked' => false
+          'blocked' => false,
+          'created' => '2016-01-30T23:50:00+00:00',
+          'protection' => {
+            'delete' => false
+          }
         }
       ],
       'meta' => {
@@ -87,16 +93,37 @@ module Hcloud
               optional :server, type: String
             end
             post :assign do
-              a = { 'action' => Action.add(command: 'assign_floating_ip', status: 'running',
+              a = { 'action' => Action.add(command: 'assign_floating_ip', status: 'success',
                                            resources: [{ id: @x['server'].to_i, type: 'server' }]) }
               @x['server'] = params[:server].to_i
               a
             end
 
             post :unassign do
-              a = { 'action' => Action.add(command: 'unassign_floating_ip', status: 'running',
+              a = { 'action' => Action.add(command: 'unassign_floating_ip', status: 'success',
                                            resources: [{ id: @x['server'].to_i, type: 'server' }]) }
               @x['server'] = nil
+              a
+            end
+
+            params do
+              requires :ip, type: String
+              requires :dns_ptr, type: String
+            end
+            post :change_dns_ptr do
+              a = { 'action' => Action.add(command: 'change_dns_ptr', status: 'success',
+                                           resources: [{ id: @x['id'].to_i, type: 'floating_ip' }]) }
+              @x['dns_ptr'].select { |i| i['dns_ptr'] = params[:dns_ptr] if i['ip'] == params[:ip] }
+              a
+            end
+
+            params do
+              optional :delete, type: Boolean
+            end
+            post :change_protection do
+              a = { 'action' => Action.add(command: 'change_protection', status: 'success',
+                                           resources: [{ id: @x['id'].to_i, type: 'floating_ip' }]) }
+              @x['protection']['delete'] = params[:delete] unless params[:delete].nil?
               a
             end
           end
@@ -143,6 +170,10 @@ module Hcloud
                 'dns_ptr' => 'static.2.0.0.127.clients.your-server.de'
               }
             ],
+            'created' => Time.now.to_s,
+            'protection' => {
+              'delete' => false
+            },
             'home_location' => $LOCATIONS['locations'].find { |x| x['name'] == params[:home_location] }
           }
           $FLOATING_IPS['floating_ips'] << f

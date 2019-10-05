@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class FloatingIP
     Attributes = {
@@ -8,7 +10,9 @@ module Hcloud
       dns_ptr: nil,
       server: nil,
       home_location: Location,
-      blocked: nil
+      blocked: nil,
+      created: :time,
+      protection: nil
     }.freeze
     include EntryLoader
 
@@ -20,24 +24,47 @@ module Hcloud
     end
 
     def assign(server:)
-      j = Oj.load(request("floating_ips/#{id.to_i}/actions/assign",
-                          j: { server: server }).run.body)
-      Action.new(j['action'], self, client)
+      action(request(base_path('actions/assign'),
+                     j: { server: server }))[0]
     end
 
     def unassign
-      j = Oj.load(request("floating_ips/#{id.to_i}/actions/unassign",
-                          method: :post).run.body)
-      Action.new(j['action'], self, client)
+      action(request(base_path('actions/unassign'), method: :post))[0]
+    end
+
+    def change_dns_ptr(ip:, dns_ptr:)
+      action(request(base_path('actions/change_dns_ptr'),
+                     j: { ip: ip, dns_ptr: dns_ptr }))[0]
+    end
+
+    def change_protection(delete: nil)
+      query = COLLECT_ARGS.call(__method__, binding)
+      action(request(base_path('actions/change_protection'), j: query))[0]
     end
 
     def actions
-      ActionResource.new(client: client, parent: self, base_path: "floating_ips/#{id.to_i}")
+      ActionResource.new(client: client, parent: self, base_path: base_path)
     end
 
     def destroy
       request("floating_ips/#{id}", method: :delete).run.body
       true
+    end
+
+    private
+
+    def action(request)
+      j = Oj.load(request.run.body)
+      [
+        Action.new(j['action'], parent, client),
+        j
+      ]
+    end
+
+    def base_path(ext = nil)
+      return ["floating_ips/#{id}", ext].compact.join('/') unless id.nil?
+
+      raise ResourcePathError, 'Unable to build resource path. Id is nil.'
     end
   end
 end

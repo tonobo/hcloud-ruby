@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   module FakeService
     $IMAGES = {
@@ -15,7 +17,11 @@ module Hcloud
           'bound_to' => nil,
           'os_flavor' => 'ubuntu',
           'os_version' => '16.04',
-          'rapid_deploy' => true
+          'rapid_deploy' => true,
+          'deprecated' => '2018-02-28T00:00:00+00:00',
+          'protection' => {
+            'delete' => false
+          }
         },
         {
           'id' => 3454,
@@ -30,7 +36,11 @@ module Hcloud
           'bound_to' => nil,
           'os_flavor' => 'ubuntu',
           'os_version' => nil,
-          'rapid_deploy' => false
+          'rapid_deploy' => false,
+          'deprecated' => nil,
+          'protection' => {
+            'delete' => false
+          }
         }
       ],
       'meta' => {
@@ -85,6 +95,37 @@ module Hcloud
             { image: @x }
           end
 
+          group :actions do
+            params do
+              optional :status, type: String
+              optional :sort, type: String
+            end
+            get do
+              dc = $ACTIONS.deep_dup
+              dc['actions'].select! do |x|
+                x['resources'].to_a.any? do |y|
+                  (y.to_h['type'] == 'image') && (y.to_h['id'].to_s == @x['id'].to_s)
+                end
+              end
+              unless params[:status].nil?
+                dc['actions'].select! do |x|
+                  x['status'].to_s == params[:status].to_s
+                end
+              end
+              dc
+            end
+
+            params do
+              optional :delete, type: Boolean
+            end
+            post :change_protection do
+              a = { 'action' => Action.add(command: 'change_protection', status: 'success',
+                                           resources: [{ id: @x['id'].to_i, type: 'image' }]) }
+              @x['protection']['delete'] = params[:delete] unless params[:delete].nil?
+              a
+            end
+          end
+
           delete do
             $IMAGES['images'].delete(@x)
             ''
@@ -98,8 +139,8 @@ module Hcloud
         end
         get do
           dc = $IMAGES.deep_dup
-          dc['images'].select! { |x| x['name'] == params[:name] } unless params[:name].nil?
-          dc['images'].select! { |x| x['type'] == params[:type] } unless params[:type].nil?
+          dc['images'].select! { |x| x['name'] == params[:name] } if params[:name]&.size&.positive?
+          dc['images'].select! { |x| x['type'] == params[:type] } if params[:type]&.size&.positive?
           unless params[:bound_to].nil?
             dc['images'].select! { |x| x['bound_to'].to_s == params[:bound_to].to_s }
           end

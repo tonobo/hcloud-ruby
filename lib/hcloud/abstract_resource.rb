@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class AbstractResource
     include Enumerable
@@ -93,11 +95,12 @@ module Hcloud
       ret = Oj.load(request(path, o.merge(ep: ep(per_page: 1, page: 1))).run.body)
       a = ret.dig('meta', 'pagination', 'total_entries').to_i
       return [ret] if a <= 1
+
       unless @limit.nil?
         a = @limit if a > @limit
       end
       r = a / Client::MAX_ENTRIES_PER_PAGE
-      r += 1 if a % Client::MAX_ENTRIES_PER_PAGE > 0
+      r += 1 if (a % Client::MAX_ENTRIES_PER_PAGE).positive?
       requests = r.times.map do |i|
         per_page = Client::MAX_ENTRIES_PER_PAGE
         if !@limit.nil? && (r == (i + 1)) && (a % per_page != 0)

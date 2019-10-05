@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class ImageResource < AbstractResource
     def all
@@ -27,10 +29,7 @@ module Hcloud
     end
 
     def where(sort: nil, type: nil, bound_to: nil, name: nil)
-      query = {}
-      method(:where).parameters.inject(query) do |r, x|
-        (var = eval(x.last.to_s)).nil? ? r : r.merge!(x.last => var)
-      end
+      query = COLLECT_ARGS.call(__method__, binding)
       mj('images', q: query) do |j|
         j.flat_map { |x| x['images'].map { |x| Image.new(x, self, client) } }
       end
@@ -39,6 +38,7 @@ module Hcloud
     def find_by(name:)
       j = Oj.load(request('images', q: { name: name }).run.body)['images']
       return if j.none?
+
       j.each do |x|
         return Image.new(x, self, client)
       end

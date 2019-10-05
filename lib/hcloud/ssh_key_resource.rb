@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hcloud
   class SSHKeyResource < AbstractResource
     def all
@@ -22,6 +24,7 @@ module Hcloud
     def find_by(name:)
       x = Oj.load(request('ssh_keys', q: { name: name }).run.body)['ssh_keys']
       return nil if x.none?
+
       x.each do |s|
         return SSHKey.new(s, self, client)
       end
