@@ -2,23 +2,14 @@
 
 module Hcloud
   class SSHKey
-    Attributes = {
-      id: nil,
-      name: nil,
-      fingerprint: nil,
-      public_key: nil
-    }.freeze
     include EntryLoader
 
     def update(name:)
-      j = Oj.load(request("ssh_keys/#{id.to_i}",
-                          j: { name: name },
-                          method: :put).run.body)
-      SSHKey.new(j['ssh_key'], self, client)
+      prepare_request(j: COLLECT_ARGS.call(__method__, binding), method: :put)
     end
 
     def destroy
-      request("ssh_keys/#{id}", method: :delete).run.body
+      prepare_request(method: :delete)
       true
     end
   end

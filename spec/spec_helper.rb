@@ -2,6 +2,7 @@
 
 require 'grape'
 require 'active_support/all'
+require 'pry'
 
 require 'simplecov'
 SimpleCov.start

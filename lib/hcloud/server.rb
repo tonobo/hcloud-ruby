@@ -2,85 +2,61 @@
 
 module Hcloud
   class Server
-    Attributes = {
-      id: nil,
-      name: nil,
-      status: nil,
-      created: :time,
-      public_net: nil,
-      server_type: ServerType,
-      datacenter: Datacenter,
-      image: Image,
-      iso: nil,
-      rescue_enabled: nil,
-      locked: nil,
-      backup_window: nil,
-      outgoing_traffic: nil,
-      ingoing_traffic: nil,
-      included_traffic: nil,
-      protection: nil
-    }.freeze
-
     include EntryLoader
 
+    schema(
+      created: :time,
+      server_type: ServerType,
+      datacenter: Datacenter,
+      image: Image
+    )
+
     def update(name:)
-      Server.new(
-        Oj.load(request(base_path, j: { name: name }, method: :put).run.body)['server'],
-        parent,
-        client
-      )
+      prepare_request(j: { name: name }, method: :put)
     end
 
     def destroy
-      action(request(base_path, method: :delete))[0]
+      prepare_request(method: :delete)
     end
 
     def enable_rescue(type: 'linux64', ssh_keys: [])
       query = COLLECT_ARGS.call(__method__, binding)
-      a, j = action(request(base_path('actions/enable_rescue'), j: query))
-      [a, j['root_password']]
+      prepare_request('actions/enable_rescue', j: query) { |j| j[:root_password] }
     end
 
     def reset_password
-      a, j = action(request(base_path('actions/reset_password'), method: :post))
-      [a, j['root_password']]
+      prepare_request('actions/reset_password', method: :post) { |j| j[:root_password] }
     end
 
     def create_image(description: nil, type: nil)
       query = COLLECT_ARGS.call(__method__, binding)
-      a, j = action(request(base_path('actions/create_image'), j: query))
-      [a, Image.new(j['image'], parent, client)]
+      prepare_request('actions/create_image', j: query) { |j| Image.new(client, j[:image]) }
     end
 
     def rebuild(image:)
-      a, j = action(request(base_path('actions/rebuild'), j: { image: image }))
-      [a, j['root_password']]
+      prepare_request('actions/rebuild', j: { image: image }) { |j| j[:root_password] }
     end
 
     def change_type(server_type:, upgrade_disk: nil)
-      query = COLLECT_ARGS.call(__method__, binding)
-      action(request(base_path('actions/change_type'), j: query))[0]
+      prepare_request('actions/change_type', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     # Specifying a backup window is not supported anymore. We keep this method
     # to ensure backwards compatibility, but ignore the argument if provided.
-    def enable_backup(**kwargs)
-      action(request(base_path('actions/enable_backup'), method: :post))[0]
+    def enable_backup(**_kwargs)
+      prepare_request('actions/enable_backup', method: :post)
     end
 
     def attach_iso(iso:)
-      action(request(base_path('actions/attach_iso'),
-                     j: { iso: iso }))[0]
+      prepare_request('actions/attach_iso', j: { iso: iso })
     end
 
     def attach_to_network(network:, ip: nil, alias_ips: nil)
-      query = COLLECT_ARGS.call(__method__, binding)
-      action(request(base_path('actions/attach_to_network'), j: query))[0]
+      prepare_request('actions/attach_to_network', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def detach_from_network(network:)
-      action(request(base_path('actions/detach_from_network'),
-                     j: { network: network }))[0]
+      prepare_request('actions/detach_from_network', j: { network: network })
     end
 
     %w[
@@ -89,38 +65,20 @@ module Hcloud
       request_console
     ].each do |action|
       define_method(action) do
-        action(request(base_path("actions/#{action}"), method: :post))[0]
+        prepare_request("actions/#{action}", method: :post)
       end
     end
 
     def change_protection(delete: nil, rebuild: nil)
-      query = COLLECT_ARGS.call(__method__, binding)
-      action(request(base_path('actions/change_protection'), j: query))[0]
+      prepare_request('actions/change_protection', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def request_console
-      a, j = action(request(base_path('actions/request_console'), method: :post))
-      [a, j['wss_url'], j['password']]
+      prepare_request('actions/request_console', method: :post) { |j| [j[:wss_url], j[:password]] }
     end
 
     def actions
-      ActionResource.new(client: client, parent: self, base_path: base_path)
-    end
-
-    private
-
-    def action(request)
-      j = Oj.load(request.run.body)
-      [
-        Action.new(j['action'], parent, client),
-        j
-      ]
-    end
-
-    def base_path(ext = nil)
-      return ["servers/#{id}", ext].compact.join('/') unless id.nil?
-
-      raise ResourcePathError, 'Unable to build resource path. Id is nil.'
+      ActionResource.new(client: client, base_path: resource_url)
     end
   end
 end

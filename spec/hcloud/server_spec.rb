@@ -132,7 +132,7 @@ describe 'Server' do
   it 'check succeded servers and actions' do
     expect(client.servers.all? { |x| x.status == 'initalizing' }).to be true
     expect(client.actions.where(status: 'running')
-           .select { |x| x.resources.first['type'] == 'server' }.size).to eq(3)
+           .select { |x| x.resources.first[:type] == 'server' }.size).to eq(3)
     expect(client.actions.per_page(1).where(status: 'running').count).to eq(1)
     expect(client.actions.per_page(2).where(status: 'running').count).to eq(2)
     expect(client.actions.per_page(2).page(2).where(status: 'running').count).to eq(1)
@@ -163,7 +163,7 @@ describe 'Server' do
       eq('off' => 2, 'running' => 1)
     )
     expect(client.actions.where(status: 'success')
-           .select { |x| x.resources.first['type'] == 'server' }.size).to eq(3)
+           .select { |x| x.resources.first[:type] == 'server' }.size).to eq(3)
   end
 
   it '#find()' do
@@ -261,7 +261,6 @@ describe 'Server' do
   end
 
   it 'check server actions' do
-    id = nil
     expect(client.servers[2].actions.count).to eq(1)
     expect(id = client.servers[2].actions.first.id).to be_a Integer
     expect(client.servers[2].actions[id].id).to eq(id)

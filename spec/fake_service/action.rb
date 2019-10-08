@@ -6,8 +6,7 @@ module Hcloud
   module FakeService
     $ACTION_ID = 0
     $ACTIONS = {
-      'actions' => [
-      ],
+      'actions' => [],
       'meta' => {
         'pagination' => {
           'page' => 1,
@@ -56,7 +55,9 @@ module Hcloud
         end
         get do
           dc = $ACTIONS.deep_dup
-          dc['actions'].select! { |x| x['status'].to_s == params[:status].to_s } unless params[:status].nil?
+          unless params[:status].nil?
+            dc['actions'].select! { |x| x['status'].to_s == params[:status].to_s }
+          end
           dc['actions'].shuffle!
           unless params[:sort].nil?
             dc['actions'].sort_by! { |x| x[params[:sort].split(':')[0]] }

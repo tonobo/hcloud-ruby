@@ -15,6 +15,19 @@ module Hcloud
       @hydra = Typhoeus::Hydra.new(max_concurrency: concurrency)
     end
 
+    def concurrent
+      @concurrent = true
+      ret = yield
+      hydra.run
+      ret
+    ensure
+      @concurrent = nil
+    end
+
+    def concurrent?
+      !@concurrent.nil?
+    end
+
     def authorized?
       request('server_types').run
       true
@@ -66,8 +79,30 @@ module Hcloud
       VolumeResource.new(client: self)
     end
 
-    def request(path, **options)
+    class ResourceFuture < Delegator
+      def initialize(request)
+        @request = request
+      end
+
+      def __getobj__
+        @__getobj__ ||= @request&.response&.resource
+      end
+    end
+
+    def prepare_request(url, **args, &block)
+      req = request(url, **args.merge(block: block))
+      return req.run.resource unless concurrent?
+
+      hydra.queue req
+      ResourceFuture.new(req)
+    end
+
+    def request(path, **options) # rubocop:disable Metrics/MethodLength
       code = options.delete(:code)
+      block = options.delete(:block)
+      resource_path = options.delete(:resource_path)
+      autoload_action = options.delete(:autoload_action)
+      resource = options.delete(:resource)
       if x = options.delete(:j)
         options[:body] = Oj.dump(x, mode: :compat)
         options[:method] ||= :post
@@ -89,33 +124,13 @@ module Hcloud
         }.merge(options)
       )
       r.on_complete do |response|
-        case response.code
-        when 401
-          raise Error::Unauthorized
-        when 0
-          raise Error::ServerError, "Connection error: #{response.return_code}"
-        when 400...600
-          j = Oj.load(response.body)
-          code = j.dig('error', 'code')
-          error_class = case code
-                        when 'invalid_input' then Error::InvalidInput
-                        when 'forbidden' then Error::Forbidden
-                        when 'locked' then Error::Locked
-                        when 'not_found' then Error::NotFound
-                        when 'rate_limit_exceeded' then Error::RateLimitExceeded
-                        when 'resource_unavailable' then Error::ResourceUnavailable
-                        when 'service_error' then Error::ServiceError
-                        when 'uniqueness_error' then Error::UniquenessError
-                        else
-                          Error::ServerError
-                        end
-          raise error_class, j.dig('error', 'message')
-        end
-        if code
-          raise Error::UnexpectedError, response.body unless code == response.code
-
-          next
-        end
+        response.extend(TyphoeusExt)
+        response.resource_path = resource_path
+        response.resource_class = resource
+        response.autoload_action = autoload_action
+        response.block = block
+        response.context.client = self
+        response.check_for_error(expected_code: code)
       end
       r
     end

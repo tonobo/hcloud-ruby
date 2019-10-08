@@ -1,76 +1,173 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/string'
+
 module Hcloud
   class AbstractResource
     include Enumerable
 
-    attr_reader :client, :parent, :base_path
+    delegate :request, :prepare_request, to: :client
 
-    def initialize(client:, parent: nil, base_path: '')
+    class << self
+      def filter_attributes(*keys)
+        return @filter_attributes if keys.to_a.empty?
+
+        @filter_attributes = keys
+      end
+
+      def resource_url(url = nil)
+        return (@resource_url = url) if url
+
+        @resource_url || name.demodulize.gsub('Resource', '').tableize
+      end
+
+      def resource_path(path = nil)
+        return (@resource_path = path) if path
+
+        @resource_path || resource_url
+      end
+
+      def resource(res = nil)
+        return (@resource = res) if res
+        return @resource if @resource
+
+        auto_const = name.demodulize.gsub('Resource', '').to_sym
+        return Hcloud.const_get(auto_const) if Hcloud.constants.include?(auto_const)
+
+        raise Error, "unable to lookup resource class for #{name}"
+      end
+    end
+
+    attr_reader :client
+
+    def initialize(client:, base_path: '')
       @client = client
-      @parent = parent
       @page = 1
       @per_page = 25
       @order = []
       @base_path = base_path
     end
 
+    def all
+      where
+    end
+
+    def where(**kwargs)
+      kwargs.keys.each do |key|
+        keys = self.class.filter_attributes.map(&:to_s)
+        next if keys.include?(key.to_s)
+
+        raise ArgumentError, "unknown filter #{key}, allowed keys are #{keys}"
+      end
+
+      _dup :@query, @query.to_h.merge(kwargs)
+    end
+
+    def find(id)
+      prepare_request(
+        [self.class.resource_url, id].join('/'),
+        resource_path: resource_path.to_s.singularize,
+        resource: self.class.resource
+      )
+    end
+
+    def [](arg)
+      find_by(id: arg)
+    end
+
+    def find_by(**kwargs)
+      if id = kwargs.delete(:id)
+        return find(id)
+      end
+
+      per_page(1).where(**kwargs).first
+    rescue Error::NotFound
+    end
+
+    # def count
+    #  per_page(1).first&.response&.pagination&.total_entries.to_i
+    # end
+
     def page(page)
-      @page = page
-      self
+      _dup :@page, page
     end
 
     def per_page(per_page)
-      @per_page = per_page
-      self
+      _dup :@per_page, per_page
     end
 
     def limit(limit)
-      @limit = limit
-      self
+      _dup :@limit, limit
     end
 
     def order(*sort)
-      @order = sort.flat_map do |s|
-        case s
-        when Symbol, String then s.to_s
-        when Hash then s.map { |k, v| "#{k}:#{v}" }
-        else
-          raise ArgumentError,
-                "Unable to resolve type for given #{s.inspect} from #{sort}"
-        end
-      end
-      self
+      _dup :@order,
+           begin
+           sort.flat_map do |s|
+             case s
+             when Symbol, String then s.to_s
+             when Hash then s.map { |k, v| "#{k}:#{v}" }
+             else
+               raise ArgumentError,
+                     "Unable to resolve type for given #{s.inspect} from #{sort}"
+             end
+           end
+         end
     end
 
-    def mj(path, **o, &block)
-      if !client.nil? && client.auto_pagination
-        requests = __entries__(path, **o)
-        if requests.all? { |x| x.is_a? Hash }
-          m = MultiReply.new(j: requests, pagination: :auto)
-          m.cb = block
-          return m
-        end
-        client.hydra.run
-        j = requests.map do |x|
-          Oj.load(x.response.body)
-        end
-        m = MultiReply.new(j: j, pagination: :auto)
-        m.cb = block
-        return m
-      end
-      m = MultiReply.new(j: [Oj.load(request(path, o.merge(ep: ep)).run.body)])
-      m.cb = block
-      m
+    def run
+      multi_query(
+        resource_url,
+        q: @query,
+        resource_path: resource_path,
+        resource: self.class.resource
+      )
     end
 
     def each
-      all.each do |member|
+      run.each do |member|
         yield(member)
       end
     end
 
+    # this is just to keep the actual bevahior
+    def pagination
+      return :auto if client.auto_pagination
+
+      run.response.pagination
+    end
+
     protected
+
+    def _dup(var, value)
+      dup.tap do |res|
+        res.instance_variable_set(var, value)
+      end
+    end
+
+    def resource_path
+      self.class.resource_path || self.class.resource_url
+    end
+
+    def resource_url
+      [@base_path.to_s, self.class.resource_url.to_s].reject(&:empty?).join('/')
+    end
+
+    def multi_query(path, **o)
+      return prepare_request(path, o.merge(ep: ep)) unless client&.auto_pagination
+
+      raise Error, 'unable to run auto paginate within concurrent excecution' if @concurrent
+
+      requests = __entries__(path, **o)
+      return requests.flat_map(&:resource) if requests.all? { |req| req.respond_to? :resource }
+
+      client.hydra.run
+      requests.flat_map { |req| req.response.resource }
+    end
+
+    def base_path(ext)
+      [@base_path, ext].reject(&:empty?).join('/')
+    end
 
     def page_params(per_page: nil, page: nil)
       { per_page: per_page || @per_page, page: page || @page }.to_param
@@ -87,28 +184,24 @@ module Hcloud
       r.compact.join('&')
     end
 
-    def request(*args)
-      client.request(*args)
-    end
-
     def __entries__(path, **o)
-      ret = Oj.load(request(path, o.merge(ep: ep(per_page: 1, page: 1))).run.body)
-      a = ret.dig('meta', 'pagination', 'total_entries').to_i
-      return [ret] if a <= 1
+      first_page = request(path, o.merge(ep: ep(per_page: 1, page: 1))).run
+      total_entries = first_page.pagination.total_entries
+      return [first_page] if total_entries <= 1 || @limit == 1
 
       unless @limit.nil?
-        a = @limit if a > @limit
+        total_entries = @limit if total_entries > @limit
       end
-      r = a / Client::MAX_ENTRIES_PER_PAGE
-      r += 1 if (a % Client::MAX_ENTRIES_PER_PAGE).positive?
-      requests = r.times.map do |i|
+      pages = total_entries / Client::MAX_ENTRIES_PER_PAGE
+      pages += 1 if (total_entries % Client::MAX_ENTRIES_PER_PAGE).positive?
+      pages.times.map do |page|
         per_page = Client::MAX_ENTRIES_PER_PAGE
-        if !@limit.nil? && (r == (i + 1)) && (a % per_page != 0)
-          per_page = a % per_page
+        if !@limit.nil? && (pages == (page + 1)) && (total_entries % per_page != 0)
+          per_page = total_entries % per_page
         end
-        req = request(path, o.merge(ep: ep(per_page: per_page, page: i + 1)))
-        client.hydra.queue req
-        req
+        request(path, o.merge(ep: ep(per_page: per_page, page: page + 1))).tap do |req|
+          client.hydra.queue req
+        end
       end
     end
   end

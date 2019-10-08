@@ -2,69 +2,40 @@
 
 module Hcloud
   class FloatingIP
-    Attributes = {
-      id: nil,
-      description: nil,
-      ip: nil,
-      type: nil,
-      dns_ptr: nil,
-      server: nil,
-      home_location: Location,
-      blocked: nil,
-      created: :time,
-      protection: nil
-    }.freeze
     include EntryLoader
 
+    schema(
+      home_location: Location,
+      created: :time
+    )
+
     def update(description:)
-      j = Oj.load(request("floating_ips/#{id.to_i}",
-                          j: { description: description },
-                          method: :put).run.body)
-      FloatingIP.new(j['floating_ip'], self, client)
+      prepare_request(j: COLLECT_ARGS.call(__method__, binding), method: :put)
     end
 
     def assign(server:)
-      action(request(base_path('actions/assign'),
-                     j: { server: server }))[0]
+      prepare_request('actions/assign', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def unassign
-      action(request(base_path('actions/unassign'), method: :post))[0]
+      prepare_request('actions/unassign', method: :post)
     end
 
     def change_dns_ptr(ip:, dns_ptr:)
-      action(request(base_path('actions/change_dns_ptr'),
-                     j: { ip: ip, dns_ptr: dns_ptr }))[0]
+      prepare_request('actions/change_dns_ptr', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def change_protection(delete: nil)
-      query = COLLECT_ARGS.call(__method__, binding)
-      action(request(base_path('actions/change_protection'), j: query))[0]
+      prepare_request('actions/change_protection', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def actions
-      ActionResource.new(client: client, parent: self, base_path: base_path)
+      ActionResource.new(client: client, base_path: resource_url)
     end
 
     def destroy
-      request("floating_ips/#{id}", method: :delete).run.body
+      prepare_request(method: :delete)
       true
-    end
-
-    private
-
-    def action(request)
-      j = Oj.load(request.run.body)
-      [
-        Action.new(j['action'], parent, client),
-        j
-      ]
-    end
-
-    def base_path(ext = nil)
-      return ["floating_ips/#{id}", ext].compact.join('/') unless id.nil?
-
-      raise ResourcePathError, 'Unable to build resource path. Id is nil.'
     end
   end
 end
