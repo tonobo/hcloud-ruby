@@ -2,6 +2,7 @@
 
 require 'hcloud/version'
 require 'active_support/core_ext/object/to_query'
+require 'active_support/core_ext/hash/indifferent_access'
 
 module Hcloud
   autoload :Error, 'hcloud/errors'

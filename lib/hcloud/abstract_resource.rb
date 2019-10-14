@@ -15,10 +15,14 @@ module Hcloud
         @filter_attributes = keys
       end
 
+      def resource_class
+        ancestors[ancestors.index(Hcloud::AbstractResource) - 1]
+      end
+
       def resource_url(url = nil)
         return (@resource_url = url) if url
 
-        @resource_url || name.demodulize.gsub('Resource', '').tableize
+        @resource_url || resource_class.name.demodulize.gsub('Resource', '').tableize
       end
 
       def resource_path(path = nil)
@@ -31,7 +35,7 @@ module Hcloud
         return (@resource = res) if res
         return @resource if @resource
 
-        auto_const = name.demodulize.gsub('Resource', '').to_sym
+        auto_const = resource_class.name.demodulize.gsub('Resource', '').to_sym
         return Hcloud.const_get(auto_const) if Hcloud.constants.include?(auto_const)
 
         raise Error, "unable to lookup resource class for #{name}"

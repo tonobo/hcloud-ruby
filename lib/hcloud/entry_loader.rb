@@ -23,6 +23,10 @@ module Hcloud
         @schema.merge!(kwargs)
       end
 
+      def resource_class
+        ancestors[ancestors.index(Hcloud::EntryLoader) - 1]
+      end
+
       def from_response(response, autoload_action: nil)
         attributes = response.resource_attributes
         action = response.parsed_json[:action] if autoload_action
@@ -63,11 +67,11 @@ module Hcloud
         return instance_exec(&block)
       end
 
-      [self.class.name.demodulize.tableize, id].compact.join('/')
+      [self.class.resource_class.name.demodulize.tableize, id].compact.join('/')
     end
 
     def resource_path
-      self.class.name.demodulize.underscore
+      self.class.resource_class.name.demodulize.underscore
     end
 
     def prepare_request(url_suffix = nil, **kwargs, &block)
