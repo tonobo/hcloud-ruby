@@ -9,9 +9,11 @@ module Hcloud
       created: :time
     )
 
-    def update(description:)
-      prepare_request(j: COLLECT_ARGS.call(__method__, binding), method: :put)
-    end
+    protectable :delete
+    updatable :description
+    destructible
+
+    has_actions
 
     def assign(server:)
       prepare_request('actions/assign', j: COLLECT_ARGS.call(__method__, binding))
@@ -23,19 +25,6 @@ module Hcloud
 
     def change_dns_ptr(ip:, dns_ptr:)
       prepare_request('actions/change_dns_ptr', j: COLLECT_ARGS.call(__method__, binding))
-    end
-
-    def change_protection(delete: nil)
-      prepare_request('actions/change_protection', j: COLLECT_ARGS.call(__method__, binding))
-    end
-
-    def actions
-      ActionResource.new(client: client, base_path: resource_url)
-    end
-
-    def destroy
-      prepare_request(method: :delete)
-      true
     end
   end
 end

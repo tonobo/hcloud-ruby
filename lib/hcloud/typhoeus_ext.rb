@@ -6,8 +6,7 @@ module Hcloud
   module TyphoeusExt
     Context = Struct.new(:client)
 
-    attr_writer :resource_path, :resource_class
-    attr_accessor :block, :autoload_action
+    attr_accessor :block, :autoload_action, :resource_path, :resource_class
 
     def parsed_json
       return {} if code == 204

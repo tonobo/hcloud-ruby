@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'active_support/concern'
+require 'active_model'
+
 module Hcloud
-  module EntryLoader
+  module EntryLoader # rubocop:disable Metrics/ModuleLength
     extend ActiveSupport::Concern
 
     module Collection
@@ -11,10 +13,19 @@ module Hcloud
 
     included do |klass|
       klass.send(:attr_writer, :client)
+      klass.include(ActiveModel::Dirty)
     end
 
-    class_methods do
+    class_methods do # rubocop:disable Metrics/BlockLength
       attr_accessor :resource_url
+
+      def _callbacks
+        @_callbacks ||= { before: [], after: [] }
+      end
+
+      %i[before after].each do |method|
+        define_method(method) { |&block| _callbacks[method] << block }
+      end
 
       def schema(**kwargs)
         @schema ||= {}.with_indifferent_access
@@ -23,8 +34,42 @@ module Hcloud
         @schema.merge!(kwargs)
       end
 
+      def updatable(*args)
+        define_attribute_methods(*args)
+        args.each do |updateable_attribute|
+          define_method(updateable_attribute) { attributes[updateable_attribute] }
+          define_method("#{updateable_attribute}=") do |value|
+            if attributes[updateable_attribute] != value
+              public_send("#{updateable_attribute}_will_change!")
+            end
+            _update_attribute(updateable_attribute, value)
+          end
+        end
+      end
+
+      def destructible
+        define_method(:destroy) { prepare_request(method: :delete) }
+      end
+
+      def protectable(*args)
+        define_method(:change_protection) do |**kwargs|
+          kwargs.keys.each do |key|
+            next if args.map(&:to_s).include? key.to_s
+
+            raise ArgumentError, "#{key} not an allowed protection mode (allowed: #{args})"
+          end
+          prepare_request('actions/change_protection', j: kwargs)
+        end
+      end
+
+      def has_actions # rubocop:disable Naming/PredicateName
+        define_method(:actions) do
+          ActionResource.new(client: client, base_path: resource_url)
+        end
+      end
+
       def resource_class
-        ancestors[ancestors.index(Hcloud::EntryLoader) - 1]
+        ancestors.reverse.find { |const| const.include?(Hcloud::EntryLoader) }
       end
 
       def from_response(response, autoload_action: nil)
@@ -98,6 +143,37 @@ module Hcloud
       attributes.key?(method) || super
     end
 
+    def update(**kwargs)
+      context = self
+      _run_callbacks(:before)
+      prepare_request(j: kwargs, method: :put) do |response|
+        response.resource_class.from_response(
+          response,
+          autoload_action: response.autoload_action
+        ).tap do |*_args|
+          _run_callbacks(:after)
+          context.send(:changes_applied)
+        end
+      end
+    end
+
+    def save
+      update(changes.map { |key, _value| [key.to_sym, attributes[key]] }.to_h)
+    end
+
+    def rollback
+      restore_attributes
+    end
+
+    def _run_callbacks(order)
+      self.class._callbacks[order].each { |block| instance_exec(&block) }
+    end
+
+    def _update_attribute(key, value)
+      attributes[key] = value
+      instance_variable_set("@#{key}", value)
+    end
+
     def _load(resource)
       @attributes = {}.with_indifferent_access
 
@@ -105,16 +181,16 @@ module Hcloud
         definition = self.class.schema[key]
 
         if definition == :time
-          attributes[key] = value ? Time.parse(value) : nil
+          _update_attribute(key, value ? Time.parse(value) : nil)
           next
         end
 
         if definition.is_a?(Class) && definition.include?(EntryLoader)
-          attributes[key] = value ? definition.new(client, value) : nil
+          _update_attribute(key, value ? definition.new(client, value) : nil)
           next
         end
 
-        attributes[key] = value.is_a?(Hash) ? value.with_indifferent_access : value
+        _update_attribute(key, value.is_a?(Hash) ? value.with_indifferent_access : value)
       end
     end
   end

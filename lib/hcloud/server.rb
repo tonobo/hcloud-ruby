@@ -11,13 +11,11 @@ module Hcloud
       image: Image
     )
 
-    def update(name:)
-      prepare_request(j: { name: name }, method: :put)
-    end
+    protectable :delete, :rebuild
+    updatable :name
+    destructible
 
-    def destroy
-      prepare_request(method: :delete)
-    end
+    has_actions
 
     def enable_rescue(type: 'linux64', ssh_keys: [])
       query = COLLECT_ARGS.call(__method__, binding)
@@ -69,16 +67,8 @@ module Hcloud
       end
     end
 
-    def change_protection(delete: nil, rebuild: nil)
-      prepare_request('actions/change_protection', j: COLLECT_ARGS.call(__method__, binding))
-    end
-
     def request_console
       prepare_request('actions/request_console', method: :post) { |j| [j[:wss_url], j[:password]] }
-    end
-
-    def actions
-      ActionResource.new(client: client, base_path: resource_url)
     end
   end
 end
