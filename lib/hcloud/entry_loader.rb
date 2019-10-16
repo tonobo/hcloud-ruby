@@ -37,9 +37,9 @@ module Hcloud
       def updatable(*args)
         define_attribute_methods(*args)
         args.each do |updateable_attribute|
-          define_method(updateable_attribute) { attributes[updateable_attribute] }
+          define_method(updateable_attribute) { _attributes[updateable_attribute] }
           define_method("#{updateable_attribute}=") do |value|
-            if attributes[updateable_attribute] != value
+            if _attributes[updateable_attribute] != value
               public_send("#{updateable_attribute}_will_change!")
             end
             _update_attribute(updateable_attribute, value)
@@ -100,7 +100,7 @@ module Hcloud
     end
 
     def inspect
-      "#<#{self.class.name}:0x#{__id__.to_s(16)} #{attributes.inspect}>"
+      "#<#{self.class.name}:0x#{__id__.to_s(16)} #{_attributes.inspect}>"
     end
 
     def client
@@ -131,16 +131,16 @@ module Hcloud
       )
     end
 
-    def attributes
-      @attributes ||= {}.with_indifferent_access
+    def _attributes
+      @_attributes ||= {}.with_indifferent_access
     end
 
     def method_missing(method, *args, &block)
-      attributes.key?(method) ? attributes[method] : super
+      _attributes.key?(method) ? _attributes[method] : super
     end
 
     def respond_to_missing?(method, *args, &block)
-      attributes.key?(method) || super
+      _attributes.key?(method) || super
     end
 
     def update(**kwargs)
@@ -158,7 +158,7 @@ module Hcloud
     end
 
     def save
-      update(changes.map { |key, _value| [key.to_sym, attributes[key]] }.to_h)
+      update(changes.map { |key, _value| [key.to_sym, _attributes[key]] }.to_h)
     end
 
     def rollback
@@ -170,12 +170,12 @@ module Hcloud
     end
 
     def _update_attribute(key, value)
-      attributes[key] = value
+      _attributes[key] = value
       instance_variable_set("@#{key}", value)
     end
 
     def _load(resource)
-      @attributes = {}.with_indifferent_access
+      @_attributes = {}.with_indifferent_access
 
       resource.each do |key, value|
         definition = self.class.schema[key]
