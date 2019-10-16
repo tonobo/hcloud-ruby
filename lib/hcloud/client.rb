@@ -7,9 +7,10 @@ module Hcloud
   class Client
     MAX_ENTRIES_PER_PAGE = 50
 
-    attr_reader :token, :auto_pagination, :hydra
-    def initialize(token:, auto_pagination: false, concurrency: 20)
+    attr_reader :token, :auto_pagination, :hydra, :user_agent
+    def initialize(token:, auto_pagination: false, concurrency: 20, user_agent: nil)
       @token = token
+      @user_agent = user_agent || "hcloud-ruby v#{VERSION}"
       @auto_pagination = auto_pagination
       @concurrency = concurrency
       @hydra = Typhoeus::Hydra.new(max_concurrency: concurrency)
@@ -115,6 +116,7 @@ module Hcloud
         {
           headers: {
             'Authorization' => "Bearer #{token}",
+            'User-Agent' => user_agent,
             'Content-Type' => 'application/json'
           }
         }.merge(options)
