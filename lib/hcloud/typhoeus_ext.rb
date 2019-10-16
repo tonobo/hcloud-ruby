@@ -30,7 +30,16 @@ module Hcloud
     def parsed_json
       return {} if code == 204
 
-      @parsed_json ||= Oj.load(body, symbol_keys: true)
+      @parsed_json ||= begin
+                         Oj.load(body, symbol_keys: true).tap do |json|
+                           next unless request.hydra
+
+                           check_for_error(
+                             e_code: json.to_h.dig(:error, :code),
+                             e_message: json.to_h.dig(:error, :message)
+                           )
+                         end
+                       end
     rescue StandardError
       raise Error::UnexpectedError, "unable to load body: #{body}"
     end
@@ -39,12 +48,12 @@ module Hcloud
       @context ||= Context.new
     end
 
-    def check_for_error(expected_code:)
+    def check_for_error(e_code: nil, e_message: nil)
       case code
       when 401 then raise(Error::Unauthorized)
       when 0 then raise(Error::ServerError, "Connection error: #{return_code}")
       when 400...600
-        raise _error_class(error_code), error_message
+        raise _error_class(e_code || error_code), e_message || error_message
       end
 
       raise Error::UnexpectedError, body if expected_code && expected_code != code

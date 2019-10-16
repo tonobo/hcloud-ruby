@@ -125,7 +125,7 @@ module Hcloud
         response.extend(TyphoeusExt)
         response.attributes = hcloud_attributes
         response.context.client = self
-        response.check_for_error(expected_code: code)
+        response.check_for_error unless response.request.hydra
       end
       r
     end
