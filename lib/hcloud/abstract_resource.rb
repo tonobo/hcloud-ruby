@@ -71,7 +71,7 @@ module Hcloud
       prepare_request(
         [self.class.resource_url, id].join('/'),
         resource_path: resource_path.to_s.singularize,
-        resource: self.class.resource
+        resource_class: self.class.resource
       )
     end
 
@@ -124,7 +124,7 @@ module Hcloud
         resource_url,
         q: @query,
         resource_path: resource_path,
-        resource: self.class.resource
+        resource_class: self.class.resource
       )
     end
 

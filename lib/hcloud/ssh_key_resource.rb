@@ -13,7 +13,8 @@ module Hcloud
 
     def create(name:, public_key:)
       prepare_request(
-        'ssh_keys', j: COLLECT_ARGS.call(__method__, binding), code: 201
+        'ssh_keys', j: COLLECT_ARGS.call(__method__, binding),
+                    expected_code: 201
       ) do |response|
         SSHKey.new(client, response.parsed_json[:ssh_key])
       end

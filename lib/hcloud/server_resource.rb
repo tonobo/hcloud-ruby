@@ -13,7 +13,8 @@ module Hcloud
                ssh_keys: [],
                networks: [],
                user_data: nil)
-      prepare_request('servers', j: COLLECT_ARGS.call(__method__, binding), code: 201) do |response|
+      prepare_request('servers', j: COLLECT_ARGS.call(__method__, binding),
+                                 expected_code: 201) do |response|
         [
           Action.new(client, response.parsed_json[:action]),
           Server.new(client, response.parsed_json[:server]),

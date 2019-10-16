@@ -98,11 +98,7 @@ module Hcloud
     end
 
     def request(path, **options) # rubocop:disable Metrics/MethodLength
-      code = options.delete(:code)
-      block = options.delete(:block)
-      resource_path = options.delete(:resource_path)
-      autoload_action = options.delete(:autoload_action)
-      resource = options.delete(:resource)
+      hcloud_attributes = TyphoeusExt.collect_attributes(options)
       if x = options.delete(:j)
         options[:body] = Oj.dump(x, mode: :compat)
         options[:method] ||= :post
@@ -125,10 +121,7 @@ module Hcloud
       )
       r.on_complete do |response|
         response.extend(TyphoeusExt)
-        response.resource_path = resource_path
-        response.resource_class = resource
-        response.autoload_action = autoload_action
-        response.block = block
+        response.attributes = hcloud_attributes
         response.context.client = self
         response.check_for_error(expected_code: code)
       end

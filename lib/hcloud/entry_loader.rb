@@ -121,7 +121,7 @@ module Hcloud
 
     def prepare_request(url_suffix = nil, **kwargs, &block)
       kwargs[:resource_path] ||= resource_path
-      kwargs[:resource] ||= self.class
+      kwargs[:resource_class] ||= self.class
       kwargs[:autoload_action] = true unless kwargs.key?(:autoload_action)
 
       client.prepare_request(

@@ -13,7 +13,8 @@ module Hcloud
 
     def create(size:, name:, automount: nil, format: nil, location: nil, server: nil)
       prepare_request(
-        'volumes', j: COLLECT_ARGS.call(__method__, binding), code: 201
+        'volumes', j: COLLECT_ARGS.call(__method__, binding),
+                   expected_code: 201
       ) do |response|
         [
           Action.new(client, response.parsed_json[:action]),

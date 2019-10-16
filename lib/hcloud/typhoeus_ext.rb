@@ -6,7 +6,26 @@ module Hcloud
   module TyphoeusExt
     Context = Struct.new(:client)
 
-    attr_accessor :block, :autoload_action, :resource_path, :resource_class
+    ATTRIBUTES = %i[
+      block autoload_action resource_path
+      resource_class expected_code
+    ].freeze
+
+    attr_accessor(*ATTRIBUTES)
+
+    def self.collect_attributes(kwargs)
+      hash = {}
+      ATTRIBUTES.each do |key|
+        hash[key] = kwargs.delete(key) if kwargs.key?(key)
+      end
+      hash
+    end
+
+    def attributes=(kwargs)
+      kwargs.each do |key, value|
+        public_send("#{key}=", value)
+      end
+    end
 
     def parsed_json
       return {} if code == 204

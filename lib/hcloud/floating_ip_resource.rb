@@ -13,7 +13,8 @@ module Hcloud
 
     def create(type:, server: nil, home_location: nil, description: nil)
       prepare_request(
-        'floating_ips', j: COLLECT_ARGS.call(__method__, binding), code: 201
+        'floating_ips', j: COLLECT_ARGS.call(__method__, binding),
+                        expected_code: 201
       ) do |response|
         action = Action.new(client, response[:action]) if response[:action]
         [action, FloatingIP.new(client, response[:floating_ip])]
