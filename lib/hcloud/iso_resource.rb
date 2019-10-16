@@ -4,6 +4,8 @@ module Hcloud
   class IsoResource < AbstractResource
     filter_attributes :name
 
+    bind_to Iso
+
     def [](arg)
       case arg
       when Integer then find_by(id: arg)

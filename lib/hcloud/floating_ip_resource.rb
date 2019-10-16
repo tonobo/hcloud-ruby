@@ -4,6 +4,8 @@ module Hcloud
   class FloatingIPResource < AbstractResource
     filter_attributes :name
 
+    bind_to FloatingIP
+
     def [](arg)
       case arg
       when Integer then find_by(id: arg)

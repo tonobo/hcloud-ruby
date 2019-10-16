@@ -2,6 +2,8 @@
 
 module Hcloud
   class Server
+    require 'hcloud/server_resource'
+
     include EntryLoader
 
     schema(

@@ -2,6 +2,8 @@
 
 module Hcloud
   class SSHKey
+    require 'hcloud/ssh_key_resource'
+
     include EntryLoader
 
     updatable :name

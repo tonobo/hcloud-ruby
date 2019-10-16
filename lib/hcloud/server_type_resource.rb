@@ -4,6 +4,8 @@ module Hcloud
   class ServerTypeResource < AbstractResource
     filter_attributes :name
 
+    bind_to ServerType
+
     def [](arg)
       case arg
       when Integer then find_by(id: arg)

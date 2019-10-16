@@ -2,6 +2,8 @@
 
 module Hcloud
   class Volume
+    require 'hcloud/volume_resource'
+
     include EntryLoader
 
     schema(

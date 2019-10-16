@@ -2,6 +2,8 @@
 
 module Hcloud
   class FloatingIP
+    require 'hcloud/floating_ip_resource'
+
     include EntryLoader
 
     schema(

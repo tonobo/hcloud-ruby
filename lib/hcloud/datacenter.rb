@@ -2,6 +2,8 @@
 
 module Hcloud
   class Datacenter
+    require 'hcloud/datacenter_resource'
+
     include EntryLoader
 
     schema(

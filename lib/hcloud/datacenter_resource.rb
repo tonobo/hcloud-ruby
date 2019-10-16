@@ -4,6 +4,8 @@ module Hcloud
   class DatacenterResource < AbstractResource
     filter_attributes :name
 
+    bind_to Datacenter
+
     def recommended
       all.first
     end

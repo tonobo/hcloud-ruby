@@ -2,6 +2,8 @@
 
 module Hcloud
   class Image
+    require 'hcloud/image_resource'
+
     include EntryLoader
 
     schema(

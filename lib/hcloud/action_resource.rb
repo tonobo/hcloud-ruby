@@ -3,5 +3,7 @@
 module Hcloud
   class ActionResource < AbstractResource
     filter_attributes :status
+
+    bind_to Action
   end
 end

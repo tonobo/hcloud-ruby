@@ -4,6 +4,8 @@ module Hcloud
   class LocationResource < AbstractResource
     filter_attributes :name
 
+    bind_to Location
+
     def [](arg)
       case arg
       when Integer then find_by(id: arg)

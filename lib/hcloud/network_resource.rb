@@ -4,6 +4,8 @@ module Hcloud
   class NetworkResource < AbstractResource
     filter_attributes :name
 
+    bind_to Network
+
     def [](arg)
       case arg
       when Integer then find_by(id: arg)

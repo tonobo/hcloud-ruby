@@ -9,6 +9,16 @@ module Hcloud
     delegate :request, :prepare_request, to: :client
 
     class << self
+      def bind_to(klass)
+        resource = self
+        %w[find find_by where all [] page limit per_page order
+           to_a count pagnation each].each do |method|
+          klass.define_singleton_method(method) do |*args, &block|
+            resource.new(client: Client.connection).public_send(method, *args, &block)
+          end
+        end
+      end
+
       def filter_attributes(*keys)
         return @filter_attributes if keys.to_a.empty?
 

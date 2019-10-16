@@ -4,6 +4,8 @@ module Hcloud
   class ServerResource < AbstractResource
     filter_attributes :status, :name
 
+    bind_to Server
+
     def create(name:,
                server_type:,
                datacenter: nil,

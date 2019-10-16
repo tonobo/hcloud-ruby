@@ -7,6 +7,16 @@ module Hcloud
   class Client
     MAX_ENTRIES_PER_PAGE = 50
 
+    class << self
+      attr_writer :connection
+
+      def connection
+        return @connection if @connection.is_a? Hcloud::Client
+
+        raise ArgumentError, "client not correctly initialized, actually #{@client.inspect}"
+      end
+    end
+
     attr_reader :token, :auto_pagination, :hydra, :user_agent
     def initialize(token:, auto_pagination: false, concurrency: 20, user_agent: nil)
       @token = token
