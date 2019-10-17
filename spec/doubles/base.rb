@@ -59,6 +59,13 @@ RSpec.shared_context 'test doubles' do
     info
   end
 
+  def non_sym(value)
+    return value.to_s if value.is_a? Symbol
+    return value.deep_stringify_keys if value.is_a? Hash
+
+    value
+  end
+
   def stub(path)
     Typhoeus.stub(%r{https://api.hetzner.cloud/v1/#{path}}) do |request|
       args = yield(request, page_info(request))
@@ -68,7 +75,8 @@ RSpec.shared_context 'test doubles' do
   end
 
   def stub_collection(key, collection)
-    stub(key) do |_request, page_info|
+    stub(key) do |request, page_info|
+      yield(request, page_info) if block_given?
       {
         body: {
           key => collection[page_info.delete(:requested_range)]

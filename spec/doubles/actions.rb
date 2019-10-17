@@ -27,7 +27,7 @@ RSpec.shared_context 'actions doubles' do
     end
   end
 
-  def action(kind = nil, **kwargs)
+  def new_action(kind = nil, **kwargs)
     {
       id: Faker::Number.number,
       command: 'start_server',

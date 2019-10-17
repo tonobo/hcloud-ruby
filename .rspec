@@ -1,3 +1,4 @@
 --format=documentation
 --color
 --tty
+--order rand

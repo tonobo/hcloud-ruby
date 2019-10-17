@@ -1,6 +1,6 @@
 language: ruby
 script: 
-  - "bundle exec rspec"
+  - "bundle exec rspec -t doubles"
   - "bundle exec rubocop"
 sudo: false
 rvm:

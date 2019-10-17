@@ -5,5 +5,10 @@ module Hcloud
     require 'hcloud/action_resource'
 
     include EntryLoader
+
+    schema(
+      started: :time,
+      finished: :time
+    )
   end
 end
