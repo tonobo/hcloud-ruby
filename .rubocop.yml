@@ -25,6 +25,8 @@ Metrics/ParameterLists:
 
 Metrics/MethodLength:
   Max: 20
+  Exclude:
+    - 'spec/doubles/*.rb'
 
 Metrics/ClassLength:
   Max: 200
