@@ -30,4 +30,11 @@ deep_load Hcloud
 
 RSpec.configure do |c|
   Faker::Config.random = Random.new(c.seed)
+
+  if ENV['LEGACY_TESTS']
+    require 'webmock/rspec'
+    c.before(:each) do
+      stub_request(:any, /api.hetzner.cloud/).to_rack(Hcloud::FakeService::Base)
+    end
+  end
 end

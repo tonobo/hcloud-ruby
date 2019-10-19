@@ -1,6 +1,7 @@
 language: ruby
 script: 
-  - "bundle exec rspec -t doubles"
+  - "bundle exec rspec -t doubles --order rand"
+  - "LEGACY_TESTS=y bundle exec rspec -t ~doubles"
   - "bundle exec rubocop"
 sudo: false
 rvm:
