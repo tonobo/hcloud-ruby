@@ -79,7 +79,7 @@ RSpec.shared_context 'test doubles' do
       yield(request, page_info) if block_given?
       {
         body: {
-          key => collection[page_info.delete(:requested_range)]
+          key => collection[page_info.delete(:requested_range)].to_a
         }.merge(pagination(collection, **page_info)),
         code: 200
       }

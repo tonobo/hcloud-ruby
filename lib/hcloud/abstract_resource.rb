@@ -130,7 +130,7 @@ module Hcloud
     end
 
     def run
-      multi_query(
+      @run ||= multi_query(
         resource_url,
         q: @query,
         resource_path: resource_path,
@@ -156,6 +156,7 @@ module Hcloud
     def _dup(var, value)
       dup.tap do |res|
         res.instance_variable_set(var, value)
+        res.instance_variable_set(:@run, nil)
       end
     end
 

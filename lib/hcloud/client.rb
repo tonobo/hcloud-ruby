@@ -29,6 +29,11 @@ module Hcloud
     def concurrent
       @concurrent = true
       ret = yield
+      ret.each do |element|
+        next unless element.is_a?(AbstractResource)
+
+        element.run
+      end
       hydra.run
       ret
     ensure
