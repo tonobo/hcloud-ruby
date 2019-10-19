@@ -180,10 +180,6 @@ module Hcloud
       requests.flat_map { |req| req.response.resource }
     end
 
-    def base_path(ext)
-      [@base_path, ext].reject(&:empty?).join('/')
-    end
-
     def page_params(per_page: nil, page: nil)
       { per_page: per_page || @per_page, page: page || @page }.to_param
     end
