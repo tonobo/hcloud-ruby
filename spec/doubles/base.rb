@@ -74,12 +74,12 @@ RSpec.shared_context 'test doubles' do
     end
   end
 
-  def stub_collection(key, collection)
+  def stub_collection(key, collection, resource_name: nil)
     stub(key) do |request, page_info|
       yield(request, page_info) if block_given?
       {
         body: {
-          key => collection[page_info.delete(:requested_range)].to_a
+          (resource_name || key) => collection[page_info.delete(:requested_range)].to_a
         }.merge(pagination(collection, **page_info)),
         code: 200
       }

@@ -102,7 +102,7 @@ RSpec.shared_context 'servers doubles' do
     end
   end
 
-  def server(**kwargs)
+  def new_server(**kwargs)
     {
       id: Faker::Number.number,
       name: Faker::Internet.slug(glue: '-'),
