@@ -2,14 +2,12 @@
 
 module Hcloud
   class Datacenter
-    Attributes = {
-      id: nil,
-      name: nil,
-      description: nil,
-      location: Location,
-      server_types: nil
-    }.freeze
+    require 'hcloud/datacenter_resource'
 
     include EntryLoader
+
+    schema(
+      location: Location
+    )
   end
 end

@@ -2,15 +2,7 @@
 
 module Hcloud
   class Location
-    Attributes = {
-      id: nil,
-      name: nil,
-      description: nil,
-      country: nil,
-      city: nil,
-      longitude: nil,
-      latitude: nil
-    }.freeze
+    require 'hcloud/location_resource'
 
     include EntryLoader
   end

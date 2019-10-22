@@ -46,6 +46,31 @@ c = Hcloud::Client.new(
 )
 ```
 
+* Expose client connection to class level
+
+```ruby
+Hcloud::Client.connection = Hcloud::Client.new(...)
+```
+
+### Client concurrency
+
+Each action could be handled concurrently. The actual downsides are located 
+at the exception handling. Means one request could break the whole bunch of requests,
+you currently have to deal with that.
+
+```ruby
+servers = []
+client.concurrent do
+  10.times do 
+    servers << client.servers.create(...)
+  end
+end 
+
+servers.each do |(action, server, root_password)|
+  # do something with your servers ...
+end
+```
+
 ### Server Resource
 
 * List servers (basic client)
@@ -64,6 +89,14 @@ end
 # default nolimit
 c.servers.limit(80).each do |server|
   server.datacenter.location.id #=> 1
+end
+```
+
+* List with registered class level client
+
+```ruby
+Server.limit(10).each do |server|
+  # do something with the server
 end
 ```
 

@@ -2,17 +2,13 @@
 
 module Hcloud
   class Action
-    Attributes = {
-      id: nil,
-      command: nil,
-      status: nil,
-      progress: nil,
-      started: :time,
-      finished: :time,
-      resources: nil,
-      error: nil
-    }.freeze
+    require 'hcloud/action_resource'
 
     include EntryLoader
+
+    schema(
+      started: :time,
+      finished: :time
+    )
   end
 end

@@ -2,11 +2,9 @@
 
 module Hcloud
   module FakeService
-
     $SERVER_ID = 0
     $SERVERS = {
-      'servers' => [
-      ],
+      'servers' => [],
       'meta' => {
         'pagination' => {
           'page' => 1,
@@ -168,9 +166,7 @@ module Hcloud
             optional :name, type: String
           end
           put do
-            if params[:name].nil?
-              error!({ error: { code: :invalid_input } }, 400)
-            end
+            error!({ error: { code: :invalid_input } }, 400) if params[:name].nil?
             if $SERVERS['servers'].any? { |x| x['name'] == params[:name] }
               error!({ error: { code: :uniqueness_error } }, 400)
             end
@@ -206,25 +202,30 @@ module Hcloud
             error!({ error: { code: :uniqueness_error } }, 400)
           end
           if $SERVER_TYPES['server_types'].none? do |x|
-               server_type = x if [x['id'].to_s, x['name']].include?(params[:server_type].to_s) end
+               server_type = x if [x['id'].to_s, x['name']].include?(params[:server_type].to_s)
+             end
             error!({ error: { code: :invalid_input, message: 'invalid server_type' } }, 400)
           end
           if $IMAGES['images'].none? do |x|
-               image = x if [x['id'].to_s, x['name']].include?(params[:image].to_s) end
+               image = x if [x['id'].to_s, x['name']].include?(params[:image].to_s)
+             end
             error!({ error: { code: :invalid_input, message: 'invalid image' } }, 400)
           end
           if !params[:datacenter].nil? &&
              $DATACENTERS['datacenters'].none? do |x|
-              datacenter = x if [x['id'].to_s, x['name']].include?(params[:datacenter].to_s) end
+               datacenter = x if [x['id'].to_s, x['name']].include?(params[:datacenter].to_s)
+             end
             error!({ error: { code: :invalid_input, message: 'invalid datacenter' } }, 400)
           end
           if !params[:location].nil? &&
              $LOCATIONS['locations'].none? do |x|
-               [x['id'].to_s, x['name']].include?(params[:location].to_s) end
+               [x['id'].to_s, x['name']].include?(params[:location].to_s)
+             end
             error!({ error: { code: :invalid_input, message: 'invalid location' } }, 400)
           end
           if params[:ssh_keys].to_a.any? do |id|
-            $SSH_KEYS['ssh_keys'].none? { |x| id.to_s == x['id'].to_s } end
+               $SSH_KEYS['ssh_keys'].none? { |x| id.to_s == x['id'].to_s }
+             end
             error!({ error: { code: :invalid_input, message: 'invalid ssh key' } }, 400)
           end
           id = $SERVER_ID += 1

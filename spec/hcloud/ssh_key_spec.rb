@@ -108,7 +108,7 @@ describe 'SSHKey' do
     expect(client.ssh_keys.first).to be_a Hcloud::SSHKey
     id = client.ssh_keys.first.id
     expect(id).to be_a Integer
-    expect(client.ssh_keys.find(id).destroy).to be true
+    expect(client.ssh_keys.find(id).destroy).to be_a Hcloud::SSHKey
     expect(client.ssh_keys[id]).to be nil
   end
 end

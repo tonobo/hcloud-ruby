@@ -10,7 +10,7 @@ module Hcloud
       page ||= 1
       per_page = 50 if per_page > 50
       per_page = 25 if per_page < 1
-      age = 1 if page < 1
+      page = 1 if page < 1
       low = per_page * (page - 1)
       high = per_page * page
       last_page = (o[key].size / per_page) + ((o[key].size % per_page).zero? ? 0 : 1)

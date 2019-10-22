@@ -2,38 +2,24 @@
 
 module Hcloud
   class FloatingIPResource < AbstractResource
-    include Enumerable
+    filter_attributes :name
 
-    def all
-      mj('floating_ips') do |j|
-        j.flat_map { |x| x['floating_ips'].map { |x| FloatingIP.new(x, self, client) } }
+    bind_to FloatingIP
+
+    def [](arg)
+      case arg
+      when Integer then find_by(id: arg)
+      when String then find_by(name: arg)
       end
     end
 
     def create(type:, server: nil, home_location: nil, description: nil)
-      query = COLLECT_ARGS.call(__method__, binding)
-      j = Oj.load(request('floating_ips', j: query, code: 201).run.body)
-      [
-        j.key?('action') ? Action.new(j['action'], self, client) : nil,
-        FloatingIP.new(j['floating_ip'], self, client)
-      ]
-    end
-
-    def find(id)
-      FloatingIP.new(
-        Oj.load(request("floating_ips/#{id}").run.body)['floating_ip'],
-        self,
-        client
-      )
-    end
-
-    def [](arg)
-      case arg
-      when Integer
-        begin
-          find(arg)
-        rescue Error::NotFound
-        end
+      prepare_request(
+        'floating_ips', j: COLLECT_ARGS.call(__method__, binding),
+                        expected_code: 201
+      ) do |response|
+        action = Action.new(client, response[:action]) if response[:action]
+        [action, FloatingIP.new(client, response[:floating_ip])]
       end
     end
   end

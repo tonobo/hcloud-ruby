@@ -4,8 +4,7 @@ module Hcloud
   module FakeService
     $SSH_KEY_ID = 0
     $SSH_KEYS = {
-      'ssh_keys' => [
-      ],
+      'ssh_keys' => [],
       'meta' => {
         'pagination' => {
           'page' => 1,
@@ -36,9 +35,7 @@ module Hcloud
             optional :name, type: String
           end
           put do
-            if params[:name].nil?
-              error!({ error: { code: :invalid_input } }, 400)
-            end
+            error!({ error: { code: :invalid_input } }, 400) if params[:name].nil?
             @x['name'] = params[:name]
             { ssh_key: @x }
           end

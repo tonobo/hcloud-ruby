@@ -7,12 +7,41 @@ module Hcloud
   class Client
     MAX_ENTRIES_PER_PAGE = 50
 
-    attr_reader :token, :auto_pagination, :hydra
-    def initialize(token:, auto_pagination: false, concurrency: 20)
+    class << self
+      attr_writer :connection
+
+      def connection
+        return @connection if @connection.is_a? Hcloud::Client
+
+        raise ArgumentError, "client not correctly initialized, actually #{@client.inspect}"
+      end
+    end
+
+    attr_reader :token, :auto_pagination, :hydra, :user_agent
+    def initialize(token:, auto_pagination: false, concurrency: 20, user_agent: nil)
       @token = token
+      @user_agent = user_agent || "hcloud-ruby v#{VERSION}"
       @auto_pagination = auto_pagination
       @concurrency = concurrency
       @hydra = Typhoeus::Hydra.new(max_concurrency: concurrency)
+    end
+
+    def concurrent
+      @concurrent = true
+      ret = yield
+      ret.each do |element|
+        next unless element.is_a?(AbstractResource)
+
+        element.run
+      end
+      hydra.run
+      ret
+    ensure
+      @concurrent = nil
+    end
+
+    def concurrent?
+      !@concurrent.nil?
     end
 
     def authorized?
@@ -66,8 +95,26 @@ module Hcloud
       VolumeResource.new(client: self)
     end
 
-    def request(path, **options)
-      code = options.delete(:code)
+    class ResourceFuture < Delegator
+      def initialize(request)
+        @request = request
+      end
+
+      def __getobj__
+        @__getobj__ ||= @request&.response&.resource
+      end
+    end
+
+    def prepare_request(url, **args, &block)
+      req = request(url, **args.merge(block: block))
+      return req.run.resource unless concurrent?
+
+      hydra.queue req
+      ResourceFuture.new(req)
+    end
+
+    def request(path, **options) # rubocop:disable Metrics/MethodLength
+      hcloud_attributes = TyphoeusExt.collect_attributes(options)
       if x = options.delete(:j)
         options[:body] = Oj.dump(x, mode: :compat)
         options[:method] ||= :post
@@ -84,38 +131,16 @@ module Hcloud
         {
           headers: {
             'Authorization' => "Bearer #{token}",
+            'User-Agent' => user_agent,
             'Content-Type' => 'application/json'
           }
         }.merge(options)
       )
       r.on_complete do |response|
-        case response.code
-        when 401
-          raise Error::Unauthorized
-        when 0
-          raise Error::ServerError, "Connection error: #{response.return_code}"
-        when 400...600
-          j = Oj.load(response.body)
-          code = j.dig('error', 'code')
-          error_class = case code
-                        when 'invalid_input' then Error::InvalidInput
-                        when 'forbidden' then Error::Forbidden
-                        when 'locked' then Error::Locked
-                        when 'not_found' then Error::NotFound
-                        when 'rate_limit_exceeded' then Error::RateLimitExceeded
-                        when 'resource_unavailable' then Error::ResourceUnavailable
-                        when 'service_error' then Error::ServiceError
-                        when 'uniqueness_error' then Error::UniquenessError
-                        else
-                          Error::ServerError
-                        end
-          raise error_class, j.dig('error', 'message')
-        end
-        if code
-          raise Error::UnexpectedError, response.body unless code == response.code
-
-          next
-        end
+        response.extend(TyphoeusExt)
+        response.attributes = hcloud_attributes
+        response.context.client = self
+        response.check_for_error unless response.request.hydra
       end
       r
     end
