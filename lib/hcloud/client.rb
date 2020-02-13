@@ -3,6 +3,8 @@
 autoload :Typhoeus, 'typhoeus'
 autoload :Oj, 'oj'
 
+require 'delegate'
+
 module Hcloud
   class Client
     MAX_ENTRIES_PER_PAGE = 50
