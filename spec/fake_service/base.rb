@@ -4,6 +4,7 @@ require 'grape'
 
 module Hcloud
   module FakeService
+    # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def self.pagination_wrapper(object, key, per_page, page)
       o = object.deep_dup
       per_page ||= 25
@@ -26,6 +27,7 @@ module Hcloud
       o[key] = o[key][low...high].to_a
       o
     end
+    # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     class Base < Grape::API
       version 'v1', using: :path

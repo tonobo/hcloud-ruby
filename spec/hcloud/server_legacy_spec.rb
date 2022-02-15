@@ -159,7 +159,7 @@ describe 'Server' do
     expect(aclient.actions.all.pagination).to eq(:auto)
     sleep(0.6)
     expect(client.servers.none? { |x| x.status == 'initalizing' }).to be true
-    expect(client.servers.group_by(&:status).map { |k, v| [k, v.size] }.to_h).to(
+    expect(client.servers.group_by(&:status).transform_values(&:size)).to(
       eq('off' => 2, 'running' => 1)
     )
     expect(client.actions.where(status: 'success')

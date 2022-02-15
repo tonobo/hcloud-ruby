@@ -65,7 +65,7 @@ module Hcloud
           key = {
             'id' => $SSH_KEY_ID += 1,
             'name' => params[:name],
-            'fingerprint' => ('%x:' * 15 + '%x') % 0.upto(15).map { rand(0..255) },
+            'fingerprint' => 0.upto(15).map { rand(0..255) }.map { |num| num.to_s(16) }.join(':'),
             'public_key' => params[:public_key]
           }
           $SSH_KEYS['ssh_keys'] << key

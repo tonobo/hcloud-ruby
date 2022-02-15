@@ -40,7 +40,7 @@ RSpec.shared_context 'servers doubles' do
   def datacenter(**kwargs)
     {
       id: Faker::Number.number,
-      name: random_choice('fsn1', 'ngb1', 'hel1') + '-dc' + Faker::Number.within(range: 1..50).to_s,
+      name: "#{random_choice('fsn1', 'ngb1', 'hel1')}-dc#{Faker::Number.within(range: 1..50)}",
       "description": 'Falkenstein 1 DC 8',
       "location": {
         "id": 1,
