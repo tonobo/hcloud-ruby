@@ -67,7 +67,7 @@ module Hcloud
     end
 
     def where(**kwargs)
-      kwargs.keys.each do |key|
+      kwargs.each_key do |key|
         keys = self.class.filter_attributes.map(&:to_s)
         next if keys.include?(key.to_s)
 
@@ -117,16 +117,16 @@ module Hcloud
     def order(*sort)
       _dup :@order,
            begin
-           sort.flat_map do |s|
-             case s
-             when Symbol, String then s.to_s
-             when Hash then s.map { |k, v| "#{k}:#{v}" }
-             else
-               raise ArgumentError,
-                     "Unable to resolve type for given #{s.inspect} from #{sort}"
+             sort.flat_map do |s|
+               case s
+               when Symbol, String then s.to_s
+               when Hash then s.map { |k, v| "#{k}:#{v}" }
+               else
+                 raise ArgumentError,
+                       "Unable to resolve type for given #{s.inspect} from #{sort}"
+               end
              end
            end
-         end
     end
 
     def run
@@ -138,10 +138,8 @@ module Hcloud
       )
     end
 
-    def each
-      run.each do |member|
-        yield(member)
-      end
+    def each(&block)
+      run.each(&block)
     end
 
     # this is just to keep the actual bevahior
@@ -195,14 +193,13 @@ module Hcloud
       r.compact.join('&')
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def __entries__(path, **o)
       first_page = request(path, o.merge(ep: ep(per_page: 1, page: 1))).run
       total_entries = first_page.pagination.total_entries
       return [first_page] if total_entries <= 1 || @limit == 1
 
-      unless @limit.nil?
-        total_entries = @limit if total_entries > @limit
-      end
+      total_entries = @limit if !@limit.nil? && (total_entries > @limit)
       pages = total_entries / Client::MAX_ENTRIES_PER_PAGE
       pages += 1 if (total_entries % Client::MAX_ENTRIES_PER_PAGE).positive?
       pages.times.map do |page|
@@ -215,5 +212,6 @@ module Hcloud
         end
       end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   end
 end

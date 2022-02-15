@@ -53,7 +53,7 @@ module Hcloud
 
       def protectable(*args)
         define_method(:change_protection) do |**kwargs|
-          kwargs.keys.each do |key|
+          kwargs.each_key do |key|
             next if args.map(&:to_s).include? key.to_s
 
             raise ArgumentError, "#{key} not an allowed protection mode (allowed: #{args})"

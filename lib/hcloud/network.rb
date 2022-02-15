@@ -14,7 +14,7 @@ module Hcloud
 
     has_actions
 
-    def add_subnet(type:, ip_range: nil, network_zone:)
+    def add_subnet(type:, network_zone:, ip_range: nil)
       prepare_request('actions/add_subnet', j: COLLECT_ARGS.call(__method__, binding))
     end
 

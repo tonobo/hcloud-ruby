@@ -30,16 +30,14 @@ module Hcloud
     def parsed_json
       return {} if code == 204
 
-      @parsed_json ||= begin
-                         Oj.load(body, symbol_keys: true).tap do |json|
-                           next unless request.hydra
+      @parsed_json ||= Oj.load(body, symbol_keys: true).tap do |json|
+        next unless request.hydra
 
-                           check_for_error(
-                             e_code: json.to_h.dig(:error, :code),
-                             e_message: json.to_h.dig(:error, :message)
-                           )
-                         end
-                       end
+        check_for_error(
+          e_code: json.to_h.dig(:error, :code),
+          e_message: json.to_h.dig(:error, :message)
+        )
+      end
     rescue StandardError
       raise Error::UnexpectedError, "unable to load body: #{body}"
     end
