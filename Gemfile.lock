@@ -3,7 +3,7 @@ PATH
   specs:
     hcloud (1.0.2)
       activemodel
-      activesupport
+      activesupport (= 6.1.4.4)
       oj
       typhoeus
 
