@@ -39,7 +39,7 @@ Metrics/PerceivedComplexity:
 # Offense count: 3
 # Configuration parameters: MinNameLength, AllowNamesEndingInNumbers, AllowedNames, ForbiddenNames.
 # AllowedNames: io, id, to, by, on, in, at, ip, db
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Exclude:
     - 'lib/hcloud/abstract_resource.rb'
     - 'spec/fake_service/action.rb'

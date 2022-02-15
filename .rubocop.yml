@@ -1,5 +1,8 @@
 inherit_from: .rubocop_todo.yml
 
+AllCops:
+  TargetRubyVersion: 2.7
+
 Style/GlobalVars:
   Exclude:
     - 'spec/**/*.rb'
@@ -10,7 +13,7 @@ Style/Documentation:
 Naming/ConstantName:
   Enabled: false
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Enabled: false
 
 Lint/AssignmentInCondition:
