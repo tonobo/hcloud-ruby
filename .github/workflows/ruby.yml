@@ -1,0 +1,33 @@
+name: hcloud-ruby ci
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+          bundler-cache: true
+      - name: Run rubocop
+        run: bundle exec rubocop --parallel
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: [ '2.7', '3.0', '3.1' ]
+    continue-on-error: ${{ matrix.ruby-version != '2.7' }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+      - name: Run double tests
+        run: bundle exec rspec -t doubles --order rand
+      - name: Run legacy tests
+        run: LEGACY_TESTS=y bundle exec rspec -t ~doubles

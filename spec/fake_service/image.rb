@@ -74,8 +74,8 @@ module Hcloud
             optional :type, type: String
           end
           put do
-            if !params[:description].nil? && @x['id'] != 3454
-              error!({ error: { code: :not_found } }, 404) if @x.nil?
+            if !params[:description].nil? && @x['id'] != 3454 && @x.nil?
+              error!({ error: { code: :not_found } }, 404)
             end
             if !params[:type].nil? && @x['id'] != 3454
               if %w[backup system snapshot].include?(params[:type])

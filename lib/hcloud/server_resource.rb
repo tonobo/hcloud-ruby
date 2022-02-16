@@ -8,10 +8,9 @@ module Hcloud
 
     def create(name:,
                server_type:,
-               datacenter: nil,
+               image:, datacenter: nil,
                location: nil,
                start_after_create: nil,
-               image:,
                ssh_keys: [],
                networks: [],
                user_data: nil)

@@ -20,6 +20,7 @@ module Hcloud
     end
 
     attr_reader :token, :auto_pagination, :hydra, :user_agent
+
     def initialize(token:, auto_pagination: false, concurrency: 20, user_agent: nil)
       @token = token
       @user_agent = user_agent || "hcloud-ruby v#{VERSION}"
@@ -98,7 +99,7 @@ module Hcloud
     end
 
     class ResourceFuture < Delegator
-      def initialize(request)
+      def initialize(request) # rubocop:disable Lint/MissingSuper
         @request = request
       end
 
@@ -127,7 +128,7 @@ module Hcloud
         q << x.to_param
       end
       path = path.dup
-      path << '?' + q.join('&')
+      path << "?#{q.join('&')}"
       r = Typhoeus::Request.new(
         "https://api.hetzner.cloud/v1/#{path}",
         {
