@@ -66,7 +66,7 @@ module Hcloud
       where
     end
 
-    def where(**kwargs)
+    def where(kwargs = {})
       kwargs.each_key do |key|
         keys = self.class.filter_attributes.map(&:to_s)
         next if keys.include?(key.to_s)
