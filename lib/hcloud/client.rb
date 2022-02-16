@@ -109,7 +109,7 @@ module Hcloud
     end
 
     def prepare_request(url, args = {}, &block)
-      req = request(url, **args.merge(block: block))
+      req = request(url, **args.merge(block:))
       return req.run.resource unless concurrent?
 
       hydra.queue req

@@ -127,8 +127,8 @@ RSpec.shared_context 'servers doubles' do
         floating_ips: []
       },
       private_net: [],
-      server_type: server_type,
-      datacenter: datacenter,
+      server_type:,
+      datacenter:,
       image: random_choice(nil, image),
       iso: random_choice(nil, iso),
       rescue_enabled: random_choice(true, false),

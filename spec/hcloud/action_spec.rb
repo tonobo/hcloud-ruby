@@ -97,7 +97,7 @@ RSpec.describe Hcloud::Action, doubles: :action do
   it 'GET /actions/:id' do
     stub "actions/#{action[:id]}" do |_request, _page_info|
       {
-        body: { action: action },
+        body: { action: },
         code: 200
       }
     end

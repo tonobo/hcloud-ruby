@@ -133,7 +133,7 @@ module Hcloud
       @run ||= multi_query(
         resource_url,
         q: @query,
-        resource_path: resource_path,
+        resource_path:,
         resource_class: self.class.resource
       )
     end
@@ -167,7 +167,7 @@ module Hcloud
     end
 
     def multi_query(path, **o)
-      return prepare_request(path, o.merge(ep: ep)) unless client&.auto_pagination
+      return prepare_request(path, o.merge(ep:)) unless client&.auto_pagination
 
       raise Error, 'unable to run auto paginate within concurrent excecution' if @concurrent
 
@@ -188,7 +188,7 @@ module Hcloud
 
     def ep(per_page: nil, page: nil)
       r = []
-      (x = page_params(per_page: per_page, page: page)).empty? ? nil : r << x
+      (x = page_params(per_page:, page:)).empty? ? nil : r << x
       (x = sort_params).empty? ? nil : r << x
       r.compact.join('&')
     end
@@ -207,7 +207,7 @@ module Hcloud
         if !@limit.nil? && (pages == (page + 1)) && (total_entries % per_page != 0)
           per_page = total_entries % per_page
         end
-        request(path, o.merge(ep: ep(per_page: per_page, page: page + 1))).tap do |req|
+        request(path, o.merge(ep: ep(per_page:, page: page + 1))).tap do |req|
           client.hydra.queue req
         end
       end

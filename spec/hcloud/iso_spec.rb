@@ -51,8 +51,8 @@ describe 'ISO' do
     expect(client.isos.first).to be_a Hcloud::Iso
     name = client.isos.first.name
     expect(name).to be_a String
-    expect(client.isos.find_by(name: name)).to be_a Hcloud::Iso
-    expect(client.isos.find_by(name: name).name).to eq(name)
+    expect(client.isos.find_by(name:)).to be_a Hcloud::Iso
+    expect(client.isos.find_by(name:).name).to eq(name)
   end
 
   it '#find_by -> filter by name, handle nonexistent' do

@@ -64,7 +64,7 @@ module Hcloud
 
       def has_actions # rubocop:disable Naming/PredicateName
         define_method(:actions) do
-          ActionResource.new(client: client, base_path: resource_url)
+          ActionResource.new(client:, base_path: resource_url)
         end
       end
 

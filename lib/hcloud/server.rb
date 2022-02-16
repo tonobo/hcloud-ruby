@@ -34,7 +34,7 @@ module Hcloud
     end
 
     def rebuild(image:)
-      prepare_request('actions/rebuild', j: { image: image }) { |j| j[:root_password] }
+      prepare_request('actions/rebuild', j: { image: }) { |j| j[:root_password] }
     end
 
     def change_type(server_type:, upgrade_disk: nil)
@@ -48,7 +48,7 @@ module Hcloud
     end
 
     def attach_iso(iso:)
-      prepare_request('actions/attach_iso', j: { iso: iso })
+      prepare_request('actions/attach_iso', j: { iso: })
     end
 
     def attach_to_network(network:, ip: nil, alias_ips: nil)
@@ -56,7 +56,7 @@ module Hcloud
     end
 
     def detach_from_network(network:)
-      prepare_request('actions/detach_from_network', j: { network: network })
+      prepare_request('actions/detach_from_network', j: { network: })
     end
 
     %w[

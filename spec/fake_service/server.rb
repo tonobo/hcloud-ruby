@@ -231,11 +231,11 @@ module Hcloud
           id = $SERVER_ID += 1
           s = {
             server: {
-              id: id,
+              id:,
               name: params[:name],
-              server_type: server_type,
-              datacenter: datacenter,
-              image: image,
+              server_type:,
+              datacenter:,
+              image:,
               rescue_enabled: false,
               locked: false,
               backup_window: '22-02',
@@ -267,7 +267,7 @@ module Hcloud
             action: Action.add(
               status: 'running',
               command: 'create_server',
-              resources: [{ id: id, type: 'server' }]
+              resources: [{ id:, type: 'server' }]
             ),
             root_password: 'test123'
           }.deep_stringify_keys

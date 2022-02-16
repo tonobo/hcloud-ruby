@@ -77,7 +77,7 @@ module Hcloud
       return [Action.new(self, action), block.call(self)].flatten(1) if block && action
       return block.call(self) if block
 
-      @resource_class.from_response(self, autoload_action: autoload_action)
+      @resource_class.from_response(self, autoload_action:)
     end
 
     def error_code
