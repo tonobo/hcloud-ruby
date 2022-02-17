@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hcloud (1.0.2)
+    hcloud (1.0.3)
       activemodel
       activesupport (= 6.1.4.4)
       oj

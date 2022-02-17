@@ -7,11 +7,11 @@ require 'hcloud/version'
 Gem::Specification.new do |spec|
   spec.name          = 'hcloud'
   spec.version       = Hcloud::VERSION
-  spec.authors       = ['Tim Foerster']
-  spec.email         = ['github@moo.gl']
+  spec.authors       = ['Tim Foerster', 'Raphael Pour']
+  spec.email         = ['github@moo.gl', 'rubygems@evilcookie.de']
 
   spec.summary       = 'HetznerCloud native Ruby client'
-  spec.homepage      = 'https://github.com/tonobo/hcloud'
+  spec.homepage      = 'https://github.com/tonobo/hcloud-ruby'
 
   spec.required_ruby_version = '>= 2.7.0'
 
