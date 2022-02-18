@@ -20,7 +20,7 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions servers].each do |kind|
+  %w[actions servers placement_groups].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end
@@ -44,12 +44,12 @@ RSpec.shared_context 'test doubles' do
     }
   end
 
+  def fetch_uri_params(request)
+    URI.parse(request.url).query.split('&').map { |pair| pair.split('=') }.to_h
+  end
+
   def page_info(request)
-    opts = URI.parse(request.url)
-              .query
-              .split('&')
-              .map { |pair| pair.split('=') }
-              .to_h
+    opts = fetch_uri_params(request)
     info = {
       page: opts['page']&.to_i || 1,
       per_page: opts['per_page']&.to_i || 25
@@ -74,9 +74,82 @@ RSpec.shared_context 'test doubles' do
     end
   end
 
+  def stub_create(resource_name, params)
+    stub("#{resource_name}s") do |req, _info|
+      expect(req.options[:method]).to eq(:post)
+      body = Oj.load(req.encoded_body)
+      params.each do |field, val|
+        expect(body[field.to_s]).to eq val
+      end
+
+      {
+        body: { resource_name => send("new_#{resource_name}", params) },
+        code: 201
+      }
+    end
+  end
+
+  def stub_update(resource_name, params)
+    res_id = params.delete(:id)
+    stub([resource_name, res_id].join('/')) do |req, _info|
+      p req
+      expect(req.options[:method]).to eq(:put)
+
+      res = client.send(resource_name).find(res_id)
+      params.each do |name, val|
+        res[name] = val
+      end
+
+      {
+        body: { resource_name => res },
+        code: 200
+      }
+    end
+  end
+
+  def stub_delete(resource_name, res_id)
+    stub([resource_name, res_id].join('/')) do |req, _info|
+      p req
+      expect(req.options[:method]).to eq(:post)
+      {
+        body: { resource_name => client.send(resource_name).find(res_id) },
+        code: 200
+      }
+    end
+  end
+
   def stub_collection(key, collection, resource_name: nil)
+    # Stub resource not found for ID=0
+    stub([resource_name || key, 0].join('/')) do
+      { body: { error: { code: :not_found } }, code: 404 }
+    end
+
+    # Stub all individual resources first
+    collection.each do |obj|
+      stub([[resource_name || key], obj[:id]].join('/')) do |_request, _page|
+        {
+          body: {
+            (resource_name || key).to_s.gsub(/s$/, '') => obj
+          },
+          code: 200
+        }
+      end
+    end
+
     stub(key) do |request, page_info|
       yield(request, page_info) if block_given?
+
+      opts = fetch_uri_params(request)
+      opts.delete('page')
+      opts.delete('per_page')
+
+      if opts.any?
+        collection = collection.select do |obj|
+          opts.map do |field, val|
+            obj[field.to_sym] == val
+          end.inject { _1 && _2 }
+        end
+      end
       {
         body: {
           (resource_name || key) => collection[page_info.delete(:requested_range)].to_a

@@ -98,6 +98,10 @@ module Hcloud
       VolumeResource.new(client: self)
     end
 
+    def placement_groups
+      PlacementGroupResource.new(client: self)
+    end
+
     class ResourceFuture < Delegator
       def initialize(request) # rubocop:disable Lint/MissingSuper
         @request = request
