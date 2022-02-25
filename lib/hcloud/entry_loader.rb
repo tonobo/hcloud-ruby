@@ -179,6 +179,7 @@ module Hcloud
       instance_variable_set("@#{key}", value)
     end
 
+    # rubocop: disable  Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/AbcSize
     def _load(resource)
       @_attributes = {}.with_indifferent_access
 
@@ -195,8 +196,30 @@ module Hcloud
           next
         end
 
+        # if schema definition is [Class]
+        if definition.is_a?(Array) && definition.first.include?(EntryLoader)
+
+          # just set attribute to an empty array if value is no array or empty
+          if !value.is_a?(Array) || value.empty?
+            _update_attribute(key, [])
+            next
+          end
+
+          if value.first.is_a?(Integer)
+            # If value is an integer, this is the id of an object which's class can be 
+            # retreived from definition. The [] operator should automatically load the 
+            # appropriate object.
+            _update_attribute(key, value.map { |item| definition.first.new(client, id: item) })
+          else
+            # Otherwise the value *is* the content of the object
+            _update_attribute(key, value.map { |item| definition.first.new(client, item) })
+          end
+          next
+        end
+
         _update_attribute(key, value.is_a?(Hash) ? value.with_indifferent_access : value)
       end
     end
+    # rubocop: enable  Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/AbcSize
   end
 end
