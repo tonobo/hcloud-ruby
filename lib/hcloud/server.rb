@@ -10,7 +10,10 @@ module Hcloud
       created: :time,
       server_type: ServerType,
       datacenter: Datacenter,
-      image: Image
+      image: Image,
+      iso: Iso,
+      private_net: [Network],
+      volumes: [Volume]
     )
 
     protectable :delete, :rebuild
