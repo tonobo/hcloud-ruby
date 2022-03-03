@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'HetznerCloud native Ruby client'
   spec.homepage      = 'https://github.com/tonobo/hcloud-ruby'
+  spec.license       = 'MIT'
 
   spec.required_ruby_version = '>= 2.7.0'
 
