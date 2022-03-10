@@ -206,10 +206,10 @@ module Hcloud
           end
 
           if value.first.is_a?(Integer)
-            # If value is an integer, this is the id of an object which's class can be 
-            # retreived from definition. The [] operator should automatically load the 
-            # appropriate object.
-            _update_attribute(key, value.map { |item| definition.first.new(client, id: item) })
+            # If value is an integer, this is the id of an object which's class can be
+            # retreived from definition. Load a future object that can on access retreive the
+            # data from the api and convert it to a proper object.
+            _update_attribute(key, value.map { |id| Future.new(client, definition.first, id) })
           else
             # Otherwise the value *is* the content of the object
             _update_attribute(key, value.map { |item| definition.first.new(client, item) })

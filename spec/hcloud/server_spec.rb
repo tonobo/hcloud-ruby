@@ -99,10 +99,11 @@ RSpec.describe Hcloud::Server, doubles: :server do
 
     # reload server with volume
     server = client.servers.find(servers[1][:id])
+    p server.client
     expect(server.volumes).to be_a Array
     expect(server.volumes).to_not be_empty
 
-    expect(server.volumes.first).to eq(volumes[0])
-    expect(server.volumes).to eq(volumes)
+    expect(server.volumes.first&.name).to eq(volumes[0][:name])
+    expect(server.volumes.first).to be_a Hcloud::Future
   end
 end

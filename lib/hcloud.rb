@@ -7,6 +7,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 module Hcloud
   autoload :Error, 'hcloud/errors'
   autoload :Client, 'hcloud/client'
+  autoload :Future, 'hcloud/future'
   autoload :TyphoeusExt, 'hcloud/typhoeus_ext'
   autoload :AbstractResource, 'hcloud/abstract_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
