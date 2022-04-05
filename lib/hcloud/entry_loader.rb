@@ -77,17 +77,21 @@ module Hcloud
         action = response.parsed_json[:action] if autoload_action
         client = response.context.client
         if attributes.is_a?(Array)
-          results = attributes.map { |item| new(item).tap { |entity| entity.response = response } }
+          results = attributes.map do |item|
+            new(client, item).tap do |entity|
+              entity.response = response
+            end
+          end
           results.tap { |ary| ary.extend(Collection) }.response = response
           return results
         end
 
         return Action.new(client, action) if attributes.nil? && action
-        return new(attributes).tap { |entity| entity.response = response } if action.nil?
+        return new(client, attributes).tap { |entity| entity.response = response } if action.nil?
 
         [
           Action.new(client, action),
-          new(attributes).tap { |entity| entity.response = response }
+          new(client, attributes).tap { |entity| entity.response = response }
         ]
       end
     end
