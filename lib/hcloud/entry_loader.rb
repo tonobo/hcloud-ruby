@@ -98,14 +98,9 @@ module Hcloud
 
     attr_accessor :response
 
-    def initialize(client = nil, kwargs = {})
-      if client.is_a?(Hash)
-        kwargs = client
-        client = nil
-      end
-
+    def initialize(client = nil, resource = {})
       @client = client
-      _load(kwargs)
+      _load(resource)
     end
 
     def inspect
