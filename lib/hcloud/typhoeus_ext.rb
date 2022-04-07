@@ -58,7 +58,7 @@ module Hcloud
     end
 
     def pagination
-      @pagination ||= Pagination.new(parsed_json[:meta].to_h[:pagination])
+      @pagination ||= Pagination.new(nil, parsed_json[:meta].to_h[:pagination])
     end
 
     def resource_attributes
