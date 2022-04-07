@@ -180,6 +180,8 @@ module Hcloud
 
     # rubocop: disable  Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/AbcSize
     def _load(resource)
+      return if resource.nil?
+
       @_attributes = {}.with_indifferent_access
 
       resource.each do |key, value|
