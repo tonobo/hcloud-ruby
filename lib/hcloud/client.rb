@@ -108,23 +108,10 @@ module Hcloud
       end
     end
 
-    def multi
-      @multi = true
-      yield
-    ensure
-      @multi = false
-    end
-
     def response(request, json: true, &block)
       raise 'No block given' unless block_given?
 
-      if @multi
-        hydra.queue request
-        sleep 1 while request.response.nil?
-      else
-        request.run
-      end
-      ret = request.response.body
+      ret = request.run.response.body
       ret = Oj.load(ret) if json
       instance_exec(ret, &block)
     end
