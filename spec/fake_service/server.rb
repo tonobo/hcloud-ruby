@@ -260,7 +260,8 @@ module Hcloud
                   blocked: false,
                   dns_ptr: []
                 },
-                floating_ips: []
+                floating_ips: [],
+                volumes: []
               }
 
             },

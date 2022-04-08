@@ -126,7 +126,12 @@ RSpec.shared_context 'servers doubles' do
         },
         floating_ips: []
       },
-      private_net: [],
+      private_net: [{
+        alias_ips: [],
+        ip: '10.0.0.2',
+        mac_address: '86:00:ff:2a:7d:e1',
+        network: 4711
+      }],
       server_type: server_type,
       datacenter: datacenter,
       image: random_choice(nil, image),
@@ -140,6 +145,30 @@ RSpec.shared_context 'servers doubles' do
       protection: { delete: random_choice(true, false), rebuild: random_choice(true, false) },
       labels: {},
       volumes: []
+    }.deep_merge(kwargs)
+  end
+
+  def new_volume(**kwargs)
+    {
+      id: Faker::Number.number,
+      name: Faker::Internet.slug(glue: '-'),
+      created: Faker::Time.backward,
+      format: 'xfs',
+      linux_device: '/dev/disk/by-id/scsi-0HC_Volume_1234',
+      location: {
+        city: 'Falkenstein',
+        country: 'DE',
+        description: 'Falkenstein DC Park 1',
+        id: 1,
+        latitude: 50.47612,
+        longitude: 12.370071,
+        name: 'fsn1',
+        network_zone: 'eu-central'
+      },
+      protection: { delete: random_choice(true, false), rebuild: random_choice(true, false) },
+      server: nil,
+      size: Faker::Number.within(range: 25..1000),
+      status: 'available'
     }.deep_merge(kwargs)
   end
 end

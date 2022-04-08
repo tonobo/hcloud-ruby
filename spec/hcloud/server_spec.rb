@@ -9,6 +9,10 @@ RSpec.describe Hcloud::Server, doubles: :server do
     Array.new(Faker::Number.within(range: 20..150)).map { new_server }
   end
 
+  let :volumes do
+    Array.new(Faker::Number.within(range: 2..10)).map { new_volume }
+  end
+
   it 'fetch server' do
     stub_collection :servers, []
     expect(client.servers.count).to eq(0)
@@ -63,5 +67,42 @@ RSpec.describe Hcloud::Server, doubles: :server do
     expect(server.created).to be_a Time
     expect(action.status).to eq('running')
     expect(pass).to eq('moo')
+    expect(server.volumes).to be_a Array
+    expect(server.volumes).to be_empty
+
+    expect(server.private_net).to_not be_empty
+  end
+
+  it 'get server with volumes' do
+    related_action = new_action.merge(action_status(:running))
+    stub_collection("servers/#{servers[1][:id]}/actions", [related_action], resource_name: :actions)
+    stub('servers') do |_request, _page_info|
+      {
+        body: { server: servers[1], action: related_action, root_password: :moo },
+        code: 201
+      }
+    end
+    action, server, pass = nil
+    expect do
+      action, server, pass = client.servers.create(name: 'moo', server_type: 'cx11', image: 1)
+    end.not_to(raise_error)
+
+    stub("volumes/#{volumes[0][:id]}") do |_request, _page_info|
+      {
+        body: { volume: volumes[0] },
+        code: 200
+      }
+    end
+
+    # "attach" volume by adding it to the server double
+    servers[1][:volumes] = volumes.map { |volume| volume[:id] }
+
+    # reload server with volume
+    server = client.servers.find(servers[1][:id])
+    expect(server.volumes).to be_a Array
+    expect(server.volumes).to_not be_empty
+
+    expect(server.volumes.first).to eq(volumes[0])
+    expect(server.volumes).to eq(volumes)
   end
 end
