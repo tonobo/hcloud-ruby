@@ -6,7 +6,7 @@ module Hcloud
   class AbstractResource
     include Enumerable
 
-    delegate :request, :prepare_request, :response, to: :client
+    delegate :request, :prepare_request, to: :client
 
     class << self
       def bind_to(klass)
