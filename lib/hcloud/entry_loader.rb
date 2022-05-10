@@ -77,31 +77,30 @@ module Hcloud
         action = response.parsed_json[:action] if autoload_action
         client = response.context.client
         if attributes.is_a?(Array)
-          results = attributes.map { |item| new(item).tap { |entity| entity.response = response } }
+          results = attributes.map do |item|
+            new(client, item).tap do |entity|
+              entity.response = response
+            end
+          end
           results.tap { |ary| ary.extend(Collection) }.response = response
           return results
         end
 
         return Action.new(client, action) if attributes.nil? && action
-        return new(attributes).tap { |entity| entity.response = response } if action.nil?
+        return new(client, attributes).tap { |entity| entity.response = response } if action.nil?
 
         [
           Action.new(client, action),
-          new(attributes).tap { |entity| entity.response = response }
+          new(client, attributes).tap { |entity| entity.response = response }
         ]
       end
     end
 
     attr_accessor :response
 
-    def initialize(client = nil, kwargs = {})
-      if client.is_a?(Hash)
-        kwargs = client
-        client = nil
-      end
-
+    def initialize(client = nil, resource = {})
       @client = client
-      _load(kwargs)
+      _load(resource)
     end
 
     def inspect
@@ -179,7 +178,10 @@ module Hcloud
       instance_variable_set("@#{key}", value)
     end
 
+    # rubocop: disable  Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/AbcSize
     def _load(resource)
+      return if resource.nil?
+
       @_attributes = {}.with_indifferent_access
 
       resource.each do |key, value|
@@ -195,8 +197,30 @@ module Hcloud
           next
         end
 
+        # if schema definition is [Class]
+        if definition.is_a?(Array) && definition.first.include?(EntryLoader)
+
+          # just set attribute to an empty array if value is no array or empty
+          if !value.is_a?(Array) || value.empty?
+            _update_attribute(key, [])
+            next
+          end
+
+          if value.first.is_a?(Integer)
+            # If value is an integer, this is the id of an object which's class can be
+            # retreived from definition. Load a future object that can on access retreive the
+            # data from the api and convert it to a proper object.
+            _update_attribute(key, value.map { |id| Future.new(client, definition.first, id) })
+          else
+            # Otherwise the value *is* the content of the object
+            _update_attribute(key, value.map { |item| definition.first.new(client, item) })
+          end
+          next
+        end
+
         _update_attribute(key, value.is_a?(Hash) ? value.with_indifferent_access : value)
       end
     end
+    # rubocop: enable  Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/AbcSize
   end
 end
