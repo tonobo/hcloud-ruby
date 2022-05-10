@@ -24,14 +24,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_development_dependency 'activemodel'
-  spec.add_development_dependency 'activesupport', '6.1.4.4'
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'grape'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'webmock'
   spec.add_runtime_dependency 'activemodel'
-  spec.add_runtime_dependency 'activesupport', '6.1.4.4'
   spec.add_runtime_dependency 'oj'
   spec.add_runtime_dependency 'typhoeus'
 end
