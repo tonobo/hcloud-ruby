@@ -9,7 +9,7 @@ module Hcloud
     class Locked < Error; end
     class NotFound < Error; end
     class RateLimitExceeded < Error; end
-    class ResourceUnavilable < Error; end
+    class ResourceUnavailable < Error; end
     class ServiceError < Error; end
     class UniquenessError < Error; end
     class UnknownError < Error; end
