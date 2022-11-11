@@ -32,6 +32,11 @@ module Hcloud
           $ACTIONS['actions'] << a
           a
         end
+
+        def reset
+          $ACTION_ID = 0
+          $ACTIONS['actions'].clear
+        end
       end
       group :actions do
         params do
