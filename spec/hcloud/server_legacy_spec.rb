@@ -3,6 +3,14 @@
 require 'spec_helper'
 
 describe 'Server' do
+  after :all do
+    # The test fake for server uses threading with delay to change action status
+    # from 'running' to 'success'. To make sure that all threads have completed
+    # at the end of the test suite (before we reset the action context and
+    # start other tests) we have to sleep a bit.
+    sleep(0.5)
+  end
+
   let :client do
     Hcloud::Client.new(token: 'secure')
   end

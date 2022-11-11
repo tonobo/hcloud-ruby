@@ -61,18 +61,6 @@ module Hcloud
 
               a = Action.add(command: 'add_route', status: 'success',
                              resources: [{ id: @x['id'], type: 'network' }])
-              # TODO: When we do not reset the action collection, Server tests
-              #       fail, because server tests count the number of executed
-              #       actions.
-              #       In network tests, we do not need the action records, so
-              #       it's safe to remove them.
-              #       Imo, this is not the right place though. The correct
-              #       behaviour would be to reset Actions after each test
-              #       collection, e.g. after network_spec.rb, after server_spec.rb
-              #       and so on (or before each). Does rspec have a hook for this
-              #       behaviour? Tried to fiddle with it in rspec_helper.rb,
-              #       but there Action is undefined.
-              Action.reset
               { action: a }
             end
 
@@ -86,7 +74,6 @@ module Hcloud
 
               a = Action.add(command: 'delete_route', status: 'success',
                              resources: [{ id: @x['id'], type: 'network' }])
-              Action.reset
               { action: a }
             end
 
@@ -105,7 +92,6 @@ module Hcloud
 
               a = Action.add(command: 'add_subnet', status: 'success',
                              resources: [{ id: @x['id'], type: 'network' }])
-              Action.reset
               { action: a }
             end
 
@@ -116,7 +102,6 @@ module Hcloud
 
               a = Action.add(command: 'delete_subnet', status: 'success',
                              resources: [{ id: @x['id'], type: 'network' }])
-              Action.reset
               { action: a }
             end
           end

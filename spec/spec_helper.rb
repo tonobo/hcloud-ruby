@@ -36,5 +36,11 @@ RSpec.configure do |c|
     c.before(:each) do
       stub_request(:any, /api.hetzner.cloud/).to_rack(Hcloud::FakeService::Base)
     end
+
+    c.after(:all) do
+      # Action holds the record of all executed actions (which can be queried
+      # on the API). We need to delete this record after each example.
+      Hcloud::FakeService::Action.reset
+    end
   end
 end
