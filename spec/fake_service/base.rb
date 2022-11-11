@@ -49,6 +49,7 @@ module Hcloud
       require_relative './ssh_key'
       require_relative './location'
       require_relative './datacenter'
+      require_relative './firewall'
       require_relative './network'
 
       mount Action
@@ -60,6 +61,7 @@ module Hcloud
       mount Datacenter
       mount Location
       mount SSHKey
+      mount Firewall
       mount Network
     end
   end
