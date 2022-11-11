@@ -91,6 +91,45 @@ describe 'Network' do
     expect(client.networks['network-missing']).to be nil
   end
 
+  it '#add_subnet' do
+    network = client.networks['testnet']
+    expect(network).to be_a Hcloud::Network
+
+    subnet = network.add_subnet(
+      type: 'cloud',
+      network_zone: 'eu-central',
+      ip_range: '192.168.1.0/24'
+    )
+
+    expect(client.networks['testnet'].subnets.length).to eq(2)
+  end
+
+  it '#del_subnet' do
+    network = client.networks['testnet']
+    expect(network).to be_a Hcloud::Network
+
+    network.del_subnet(ip_range: '192.168.1.0/24')
+    expect(client.networks['testnet'].subnets.length).to eq(1)
+  end
+
+  it '#add_route' do
+    network = client.networks['testnet']
+    expect(network).to be_a Hcloud::Network
+
+    network.add_route(destination: '10.0.1.0/24', gateway: '192.168.0.10')
+
+    expect(client.networks['testnet'].routes.length).to eq(2)
+  end
+
+  it '#del_route' do
+    network = client.networks['testnet']
+    expect(network).to be_a Hcloud::Network
+
+    network.del_route(destination: '10.0.1.0/24', gateway: '192.168.0.10')
+
+    expect(client.networks['testnet'].routes.length).to eq(1)
+  end
+
   it '#update' do
     id = client.networks['testnet'].id
     expect(id).to be_a Integer

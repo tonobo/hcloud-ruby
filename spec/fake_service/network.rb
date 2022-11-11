@@ -31,6 +31,96 @@ module Hcloud
             { network: @x }
           end
 
+          group :actions do
+            params do
+              requires :aid, type: Integer
+            end
+            route_param :aid do
+              before_validation do
+                @a = $ACTIONS['actions'].find do |x|
+                  (x['id'].to_s == params[:aid].to_s) &&
+                    (x['resources'].to_a.any? do |y|
+                      (y.to_h['type'] == 'network') && (y.to_h['id'] == @x['id'])
+                    end)
+                end
+                error!({ error: { code: :not_found } }, 404) if @x.nil?
+              end
+              get do
+                { action: @a }
+              end
+            end
+
+            post :add_route do
+              error!({ error: { code: :invalid_input } }, 400) if params[:gateway].nil?
+              error!({ error: { code: :invalid_input } }, 400) if params[:destination].nil?
+
+              @x['routes'] << {
+                gateway: params[:gateway],
+                destination: params[:destination]
+              }
+
+              a = Action.add(command: 'add_route', status: 'success',
+                             resources: [{ id: @x['id'], type: 'network' }])
+              # TODO: When we do not reset the action collection, Server tests
+              #       fail, because server tests count the number of executed
+              #       actions.
+              #       In network tests, we do not need the action records, so
+              #       it's safe to remove them.
+              #       Imo, this is not the right place though. The correct
+              #       behaviour would be to reset Actions after each test
+              #       collection, e.g. after network_spec.rb, after server_spec.rb
+              #       and so on (or before each). Does rspec have a hook for this
+              #       behaviour? Tried to fiddle with it in rspec_helper.rb,
+              #       but there Action is undefined.
+              Action.reset
+              { action: a }
+            end
+
+            post :delete_route do
+              error!({ error: { code: :invalid_input } }, 400) if params[:gateway].nil?
+              error!({ error: { code: :invalid_input } }, 400) if params[:destination].nil?
+
+              @x['routes'].delete_if do |route|
+                route[:gateway] == params[:gateway] && route[:destination] == params[:destination]
+              end
+
+              a = Action.add(command: 'delete_route', status: 'success',
+                             resources: [{ id: @x['id'], type: 'network' }])
+              Action.reset
+              { action: a }
+            end
+
+            post :add_subnet do
+              error!({ error: { code: :invalid_input } }, 400) if params[:type].nil?
+              error!({ error: { code: :invalid_input } }, 400) if params[:network_zone].nil?
+
+              @x['subnets'] << {
+                type: params[:type],
+                network_zone: params[:network_zone],
+                # IP range 10.0.0.0/24 might not match the actual sub net
+                # but for unit tests should be OK. The real API allocates
+                # a subnet that's inside the network IP range.
+                ip_range: params[:ip_range] || '10.0.0.0/24'
+              }
+
+              a = Action.add(command: 'add_subnet', status: 'success',
+                             resources: [{ id: @x['id'], type: 'network' }])
+              Action.reset
+              { action: a }
+            end
+
+            post :delete_subnet do
+              error!({ error: { code: :invalid_input } }, 400) if params[:ip_range].nil?
+
+              @x['subnets'].delete_if { |subnet| subnet[:ip_range] == params[:ip_range] }
+
+              a = Action.add(command: 'delete_subnet', status: 'success',
+                             resources: [{ id: @x['id'], type: 'network' }])
+              Action.reset
+              { action: a }
+            end
+          end
+
           params do
             optional :name, type: String
           end

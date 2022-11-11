@@ -19,7 +19,7 @@ module Hcloud
     end
 
     def del_subnet(ip_range:)
-      prepare_request('actions/del_subnet', j: COLLECT_ARGS.call(__method__, binding))
+      prepare_request('actions/delete_subnet', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def add_route(destination:, gateway:)
@@ -27,7 +27,7 @@ module Hcloud
     end
 
     def del_route(destination:, gateway:)
-      prepare_request('actions/del_route', j: COLLECT_ARGS.call(__method__, binding))
+      prepare_request('actions/delete_route', j: COLLECT_ARGS.call(__method__, binding))
     end
   end
 end
