@@ -94,6 +94,10 @@ module Hcloud
       NetworkResource.new(client: self)
     end
 
+    def firewalls
+      FirewallResource.new(client: self)
+    end
+
     def volumes
       VolumeResource.new(client: self)
     end

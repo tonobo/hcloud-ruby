@@ -36,6 +36,9 @@ module Hcloud
   autoload :Network, 'hcloud/network'
   autoload :NetworkResource, 'hcloud/network_resource'
 
+  autoload :Firewall, 'hcloud/firewall'
+  autoload :FirewallResource, 'hcloud/firewall_resource'
+
   autoload :Volume, 'hcloud/volume'
   autoload :VolumeResource, 'hcloud/volume_resource'
 
