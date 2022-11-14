@@ -37,6 +37,24 @@ module Hcloud
           $ACTION_ID = 0
           $ACTIONS['actions'].clear
         end
+
+        def resource_actions(resource_type, resource_id)
+          actions = $ACTIONS.deep_dup
+          actions['actions'].select! do |action|
+            action['resources'].to_a.any? do |res|
+              (res.to_h['type'] == resource_type) && (res.to_h['id'].to_s == resource_id.to_s)
+            end
+          end
+          actions
+        end
+
+        def resource_action(resource_type, resource_id, action_id)
+          actions = resource_actions(resource_type, resource_id)
+
+          actions['actions'].find do |action|
+            action['id'].to_s == action_id.to_s
+          end
+        end
       end
       group :actions do
         params do

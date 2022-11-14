@@ -102,6 +102,9 @@ describe 'Network' do
     )
 
     expect(client.networks['testnet'].subnets.length).to eq(2)
+
+    expect(client.actions.count).to eq(1)
+    expect(client.networks['testnet'].actions.count).to eq(1)
   end
 
   it '#del_subnet' do
@@ -110,6 +113,9 @@ describe 'Network' do
 
     network.del_subnet(ip_range: '192.168.1.0/24')
     expect(client.networks['testnet'].subnets.length).to eq(1)
+
+    expect(client.actions.count).to eq(2)
+    expect(client.networks['testnet'].actions.count).to eq(2)
   end
 
   it '#add_route' do
@@ -119,6 +125,9 @@ describe 'Network' do
     network.add_route(destination: '10.0.1.0/24', gateway: '192.168.0.10')
 
     expect(client.networks['testnet'].routes.length).to eq(2)
+
+    expect(client.actions.count).to eq(3)
+    expect(client.networks['testnet'].actions.count).to eq(3)
   end
 
   it '#del_route' do
@@ -128,6 +137,9 @@ describe 'Network' do
     network.del_route(destination: '10.0.1.0/24', gateway: '192.168.0.10')
 
     expect(client.networks['testnet'].routes.length).to eq(1)
+
+    expect(client.actions.count).to eq(4)
+    expect(client.networks['testnet'].actions.count).to eq(4)
   end
 
   it '#update' do
