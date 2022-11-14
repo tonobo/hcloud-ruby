@@ -37,12 +37,7 @@ module Hcloud
             end
             route_param :aid do
               before_validation do
-                @a = $ACTIONS['actions'].find do |x|
-                  (x['id'].to_s == params[:aid].to_s) &&
-                    (x['resources'].to_a.any? do |y|
-                      (y.to_h['type'] == 'server') && (y.to_h['id'] == @x['id'])
-                    end)
-                end
+                @a = Action.resource_action('server', @x['id'], params[:aid])
                 error!({ error: { code: :not_found } }, 404) if @x.nil?
               end
               get do
@@ -55,27 +50,18 @@ module Hcloud
               optional :sort, type: String
             end
             get do
-              dc = $ACTIONS.deep_dup
-              dc['actions'].select! do |x|
-                x['resources'].to_a.any? do |y|
-                  (y.to_h['type'] == 'server') && (y.to_h['id'].to_s == @x['id'].to_s)
-                end
-              end
+              actions = Action.resource_actions('server', @x['id'])
               unless params[:status].nil?
-                dc['actions'].select! do |x|
+                actions['actions'].select! do |x|
                   x['status'].to_s == params[:status].to_s
                 end
               end
-              dc
+              actions
             end
 
             helpers do
               def locked?
-                a = $ACTIONS['actions'].select do |x|
-                  x['resources'].to_a.any? do |y|
-                    (y.to_h['type'] == 'server') && (y.to_h['id'] == @x['id'])
-                  end
-                end
+                a = Action.resource_actions('server', @x['id'])['actions']
                 a.to_a.any? { |x| x['status'] == 'running' }
               end
             end

@@ -37,17 +37,26 @@ module Hcloud
             end
             route_param :aid do
               before_validation do
-                @a = $ACTIONS['actions'].find do |x|
-                  (x['id'].to_s == params[:aid].to_s) &&
-                    (x['resources'].to_a.any? do |y|
-                      (y.to_h['type'] == 'network') && (y.to_h['id'] == @x['id'])
-                    end)
-                end
+                @a = Action.resource_action('network', @x['id'], params[:aid])
                 error!({ error: { code: :not_found } }, 404) if @x.nil?
               end
               get do
                 { action: @a }
               end
+            end
+
+            params do
+              optional :status, type: String
+              optional :sort, type: String
+            end
+            get do
+              actions = Action.resource_actions('network', @x['id'])
+              unless params[:status].nil?
+                actions['actions'].select! do |x|
+                  x['status'].to_s == params[:status].to_s
+                end
+              end
+              actions
             end
 
             post :add_route do
