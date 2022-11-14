@@ -142,7 +142,10 @@ module Hcloud
             error!({ error: { code: :uniqueness_error } }, 400)
           end
 
-          gateway = params[:ip_range].split('.')[1..3].join('.') + '.1'
+          # for tests set the last segment of the net range to 1 to create the gateway
+          net = IPAddr.new(params[:ip_range])
+          masklen = net.ipv6? ? 120 : 24
+          gateway = (net.mask(masklen) | 1).to_s
 
           subnets = {}
           unless params[:subnets].nil?
@@ -153,15 +156,14 @@ module Hcloud
             end
           end
 
-          routes = {}
-          routes = params[:routes] unless params[:routes].nil?
+          routes = params[:routes] || {}
 
           network = {
             'id' => $NETWORK_ID += 1,
             'name' => params[:name],
             'ip_range' => params[:ip_range],
-            'subnets' => params[:subnets],
-            'routes' => params[:routes]
+            'subnets' => subnets,
+            'routes' => routes
           }
           $NETWORKS['networks'] << network
           { network: network }

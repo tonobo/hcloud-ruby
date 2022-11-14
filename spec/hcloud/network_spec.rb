@@ -95,7 +95,7 @@ describe 'Network' do
     network = client.networks['testnet']
     expect(network).to be_a Hcloud::Network
 
-    subnet = network.add_subnet(
+    network.add_subnet(
       type: 'cloud',
       network_zone: 'eu-central',
       ip_range: '192.168.1.0/24'
