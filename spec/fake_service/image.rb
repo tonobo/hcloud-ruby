@@ -92,6 +92,7 @@ module Hcloud
             end
             @x['description'] = params[:description] unless params[:description].nil?
             @x['type'] = params[:type] unless params[:type].nil?
+            @x['labels'] = params[:labels] unless params[:labels].nil?
             { image: @x }
           end
 
@@ -143,6 +144,11 @@ module Hcloud
           dc['images'].select! { |x| x['type'] == params[:type] } if params[:type]&.size&.positive?
           unless params[:bound_to].nil?
             dc['images'].select! { |x| x['bound_to'].to_s == params[:bound_to].to_s }
+          end
+          unless params[:label_selector].nil?
+            dc['images'].select! do |x|
+              FakeService.label_selector_matches(params[:label_selector], x['labels'])
+            end
           end
           dc
         end

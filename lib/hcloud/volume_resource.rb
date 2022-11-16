@@ -2,7 +2,7 @@
 
 module Hcloud
   class VolumeResource < AbstractResource
-    filter_attributes :name
+    filter_attributes :name, :label_selector
 
     def [](arg)
       case arg
@@ -11,7 +11,7 @@ module Hcloud
       end
     end
 
-    def create(size:, name:, automount: nil, format: nil, location: nil, server: nil)
+    def create(size:, name:, automount: nil, format: nil, location: nil, server: nil, labels: {})
       prepare_request(
         'volumes', j: COLLECT_ARGS.call(__method__, binding),
                    expected_code: 201

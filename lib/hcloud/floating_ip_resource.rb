@@ -2,7 +2,7 @@
 
 module Hcloud
   class FloatingIPResource < AbstractResource
-    filter_attributes :name
+    filter_attributes :name, :label_selector
 
     bind_to FloatingIP
 
@@ -13,7 +13,7 @@ module Hcloud
       end
     end
 
-    def create(type:, server: nil, home_location: nil, description: nil)
+    def create(type:, server: nil, home_location: nil, description: nil, labels: {})
       prepare_request(
         'floating_ips', j: COLLECT_ARGS.call(__method__, binding),
                         expected_code: 201

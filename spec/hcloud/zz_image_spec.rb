@@ -76,6 +76,19 @@ describe 'Image' do
     )
   end
 
+  it '#update(labels:)' do
+    image = client.images[3454]
+    updated = image.update(labels: { 'source' => 'update' })
+    expect(updated.labels).to eq({ 'source' => 'update' })
+    expect(client.images[3454].labels).to eq({ 'source' => 'update' })
+  end
+
+  it '#where -> find by label_selector' do
+    images = client.images.where(label_selector: 'source=update').to_a
+    expect(images.length).to eq(1)
+    expect(images.first.labels).to include('source' => 'update')
+  end
+
   it '#to_snapshot' do
     expect(client.images[3454].description).to eq('test123')
     expect(client.images[3454].to_snapshot).to be_a Hcloud::Image
