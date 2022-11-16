@@ -1,6 +1,6 @@
 # Hcloud
 
-[![Build Status](https://travis-ci.org/tonobo/hcloud-ruby.svg?branch=master)](https://travis-ci.org/tonobo/hcloud-ruby)
+[![Build Status](https://github.com/tonobo/hcloud-ruby/actions/workflows/ruby.yml/badge.svg)](https://github.com/tonobo/hcloud-ruby/actions/workflows/ruby.yml)
 [![codecov](https://codecov.io/gh/tonobo/hcloud-ruby/branch/master/graph/badge.svg)](https://codecov.io/gh/tonobo/hcloud-ruby)
 [![Gem Version](https://badge.fury.io/rb/hcloud.svg)](https://badge.fury.io/rb/hcloud)
 [![Maintainability](https://api.codeclimate.com/v1/badges/aa67f9d590d86845822f/maintainability)](https://codeclimate.com/github/tonobo/hcloud-ruby/maintainability)
