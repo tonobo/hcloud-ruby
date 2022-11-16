@@ -8,5 +8,7 @@ module Hcloud
 
     updatable :name
     destructible
+
+    has_labels
   end
 end

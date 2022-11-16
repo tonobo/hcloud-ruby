@@ -2,7 +2,7 @@
 
 module Hcloud
   class SSHKeyResource < AbstractResource
-    filter_attributes :name
+    filter_attributes :name, :label_selector
 
     def [](arg)
       case arg
@@ -11,7 +11,7 @@ module Hcloud
       end
     end
 
-    def create(name:, public_key:)
+    def create(name:, public_key:, labels: {})
       prepare_request(
         'ssh_keys', j: COLLECT_ARGS.call(__method__, binding),
                     expected_code: 201

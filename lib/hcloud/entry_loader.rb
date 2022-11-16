@@ -68,6 +68,34 @@ module Hcloud
         end
       end
 
+      def has_labels # rubocop:disable Naming/PredicateName
+        define_method(:add_label) do |label, value = nil|
+          add_labels({ label => value })
+        end
+
+        define_method(:add_labels) do |labels|
+          labels.each do |label, value|
+            self.labels[label.to_s] = value.to_s
+          end
+
+          update(labels: self.labels)
+          self.labels
+        end
+
+        define_method(:remove_label) do |label|
+          remove_labels([label])
+        end
+
+        define_method(:remove_labels) do |labels|
+          labels.each do |label|
+            self.labels.delete(label.to_s)
+          end
+
+          update(labels: self.labels)
+          self.labels
+        end
+      end
+
       def resource_class
         ancestors.reverse.find { |const| const.include?(Hcloud::EntryLoader) }
       end

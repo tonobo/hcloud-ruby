@@ -35,8 +35,8 @@ module Hcloud
             optional :name, type: String
           end
           put do
-            error!({ error: { code: :invalid_input } }, 400) if params[:name].nil?
-            @x['name'] = params[:name]
+            @x['name'] = params[:name] unless params[:name].nil?
+            @x['labels'] = params[:labels] unless params[:labels].nil?
             { ssh_key: @x }
           end
 
@@ -66,7 +66,8 @@ module Hcloud
             'id' => $SSH_KEY_ID += 1,
             'name' => params[:name],
             'fingerprint' => 0.upto(15).map { rand(0..255) }.map { |num| num.to_s(16) }.join(':'),
-            'public_key' => params[:public_key]
+            'public_key' => params[:public_key],
+            'labels' => params[:labels]
           }
           $SSH_KEYS['ssh_keys'] << key
           { ssh_key: key }
@@ -76,13 +77,16 @@ module Hcloud
           optional :name, type: String
         end
         get do
-          if params.key?(:name)
-            dc = $SSH_KEYS.deep_dup
-            dc['ssh_keys'].select! { |x| x['name'] == params[:name] }
-            dc
-          else
-            $SSH_KEYS
+          ssh_keys = $SSH_KEYS.deep_dup
+
+          ssh_keys['ssh_keys'].select! { |x| x['name'] == params[:name] } unless params[:name].nil?
+          unless params[:label_selector].nil?
+            ssh_keys['ssh_keys'].select! do |x|
+              FakeService.label_selector_matches(params[:label_selector], x['labels'])
+            end
           end
+
+          ssh_keys
         end
       end
     end

@@ -32,12 +32,13 @@ describe 'SSHKey' do
   end
 
   it 'create new ssh_key' do
-    key = client.ssh_keys.create(name: 'moo', public_key: REAL_KEY)
+    key = client.ssh_keys.create(name: 'moo', public_key: REAL_KEY, labels: { 'source' => 'test' })
     expect(key).to be_a Hcloud::SSHKey
     expect(key.id).to be_a Integer
     expect(key.name).to eq('moo')
     expect(key.fingerprint.split(':').count).to eq(16)
     expect(key.public_key).to eq(REAL_KEY)
+    expect(key.labels).to eq({ 'source' => 'test' })
   end
 
   it 'create new ssh_key, uniq name' do
@@ -100,8 +101,69 @@ describe 'SSHKey' do
     id = client.ssh_keys.first.id
     expect(id).to be_a Integer
     expect(client.ssh_keys.find(id).name).to eq('moo')
-    expect(client.ssh_keys.find(id).update(name: 'hui').name).to eq('hui')
+    updated = client.ssh_keys.find(id).update(
+      name: 'hui',
+      labels: { 'source' => 'unittest' }
+    )
+    expect(updated.name).to eq('hui')
+    expect(updated.labels['source']).to eq('unittest')
+
     expect(client.ssh_keys.find(id).name).to eq('hui')
+    expect(client.ssh_keys.find(id).labels['source']).to eq('unittest')
+  end
+
+  it '#add_label' do
+    id = client.ssh_keys.first.id
+
+    # add_label must return the label status after adding
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.add_label('label-no-value')).to include('label-no-value' => '')
+    expect(ssh_key.add_label('label', 'value')).to include('label' => 'value')
+
+    # re-read the resource
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.labels).to include('label-no-value' => '')
+    expect(ssh_key.labels).to include('label' => 'value')
+  end
+
+  it '#add_labels' do
+    id = client.ssh_keys.first.id
+
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.add_labels({ 'mylabel' => 'value' })).to include('mylabel' => 'value')
+
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.labels).to include('mylabel' => 'value')
+  end
+
+  it '#where -> find by label_selector' do
+    ssh_keys = client.ssh_keys.where(label_selector: 'label=value').to_a
+    expect(ssh_keys.length).to eq(1)
+    expect(ssh_keys.first.labels).to include('label' => 'value')
+  end
+
+  it '#remove_labels' do
+    id = client.ssh_keys.first.id
+
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.add_labels(['mylabel'])).not_to include('mylabel' => 'value')
+
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.labels).not_to include('mylabel' => 'value')
+  end
+
+  it '#remove_label' do
+    id = client.ssh_keys.first.id
+
+    # remove_label must return the label status after removal
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.remove_label('label-no-value')).not_to include('label-no-value' => '')
+    expect(ssh_key.remove_label('label')).not_to include('label' => 'value')
+
+    # re-read the resource
+    ssh_key = client.ssh_keys[id]
+    expect(ssh_key.labels).not_to include('label-no-value' => '')
+    expect(ssh_key.labels).not_to include('label' => 'value')
   end
 
   it '#destroy' do
