@@ -29,6 +29,20 @@ module Hcloud
     end
     # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
+    def self.label_selector_matches(label_selector, resource_labels)
+      resource_labels ||= {}
+
+      # only implements a subset of the label selector query language
+      # to support selectors like "key=value,key2"
+      selectors = label_selector.split(',')
+      selectors.all? do |selector|
+        key, value = selector.split('=', 2)
+        value = '' if value.nil? # API uses "" to denote labels without values
+
+        resource_labels.key?(key) && resource_labels[key] == value
+      end
+    end
+
     class Base < Grape::API
       version 'v1', using: :path
 

@@ -35,7 +35,8 @@ describe 'Network' do
         ip_range: '192.168.0.0/24',
         network_zone: 'eu-central',
         type: 'cloud'
-      }]
+      }],
+      labels: { 'source' => 'create' }
     )
     expect(network).to be_a Hcloud::Network
     expect(network.id).to be_a Integer
@@ -45,6 +46,7 @@ describe 'Network' do
     expect(network.subnets[0][:ip_range]).to eq('192.168.0.0/24')
     expect(network.subnets[0][:network_zone]).to eq('eu-central')
     expect(network.subnets[0][:type]).to eq('cloud')
+    expect(network.labels).to eq({ 'source' => 'create' })
   end
 
   it 'create new network, uniq name' do
@@ -142,12 +144,26 @@ describe 'Network' do
     expect(client.networks['testnet'].actions.count).to eq(4)
   end
 
-  it '#update' do
+  it '#update(name:)' do
     id = client.networks['testnet'].id
     expect(id).to be_a Integer
     expect(client.networks.find(id).name).to eq('testnet')
     expect(client.networks.find(id).update(name: 'testing').name).to eq('testing')
     expect(client.networks.find(id).name).to eq('testing')
+  end
+
+  it '#update(labels:)' do
+    id = client.networks.first.id
+    network = client.networks[id]
+    updated = network.update(labels: { 'source' => 'update' })
+    expect(updated.labels).to eq({ 'source' => 'update' })
+    expect(client.networks[id].labels).to eq({ 'source' => 'update' })
+  end
+
+  it '#where -> find by label_selector' do
+    networks = client.networks.where(label_selector: 'source=update').to_a
+    expect(networks.length).to eq(1)
+    expect(networks.first.labels).to include('source' => 'update')
   end
 
   it '#destroy' do

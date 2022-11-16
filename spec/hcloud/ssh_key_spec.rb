@@ -32,12 +32,13 @@ describe 'SSHKey' do
   end
 
   it 'create new ssh_key' do
-    key = client.ssh_keys.create(name: 'moo', public_key: REAL_KEY)
+    key = client.ssh_keys.create(name: 'moo', public_key: REAL_KEY, labels: { 'source' => 'test' })
     expect(key).to be_a Hcloud::SSHKey
     expect(key.id).to be_a Integer
     expect(key.name).to eq('moo')
     expect(key.fingerprint.split(':').count).to eq(16)
     expect(key.public_key).to eq(REAL_KEY)
+    expect(key.labels).to eq({ 'source' => 'test' })
   end
 
   it 'create new ssh_key, uniq name' do
@@ -100,8 +101,21 @@ describe 'SSHKey' do
     id = client.ssh_keys.first.id
     expect(id).to be_a Integer
     expect(client.ssh_keys.find(id).name).to eq('moo')
-    expect(client.ssh_keys.find(id).update(name: 'hui').name).to eq('hui')
+    updated = client.ssh_keys.find(id).update(
+      name: 'hui',
+      labels: { 'source' => 'unittest' }
+    )
+    expect(updated.name).to eq('hui')
+    expect(updated.labels['source']).to eq('unittest')
+
     expect(client.ssh_keys.find(id).name).to eq('hui')
+    expect(client.ssh_keys.find(id).labels['source']).to eq('unittest')
+  end
+
+  it '#where -> find by label_selector' do
+    ssh_keys = client.ssh_keys.where(label_selector: 'source=unittest').to_a
+    expect(ssh_keys.length).to eq(1)
+    expect(ssh_keys.first.labels).to include('source' => 'unittest')
   end
 
   it '#destroy' do

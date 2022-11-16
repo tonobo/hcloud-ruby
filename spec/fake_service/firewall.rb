@@ -115,8 +115,8 @@ module Hcloud
             optional :name, type: String
           end
           put do
-            error!({ error: { code: :invalid_input } }, 400) if params[:name].nil?
-            @x['name'] = params[:name]
+            @x['name'] = params[:name] unless params[:name].nil?
+            @x['labels'] = params[:labels] unless params[:labels].nil?
             { firewall: @x }
           end
 
@@ -143,7 +143,8 @@ module Hcloud
             'id' => $FIREWALL_ID += 1,
             'name' => params[:name],
             'applied_to' => params[:apply_to] || [],
-            'rules' => params[:rules] || []
+            'rules' => params[:rules] || [],
+            'labels' => params[:labels] || {}
           }
           $FIREWALLS['firewalls'] << firewall
           { firewall: firewall }
@@ -153,13 +154,19 @@ module Hcloud
           optional :name, type: String
         end
         get do
-          if params.key?(:name)
-            firewalls = $FIREWALLS.deep_dup
+          firewalls = $FIREWALLS.deep_dup
+
+          unless params[:name].nil?
             firewalls['firewalls'].select! { |x| x['name'] == params[:name] }
-            firewalls
-          else
-            $FIREWALLS
           end
+
+          unless params[:label_selector].nil?
+            firewalls['firewalls'].select! do |x|
+              FakeService.label_selector_matches(params[:label_selector], x['labels'])
+            end
+          end
+
+          firewalls
         end
       end
     end

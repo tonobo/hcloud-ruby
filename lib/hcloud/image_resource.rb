@@ -2,7 +2,7 @@
 
 module Hcloud
   class ImageResource < AbstractResource
-    filter_attributes :type, :bound_to, :name
+    filter_attributes :type, :bound_to, :name, :label_selector
 
     bind_to Image
 

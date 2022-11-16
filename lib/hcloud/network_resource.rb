@@ -2,7 +2,7 @@
 
 module Hcloud
   class NetworkResource < AbstractResource
-    filter_attributes :name
+    filter_attributes :name, :label_selector
 
     bind_to Network
 
@@ -13,7 +13,7 @@ module Hcloud
       end
     end
 
-    def create(name:, ip_range:, subnets: nil, routes: nil)
+    def create(name:, ip_range:, subnets: nil, routes: nil, labels: {})
       prepare_request(
         'networks', j: COLLECT_ARGS.call(__method__, binding),
                     expected_code: 201

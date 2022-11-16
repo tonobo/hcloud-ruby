@@ -52,7 +52,9 @@ describe 'FloatingIP' do
   it '#create(type: ipv4, server: 1)' do
     a, f = nil
     expect do
-      a, f = client.floating_ips.create(type: 'ipv4', server: 1)
+      a, f = client.floating_ips.create(
+        type: 'ipv4', server: 1, labels: { 'source' => 'create' }
+      )
     end.not_to raise_error
     expect(a).to be_a Hcloud::Action
     expect(a.status).to eq('running')
@@ -61,6 +63,7 @@ describe 'FloatingIP' do
     expect(f.ip).to eq('127.0.0.2')
     expect(f.blocked).to be false
     expect(f.home_location.name).to eq('nbg1')
+    expect(f.labels).to eq({ 'source' => 'create' })
     expect(f.actions.count).to eq(1)
     expect(f.actions.first.command).to eq('assign_floating_ip')
   end
@@ -95,6 +98,19 @@ describe 'FloatingIP' do
     expect(client.floating_ips.find(1).description).to be nil
     expect { client.floating_ips.find(1).update(description: 'moo') }.not_to raise_error
     expect(client.floating_ips.find(1).description).to eq('moo')
+  end
+
+  it '#update(labels:)' do
+    ip = client.floating_ips.find(1)
+    updated = ip.update(labels: { 'source' => 'update' })
+    expect(updated.labels).to eq({ 'source' => 'update' })
+    expect(client.floating_ips.find(1).labels).to eq({ 'source' => 'update' })
+  end
+
+  it '#where -> find by label_selector' do
+    ips = client.floating_ips.where(label_selector: 'source=update').to_a
+    expect(ips.length).to eq(1)
+    expect(ips.first.labels).to include('source' => 'update')
   end
 
   it '#assign(server: 999)' do

@@ -2,7 +2,7 @@
 
 module Hcloud
   class FirewallResource < AbstractResource
-    filter_attributes :name
+    filter_attributes :name, :label_selector
 
     def [](arg)
       case arg
@@ -11,7 +11,7 @@ module Hcloud
       end
     end
 
-    def create(name:, rules: [], apply_to: [])
+    def create(name:, rules: [], apply_to: [], labels: {})
       prepare_request(
         'firewalls', j: COLLECT_ARGS.call(__method__, binding),
                      expected_code: 201

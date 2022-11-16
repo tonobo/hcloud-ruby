@@ -152,11 +152,11 @@ module Hcloud
             optional :name, type: String
           end
           put do
-            error!({ error: { code: :invalid_input } }, 400) if params[:name].nil?
             if $SERVERS['servers'].any? { |x| x['name'] == params[:name] }
               error!({ error: { code: :uniqueness_error } }, 400)
             end
-            @x['name'] = params[:name]
+            @x['name'] = params[:name] unless params[:name].nil?
+            @x['labels'] = params[:labels] unless params[:labels].nil?
             { server: @x }
           end
 
@@ -248,8 +248,8 @@ module Hcloud
                 },
                 floating_ips: [],
                 volumes: []
-              }
-
+              },
+              labels: params[:labels]
             },
             action: Action.add(
               status: 'running',
@@ -272,7 +272,14 @@ module Hcloud
         end
         get do
           dc = $SERVERS.deep_dup
+
           dc['servers'].select! { |x| x['name'] == params[:name] } unless params[:name].nil?
+          unless params[:label_selector].nil?
+            dc['servers'].select! do |x|
+              FakeService.label_selector_matches(params[:label_selector], x['labels'])
+            end
+          end
+
           dc
         end
       end
