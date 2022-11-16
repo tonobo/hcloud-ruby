@@ -82,7 +82,9 @@ describe 'Server' do
   it 'create new server' do
     action, server, pass = nil
     expect do
-      action, server, pass = client.servers.create(name: 'moo', server_type: 'cx11', image: 1)
+      action, server, pass = client.servers.create(
+        name: 'moo', server_type: 'cx11', image: 1, labels: { 'source' => 'test' }
+      )
     end.not_to(raise_error)
     expect(client.actions.per_page(1).page(1).count).to eq(1)
     expect(aclient.actions.count).to eq(1)
@@ -101,6 +103,7 @@ describe 'Server' do
     expect(server.image.id).to eq(1)
     expect(server.status).to eq('initalizing')
     expect(server.image.id).to eq(1)
+    expect(server.labels).to eq({ 'source' => 'test' })
     expect(action.status).to eq('running')
     expect(action.command).to eq('create_server')
     expect(pass).to eq('test123')
@@ -259,6 +262,19 @@ describe 'Server' do
     expect { server = client.servers[1].update(name: 'hui') }.not_to raise_error
     expect(server.name).to eq('hui')
     expect(client.servers.find(1).name).to eq('hui')
+  end
+
+  it '#update(labels:)' do
+    server = client.servers.find(1)
+    updated = server.update(labels: { 'source' => 'update' })
+    expect(updated.labels).to eq({ 'source' => 'update' })
+    expect(client.servers.find(1).labels).to eq({ 'source' => 'update' })
+  end
+
+  it '#where -> find by label_selector' do
+    servers = client.servers.where(label_selector: 'source=update').to_a
+    expect(servers.length).to eq(1)
+    expect(servers.first.labels).to include('source' => 'update')
   end
 
   it '#destroy' do

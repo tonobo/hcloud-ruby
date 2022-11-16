@@ -119,8 +119,8 @@ module Hcloud
             optional :name, type: String
           end
           put do
-            error!({ error: { code: :invalid_input } }, 400) if params[:name].nil?
-            @x['name'] = params[:name]
+            @x['name'] = params[:name] unless params[:name].nil?
+            @x['labels'] = params[:labels] unless params[:labels].nil?
             { network: @x }
           end
 
@@ -163,7 +163,8 @@ module Hcloud
             'name' => params[:name],
             'ip_range' => params[:ip_range],
             'subnets' => subnets,
-            'routes' => routes
+            'routes' => routes,
+            'labels' => params[:labels]
           }
           $NETWORKS['networks'] << network
           { network: network }
@@ -173,13 +174,15 @@ module Hcloud
           optional :name, type: String
         end
         get do
-          if params.key?(:name)
-            network = $NETWORKS.deep_dup
-            network['networks'].select! { |x| x['name'] == params[:name] }
-            network
-          else
-            $NETWORKS
+          networks = $NETWORKS.deep_dup
+          networks['networks'].select! { |x| x['name'] == params[:name] } unless params[:name].nil?
+          unless params[:label_selector].nil?
+            networks['networks'].select! do |x|
+              FakeService.label_selector_matches(params[:label_selector], x['labels'])
+            end
           end
+
+          networks
         end
       end
     end

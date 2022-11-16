@@ -2,7 +2,7 @@
 
 module Hcloud
   class ServerResource < AbstractResource
-    filter_attributes :status, :name
+    filter_attributes :status, :name, :label_selector
 
     bind_to Server
 
@@ -13,7 +13,8 @@ module Hcloud
                start_after_create: nil,
                ssh_keys: [],
                networks: [],
-               user_data: nil)
+               user_data: nil,
+               labels: {})
       prepare_request('servers', j: COLLECT_ARGS.call(__method__, binding),
                                  expected_code: 201) do |response|
         [

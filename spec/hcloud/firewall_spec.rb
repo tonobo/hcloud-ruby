@@ -44,10 +44,16 @@ describe 'Firewall' do
       },
       'type' => 'server'
     }]
-    firewall = client.firewalls.create(name: 'fw-rules', rules: rules, apply_to: apply_to)
+    firewall = client.firewalls.create(
+      name: 'fw-rules',
+      rules: rules,
+      apply_to: apply_to,
+      labels: { 'source' => 'unittest' }
+    )
     expect(firewall).to be_a Hcloud::Firewall
     expect(firewall.id).to be_a Integer
     expect(firewall.name).to eq('fw-rules')
+    expect(firewall.labels).to eq({ 'source' => 'unittest' })
     expect(firewall.rules.length).to eq(1)
     expect(firewall.rules[0]['protocol']).to eq('tcp')
     expect(firewall.rules[0]['source_ips']).to eq(['192.0.2.0/24'])
@@ -174,12 +180,26 @@ describe 'Firewall' do
     )
   end
 
-  it '#update' do
+  it '#update(name:)' do
     id = client.firewalls['fw'].id
     expect(id).to be_a Integer
     expect(client.firewalls.find(id).name).to eq('fw')
     expect(client.firewalls.find(id).update(name: 'firewall').name).to eq('firewall')
     expect(client.firewalls.find(id).name).to eq('firewall')
+  end
+
+  it '#update(labels:)' do
+    id = client.firewalls['firewall'].id
+    firewall = client.firewalls[id]
+    updated = firewall.update(labels: { 'source' => 'update' })
+    expect(updated.labels).to eq({ 'source' => 'update' })
+    expect(client.firewalls[id].labels).to eq({ 'source' => 'update' })
+  end
+
+  it '#where -> find by label_selector' do
+    firewalls = client.firewalls.where(label_selector: 'source=update').to_a
+    expect(firewalls.length).to eq(1)
+    expect(firewalls.first.labels).to include('source' => 'update')
   end
 
   it '#destroy' do

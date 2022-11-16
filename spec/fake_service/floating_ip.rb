@@ -63,7 +63,8 @@ module Hcloud
             optional :description, type: String
           end
           put do
-            @x['description'] = params[:description]
+            @x['description'] = params[:description] unless params[:description].nil?
+            @x['labels'] = params[:labels] unless params[:labels].nil?
             { floating_ip: @x }
           end
 
@@ -176,7 +177,8 @@ module Hcloud
             'protection' => {
               'delete' => false
             },
-            'home_location' => $LOCATIONS['locations'].find { |x| x['name'] == params[:home_location] }
+            'home_location' => $LOCATIONS['locations'].find { |x| x['name'] == params[:home_location] },
+            'labels' => params[:labels]
           }
           $FLOATING_IPS['floating_ips'] << f
           if params[:server]
@@ -187,7 +189,15 @@ module Hcloud
         end
 
         get do
-          $FLOATING_IPS.deep_dup
+          ips = $FLOATING_IPS.deep_dup
+          ips['floating_ips'].select! { |x| x['name'] == params[:name] } unless params[:name].nil?
+          unless params[:label_selector].nil?
+            ips['floating_ips'].select! do |x|
+              FakeService.label_selector_matches(params[:label_selector], x['labels'])
+            end
+          end
+
+          ips
         end
       end
     end
