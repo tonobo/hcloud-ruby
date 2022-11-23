@@ -19,7 +19,7 @@ RSpec.describe Hcloud::Action, doubles: :action do
     end
 
     it 'checks auto pagination' do
-      actions = Array.new(Faker::Number.within(range: 100..150)).map { new_action }
+      actions = Array.new(Faker::Number.within(range: 101..150)).map { new_action }
       pages = []
       page_count = []
       stub_collection(:actions, actions) do |request, _page_info|
