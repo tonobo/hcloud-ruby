@@ -103,7 +103,7 @@ describe 'Firewall' do
       'direction' => 'in',
       'description' => 'FTP access'
     }]
-    action = client.firewalls['fw'].set_rules(rules: rules)
+    actions = client.firewalls['fw'].set_rules(rules: rules)
 
     expect(client.firewalls['fw'].rules.length).to eq(1)
     expect(client.firewalls['fw'].rules[0][:protocol]).to eq('tcp')
@@ -114,7 +114,7 @@ describe 'Firewall' do
 
     expect(client.actions.count).to eq(1)
     expect(client.firewalls['fw'].actions.count).to eq(1)
-    expect(action.command).to eq('set_rules')
+    expect(actions[0].command).to eq('set_rules')
   end
 
   it '#set_rules, missing rules' do
@@ -135,14 +135,14 @@ describe 'Firewall' do
       },
       'type' => 'server'
     }]
-    action = client.firewalls['fw'].apply_to_resources(apply_to: apply_to)
+    actions = client.firewalls['fw'].apply_to_resources(apply_to: apply_to)
 
     expect(client.firewalls['fw'].applied_to.length).to eq(2)
     expect(client.firewalls['fw'].applied_to.map { |res| res[:server][:id] }).to eq([42, 1])
 
     expect(client.actions.count).to eq(2)
     expect(client.firewalls['fw'].actions.count).to eq(2)
-    expect(action.command).to eq('apply_to_resources')
+    expect(actions[0].command).to eq('apply_to_resources')
   end
 
   it '#apply_to_resources, missing apply_to' do
@@ -158,14 +158,14 @@ describe 'Firewall' do
       },
       'type' => 'server'
     }]
-    action = client.firewalls['fw'].remove_from_resources(remove_from: remove_from)
+    actions = client.firewalls['fw'].remove_from_resources(remove_from: remove_from)
 
     expect(client.firewalls['fw'].applied_to.length).to eq(1)
     expect(client.firewalls['fw'].applied_to[0][:server][:id]).to eq(42)
 
     expect(client.actions.count).to eq(3)
     expect(client.firewalls['fw'].actions.count).to eq(3)
-    expect(action.command).to eq('remove_from_resources')
+    expect(actions[0].command).to eq('remove_from_resources')
   end
 
   it '#remove_from_resources, missing remove_from' do

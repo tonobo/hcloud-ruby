@@ -146,6 +146,26 @@ module Hcloud
               @x['protection']['rebuild'] = params[:rebuild] unless params[:rebuild].nil?
               a
             end
+
+            params do
+              optional :type, type: String
+              optional :description, type: String
+              optional :labels, type: Hash
+            end
+            post :create_image do
+              # image will not be stored permanently in this fake, we only return
+              # it immediately on the API call. But subsequent calls to /images/ endpoints
+              # will not return the image
+              a = Action.add(command: 'create_image', status: 'running',
+                             resources: [{ id: @x['id'].to_i, type: 'server' }])
+              image = {
+                'id' => 1,
+                'description' => params[:description],
+                'type' => params[:type],
+                'labels' => params[:labels] || {}
+              }
+              { action: a, image: image }
+            end
           end
 
           params do

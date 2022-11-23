@@ -74,7 +74,10 @@ module Hcloud
 
       def from_response(response, autoload_action: nil)
         attributes = response.resource_attributes
-        action = response.parsed_json[:action] if autoload_action
+
+        action_resp = _try_load_action(response) if autoload_action
+        return action_resp unless attributes || action_resp.nil?
+
         client = response.context.client
         if attributes.is_a?(Array)
           results = attributes.map do |item|
@@ -86,13 +89,34 @@ module Hcloud
           return results
         end
 
-        return Action.new(client, action) if attributes.nil? && action
-        return new(client, attributes).tap { |entity| entity.response = response } if action.nil?
+        if action_resp.nil?
+          return new(client, attributes).tap { |entity| entity.response = response }
+        end
 
         [
-          Action.new(client, action),
+          action_resp,
           new(client, attributes).tap { |entity| entity.response = response }
         ]
+      end
+
+      def _try_load_action(response)
+        # some API endpoints return a list of actions (e.g. firewall action
+        # apply_to_resources), some a single action (e.g. server action
+        # attach_iso)
+        actions = response.parsed_json[:actions]
+        action = response.parsed_json[:action]
+
+        client = response.context.client
+
+        if actions
+          return actions.map do |act|
+            Action.new(client, act)
+          end
+        elsif action
+          return Action.new(client, action)
+        end
+
+        nil
       end
     end
 

@@ -69,7 +69,7 @@ module Hcloud
 
               a = Action.add(command: 'set_rules', status: 'success',
                              resources: [{ id: @x['id'], type: 'firewall' }])
-              { action: a }
+              { actions: [a] }
             end
 
             params do
@@ -82,7 +82,7 @@ module Hcloud
 
               a = Action.add(command: 'apply_to_resources', status: 'success',
                              resources: [{ id: @x['id'], type: 'firewall' }])
-              { action: a }
+              { actions: [a] }
             end
 
             params do
@@ -107,7 +107,7 @@ module Hcloud
 
               a = Action.add(command: 'remove_from_resources', status: 'success',
                              resources: [{ id: @x['id'], type: 'firewall' }])
-              { action: a }
+              { actions: [a] }
             end
           end
 

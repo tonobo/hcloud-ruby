@@ -342,4 +342,12 @@ describe 'Server' do
     expect(client.servers[2].protection).to be_a Hash
     expect(client.servers[2].protection['delete']).to be true
   end
+
+  it '#create_image' do
+    expect(client.servers[2]).to be_a Hcloud::Server
+    action, image = client.servers[2].create_image(description: 'test image', type: 'snapshot')
+    expect(image.description).to eq('test image')
+    expect(image.type).to eq('snapshot')
+    expect(action.command).to eq('create_image')
+  end
 end
