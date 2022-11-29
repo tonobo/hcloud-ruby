@@ -1,5 +1,31 @@
 # Changelog
 
+## [v1.1.0](https://github.com/tonobo/hcloud-ruby/tree/v1.1.0) (2022-11-29)
+
+[Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v1.0.3...v1.1.0)
+
+**Closed issues:**
+
+- Doubles tests failure with seed 50938 [\#46](https://github.com/tonobo/hcloud-ruby/issues/46)
+- \[Feature\] Add missing Resources/Endpoints Q1/2022 [\#24](https://github.com/tonobo/hcloud-ruby/issues/24)
+- \[Dependencies\] Unpin activesupport [\#23](https://github.com/tonobo/hcloud-ruby/issues/23)
+
+**Merged pull requests:**
+
+- handle action array responses for firewall actions [\#48](https://github.com/tonobo/hcloud-ruby/pull/48) ([aufziehvogel](https://github.com/aufziehvogel))
+- fix auto pagination test to always use three pages [\#47](https://github.com/tonobo/hcloud-ruby/pull/47) ([aufziehvogel](https://github.com/aufziehvogel))
+- label support \(create, update, search\) [\#45](https://github.com/tonobo/hcloud-ruby/pull/45) ([aufziehvogel](https://github.com/aufziehvogel))
+- set Github Workflow badge for build status [\#44](https://github.com/tonobo/hcloud-ruby/pull/44) ([aufziehvogel](https://github.com/aufziehvogel))
+- fix rubocop linting warnings [\#42](https://github.com/tonobo/hcloud-ruby/pull/42) ([aufziehvogel](https://github.com/aufziehvogel))
+- Implement firewall support [\#41](https://github.com/tonobo/hcloud-ruby/pull/41) ([aufziehvogel](https://github.com/aufziehvogel))
+- Create unit tests for networks [\#40](https://github.com/tonobo/hcloud-ruby/pull/40) ([aufziehvogel](https://github.com/aufziehvogel))
+- fix typo in exception name ResourceUnavailable [\#39](https://github.com/tonobo/hcloud-ruby/pull/39) ([aufziehvogel](https://github.com/aufziehvogel))
+- Bump rack from 2.2.3 to 2.2.3.1 [\#38](https://github.com/tonobo/hcloud-ruby/pull/38) ([dependabot[bot]](https://github.com/apps/dependabot))
+- dependency: update + unpin activesupport [\#36](https://github.com/tonobo/hcloud-ruby/pull/36) ([RaphaelPour](https://github.com/RaphaelPour))
+- Add MIT license to gemspec [\#34](https://github.com/tonobo/hcloud-ruby/pull/34) ([bastelfreak](https://github.com/bastelfreak))
+- Create LICENSE [\#33](https://github.com/tonobo/hcloud-ruby/pull/33) ([RaphaelPour](https://github.com/RaphaelPour))
+- Update server attributes [\#32](https://github.com/tonobo/hcloud-ruby/pull/32) ([RaphaelPour](https://github.com/RaphaelPour))
+
 ## [v1.0.3](https://github.com/tonobo/hcloud-ruby/tree/v1.0.3) (2022-02-17)
 
 [Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v1.0.2...v1.0.3)
@@ -10,6 +36,7 @@
 
 **Merged pull requests:**
 
+- bump version to v1.0.3 [\#22](https://github.com/tonobo/hcloud-ruby/pull/22) ([RaphaelPour](https://github.com/RaphaelPour))
 - lib: adjust code to work with 3.x ruby versions [\#21](https://github.com/tonobo/hcloud-ruby/pull/21) ([Kjarrigan](https://github.com/Kjarrigan))
 - ci: add github workflow [\#20](https://github.com/tonobo/hcloud-ruby/pull/20) ([RaphaelPour](https://github.com/RaphaelPour))
 
