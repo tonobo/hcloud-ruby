@@ -11,7 +11,7 @@ module Hcloud
 
     has_actions
 
-    def set_rules(rules:) # rubocop:disable Naming/AccessorMethodName
+    def set_rules(rules:)
       prepare_request('actions/set_rules', j: COLLECT_ARGS.call(__method__, binding))
     end
 
