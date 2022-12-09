@@ -14,6 +14,9 @@ module Hcloud
     end
 
     def create(name:, ip_range:, subnets: nil, routes: nil, labels: {})
+      raise Hcloud::Error::InvalidInput, 'no name given' if name.blank?
+      raise Hcloud::Error::InvalidInput, 'no IP range given' if ip_range.blank?
+
       prepare_request(
         'networks', j: COLLECT_ARGS.call(__method__, binding),
                     expected_code: 201
