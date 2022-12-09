@@ -1,41 +1,22 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'support/it_supports_fetch'
+require 'support/it_supports_find_by_id_and_name'
 
-describe 'Location' do
-  before(:each) do
-    Hcloud::Client.connection = Hcloud::Client.new(token: 'secure')
+describe Hcloud::Location, doubles: :location do
+  include_context 'test doubles'
+
+  let :locations do
+    Array.new(Faker::Number.within(range: 20..150)).map { new_location }
   end
-  after(:each) do
-    Hcloud::Client.connection = nil
-  end
+
+  let(:location) { locations.sample }
+
   let :client do
-  end
-  it 'fetchs locations' do
-    expect(Hcloud::Location.count).to eq(2)
+    Hcloud::Client.new(token: 'secure')
   end
 
-  it '#[] -> find by id' do
-    expect(Hcloud::Location[1].id).to eq(1)
-  end
-
-  it '#[] -> find by id, handle nonexistent' do
-    expect(Hcloud::Location[3]).to be nil
-  end
-
-  it '#find -> find by id' do
-    expect(Hcloud::Location.find(1).id).to eq(1)
-  end
-
-  it '#find -> find by id, handle nonexistent' do
-    expect { Hcloud::Location.find(3).id }.to raise_error(Hcloud::Error::NotFound)
-  end
-
-  it '#[] -> filter by name' do
-    expect(Hcloud::Location['fsn1'].name).to eq('fsn1')
-  end
-
-  it '#[] -> filter by name, handle nonexistent' do
-    expect(Hcloud::Location['mooo']).to be nil
-  end
+  include_examples 'it_supports_fetch', described_class
+  include_examples 'it_supports_find_by_id_and_name', described_class
 end

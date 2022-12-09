@@ -6,16 +6,7 @@ RSpec.shared_context 'datacenters doubles' do
       id: Faker::Number.number,
       name: Faker::Internet.slug,
       description: Faker::Lorem.sentence,
-      location: {
-        id: Faker::Number.number,
-        name: Faker::Internet.slug,
-        description: Faker::Lorem.sentence,
-        city: Faker::Address.city,
-        country: Faker::Address.country,
-        latitude: Faker::Address.latitude,
-        longitude: Faker::Address.longitude,
-        network_zone: random_choice('eu-central', 'us-west', 'us-east')
-      },
+      location: new_location,
       server_types: {
         available: random_server_types,
         available_for_migration: random_server_types,
