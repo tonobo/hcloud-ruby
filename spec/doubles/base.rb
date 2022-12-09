@@ -20,7 +20,7 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions servers ssh_keys placement_groups].each do |kind|
+  %w[actions firewalls servers ssh_keys placement_groups].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end
@@ -76,22 +76,30 @@ RSpec.shared_context 'test doubles' do
     end
   end
 
-  def stub_create(resource_name, params)
+  def stub_create(resource_name, params, response_params: nil, action: nil, actions: nil)
     stub("#{resource_name}s", :post) do |req, _info|
       expect(req.options[:method]).to eq(:post)
-      expect(req).to have_body_params(a_hash_including(params.stringify_keys))
+      expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
 
-      {
-        body: { resource_name => send("new_#{resource_name}", params) },
+      resp = {
+        # most resources have the same response and query params (e.g. "name"),
+        # but some parameters have a different name on requests ("apply_to") compared
+        # to the response ("applied_to")
+        body: { resource_name => send("new_#{resource_name}", (response_params || params)) },
         code: 201
       }
+
+      resp[:action] = action unless action.nil?
+      resp[:actions] = actions unless actions.nil?
+
+      resp
     end
   end
 
   def stub_update(resource_name, resource_data, params)
     stub(["#{resource_name}s", resource_data[:id]].join('/'), :put) do |req, _info|
       expect(req.options[:method]).to eq(:put)
-      expect(req).to have_body_params(a_hash_including(params.stringify_keys))
+      expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
 
       res = resource_data.dup
       params.each do |name, val|

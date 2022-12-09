@@ -12,6 +12,8 @@ module Hcloud
     end
 
     def create(name:, rules: [], apply_to: [], labels: {})
+      raise Hcloud::Error::InvalidInput, 'no name given' if name.blank?
+
       prepare_request(
         'firewalls', j: COLLECT_ARGS.call(__method__, binding),
                      expected_code: 201
