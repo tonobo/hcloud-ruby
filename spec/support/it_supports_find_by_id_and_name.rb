@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require 'hcloud/errors'
+
 RSpec.shared_examples 'it_supports_find_by_id_and_name' do |resource|
   source_url = resource.resource_class.name.demodulize.tableize
   sample_resource = source_url.gsub(/s$/, '')
@@ -53,7 +57,7 @@ RSpec.shared_examples 'it_supports_find_by_id_and_name' do |resource|
       it '#[] -> find by id' do
         expect do
           client.send(source_url).find(0)
-        end.to raise Hcloud::Error::NotFound
+        end.to raise_error Hcloud::Error::NotFound
       end
 
       it '#[] -> find by name' do
@@ -71,7 +75,7 @@ RSpec.shared_examples 'it_supports_find_by_id_and_name' do |resource|
       it '#find -> find by id' do
         expect do
           client.send(source_url).find(0)
-        end.to raise Hcloud::Error::NotFound
+        end.to raise_error Hcloud::Error::NotFound
       end
     end
   end

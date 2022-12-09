@@ -20,7 +20,7 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions servers].each do |kind|
+  %w[actions servers placement_groups].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end
@@ -44,12 +44,12 @@ RSpec.shared_context 'test doubles' do
     }
   end
 
+  def fetch_uri_params(request)
+    URI.parse(request.url).query.split('&').map { |pair| pair.split('=') }.to_h
+  end
+
   def page_info(request)
-    opts = URI.parse(request.url)
-              .query
-              .split('&')
-              .map { |pair| pair.split('=') }
-              .to_h
+    opts = fetch_uri_params(request)
     info = {
       page: opts['page']&.to_i || 1,
       per_page: opts['per_page']&.to_i || 25
@@ -66,17 +66,94 @@ RSpec.shared_context 'test doubles' do
     value
   end
 
-  def stub(path)
-    Typhoeus.stub(%r{https://api.hetzner.cloud/v1/#{path}}) do |request|
+  def stub(path, method = nil)
+    options = method.nil? ? {} : { method: method }
+
+    Typhoeus.stub(%r{^https://api\.hetzner\.cloud/v1/#{path}}, options) do |request|
       args = yield(request, page_info(request))
       args[:body] = Oj.dump(args[:body], mode: :compat) if args.key?(:body)
       Typhoeus::Response.new(args)
     end
   end
 
+  def stub_create(resource_name, params)
+    stub("#{resource_name}s", :post) do |req, _info|
+      expect(req.options[:method]).to eq(:post)
+      expect(req).to have_body_params(a_hash_including(params.stringify_keys))
+
+      {
+        body: { resource_name => send("new_#{resource_name}", params) },
+        code: 201
+      }
+    end
+  end
+
+  def stub_update(resource_name, resource_data, params)
+    stub(["#{resource_name}s", resource_data[:id]].join('/'), :put) do |req, _info|
+      expect(req.options[:method]).to eq(:put)
+      expect(req).to have_body_params(a_hash_including(params.stringify_keys))
+
+      res = resource_data.dup
+      params.each do |name, val|
+        res[name] = val
+      end
+
+      {
+        body: { resource_name => res },
+        code: 200
+      }
+    end
+  end
+
+  def stub_delete(resource_name, resource_data)
+    stub(["#{resource_name}s", resource_data[:id]].join('/'), :delete) do |req, _info|
+      # TODO: 200 + resource data is only true for some API endpoints,
+      #       some also respond with 204 and no data
+      expect(req.options[:method]).to eq(:delete)
+
+      {
+        body: { resource_name => resource_data },
+        code: 200
+      }
+    end
+  end
+
+  def stub_item(resource_name, item)
+    stub([resource_name, item[:id]].join('/')) do |_request, _page|
+      {
+        body: {
+          resource_name.to_s.gsub(/s$/, '') => item
+        },
+        code: 200
+      }
+    end
+  end
+
   def stub_collection(key, collection, resource_name: nil)
+    # Stub resource not found for ID=0
+    stub([resource_name || key, 0].join('/')) do
+      { body: { error: { code: :not_found } }, code: 404 }
+    end
+
+    # Stub all individual resources first
+    collection.each do |obj|
+      stub_item((resource_name || key), obj)
+    end
+
     stub(key) do |request, page_info|
       yield(request, page_info) if block_given?
+
+      opts = fetch_uri_params(request)
+      opts.delete('page')
+      opts.delete('per_page')
+
+      if opts.any?
+        collection = collection.select do |obj|
+          opts.map do |field, val|
+            obj[field.to_sym].to_s == val.to_s
+          end.all?
+        end
+      end
       {
         body: {
           (resource_name || key) => collection[page_info.delete(:requested_range)].to_a
