@@ -90,7 +90,7 @@ RSpec.describe Hcloud::Action, doubles: :action do
       expect(request.url).to include('status=running')
     end
     expect(Hcloud::Action.where(status: :running).map(&:id)).to(
-      eq(actions.map { |x| x[:id] }.compact)
+      eq(actions.select { |x| x[:status] == :running }.map { |x| x[:id] }.compact)
     )
   end
 
