@@ -12,6 +12,8 @@ SimpleCov.formatter = SimpleCov::Formatter::Codecov
 
 require_relative './fake_service/base'
 require_relative './doubles/base'
+require_relative './support/typhoeus_ext'
+require_relative './support/matchers'
 
 require 'rspec'
 require 'hcloud'
