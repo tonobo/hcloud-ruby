@@ -6,7 +6,7 @@ require 'support/it_supports_fetch'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
-require 'support/it_supports_labels'
+require 'support/it_supports_labels_on_update'
 
 describe Hcloud::Network, doubles: :network do
   include_context 'test doubles'
@@ -25,7 +25,7 @@ describe Hcloud::Network, doubles: :network do
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class
-  include_examples 'it_supports_labels', described_class, { name: 'moo', ip_range: '10.0.0.0/16' }
+  include_examples 'it_supports_labels_on_update', described_class
 
   context '#create' do
     it 'handle missing name' do
@@ -66,11 +66,14 @@ describe Hcloud::Network, doubles: :network do
             ip_range: '10.0.1.0/24',
             network_zone: 'eu-central',
             type: 'cloud'
-          }]
+          }],
+          labels: { 'key' => 'value' }
         }
-        stub_create(:network, params)
+        expectation = stub_create(:network, params)
 
         key = client.networks.create(**params)
+        expect(expectation.times_called).to eq(1)
+
         expect(key).to be_a described_class
         expect(key.id).to be_a Integer
         expect(key.name).to eq('moo')
@@ -79,6 +82,7 @@ describe Hcloud::Network, doubles: :network do
         expect(key.protection[:delete]).to be_in([true, false])
         expect(key.routes).to eq(params[:routes].map(&:deep_stringify_keys))
         expect(key.subnets).to eq(params[:subnets].map(&:deep_stringify_keys))
+        expect(key.labels).to eq(params[:labels])
       end
     end
 

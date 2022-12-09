@@ -5,7 +5,7 @@ require 'support/it_supports_fetch'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
-require 'support/it_supports_labels'
+require 'support/it_supports_labels_on_update'
 
 SSH_KEY = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILh8GHJkJRgf3wuuUUQYG3UfqtVK56+FEXAOFaNZ659C m@x.com'
 
@@ -28,7 +28,7 @@ describe Hcloud::SSHKey, doubles: :ssh_key do
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class
-  include_examples 'it_supports_labels', described_class, { name: 'moo', public_key: SSH_KEY }
+  include_examples 'it_supports_labels_on_update', described_class
 
   context '#create' do
     it 'handle missing name' do
@@ -50,16 +50,23 @@ describe Hcloud::SSHKey, doubles: :ssh_key do
     end
 
     it 'works' do
-      params = { name: 'moo', public_key: ssh_pub_key }
-      stub_create(:ssh_key, params)
+      params = {
+        name: 'moo',
+        public_key: ssh_pub_key,
+        labels: { 'key' => 'value' }
+      }
+      expectation = stub_create(:ssh_key, params)
 
       key = client.ssh_keys.create(**params)
+      expect(expectation.times_called).to eq(1)
+
       expect(key).to be_a described_class
       expect(key.id).to be_a Integer
       expect(key.name).to eq('moo')
       expect(key.public_key).to eq(ssh_pub_key)
       expect(key.fingerprint).to be_a String
       expect(key.created).to be_a Time
+      expect(key.labels).to eq(params[:labels])
     end
 
     it 'validates uniq name' do

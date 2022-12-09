@@ -6,7 +6,7 @@ require 'support/it_supports_fetch'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
-require 'support/it_supports_labels'
+require 'support/it_supports_labels_on_update'
 
 describe Hcloud::Firewall, doubles: :firewall do
   include_context 'test doubles'
@@ -25,7 +25,7 @@ describe Hcloud::Firewall, doubles: :firewall do
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class
-  include_examples 'it_supports_labels', described_class, { name: 'moo' }
+  include_examples 'it_supports_labels_on_update', described_class
 
   context '#create' do
     it 'handle missing name' do
@@ -37,10 +37,12 @@ describe Hcloud::Firewall, doubles: :firewall do
     context 'works' do
       it 'with required parameters' do
         params = { name: 'moo' }
-        stub_create(:firewall, params, actions: [])
+        expectation = stub_create(:firewall, params, actions: [])
 
         # TODO: client.firewalls should return the actions array, too
         firewall = client.firewalls.create(**params)
+        expect(expectation.times_called).to eq(1)
+
         expect(firewall).to be_a described_class
         expect(firewall.id).to be_a Integer
         expect(firewall.created).to be_a Time

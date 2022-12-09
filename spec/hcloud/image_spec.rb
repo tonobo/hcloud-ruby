@@ -5,7 +5,7 @@ require 'support/it_supports_fetch'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
-require 'support/it_supports_labels'
+require 'support/it_supports_labels_on_update'
 
 describe Hcloud::Image, doubles: :image do
   include_context 'test doubles'
