@@ -20,7 +20,7 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions servers placement_groups].each do |kind|
+  %w[actions servers ssh_keys placement_groups].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end
@@ -159,6 +159,15 @@ RSpec.shared_context 'test doubles' do
           (resource_name || key) => collection[page_info.delete(:requested_range)].to_a
         }.merge(pagination(collection, **page_info)),
         code: 200
+      }
+    end
+  end
+
+  def stub_error(resource, method, error_code, http_code)
+    stub(resource, method) do |_req, _info|
+      {
+        body: { error: { message: '', code: error_code, details: nil } },
+        code: http_code
       }
     end
   end

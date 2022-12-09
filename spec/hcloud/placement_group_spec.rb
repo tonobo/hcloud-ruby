@@ -59,14 +59,7 @@ describe Hcloud::PlacementGroup, doubles: :placement_group do
     end
 
     it 'validates uniq name' do
-      stub(:placement_groups, :post) do |_req, _info|
-        {
-          body: {
-            error: { message: 'name is already used', code: 'uniqueness_error', details: nil }
-          },
-          code: 409
-        }
-      end
+      stub_error(:placement_groups, :post, 'uniqueness_error', 409)
 
       expect { client.placement_groups.create(name: 'moo', type: 'spread') }.to(
         raise_error(Hcloud::Error::UniquenessError)
