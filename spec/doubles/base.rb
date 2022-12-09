@@ -20,7 +20,7 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions firewalls servers ssh_keys placement_groups].each do |kind|
+  %w[actions datacenters firewalls servers ssh_keys placement_groups].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end

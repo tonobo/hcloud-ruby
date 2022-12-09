@@ -1,48 +1,41 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'support/it_supports_fetch'
+require 'support/it_supports_find_by_id_and_name'
 
-describe 'Datacenter' do
+describe Hcloud::Datacenter, doubles: :datacenter do
+  include_context 'test doubles'
+
+  let :datacenters do
+    Array.new(Faker::Number.within(range: 20..150)).map { new_datacenter }
+  end
+
+  let(:datacenter) { datacenters.sample }
+
   let :client do
     Hcloud::Client.new(token: 'secure')
   end
-  it 'fetchs datacenters' do
-    expect(client.datacenters.count).to eq(2)
-  end
 
-  it '#[] -> find by id' do
-    expect(client.datacenters[1].id).to eq(1)
-  end
+  include_examples 'it_supports_fetch', described_class
+  include_examples 'it_supports_find_by_id_and_name', described_class
 
-  it '#[] -> find by id, handle nonexistent' do
-    expect(client.datacenters[3]).to be nil
-  end
+  it '#recommended' do
+    # using skip instead of pending, because due to randomness sometimes
+    # this test will work successfully
+    skip 'currently does not take into account the recommendation from the API'
 
-  it '#find -> find by id' do
-    expect(client.datacenters.find(1).id).to eq(1)
-  end
+    stub(:datacenters) do |_req, _info|
+      {
+        body: {
+          datacenters: datacenters,
+          recommendation: datacenter[:id]
+        },
+        code: 200
+      }
+    end
 
-  it '#find -> find by id, handle nonexistent' do
-    expect { client.datacenters.find(3).id }.to raise_error(Hcloud::Error::NotFound)
-  end
-
-  it '#[] -> filter by name' do
-    expect(client.datacenters['fsn1-dc8'].name).to eq('fsn1-dc8')
-  end
-
-  it '#[] -> filter by name, handle nonexistent' do
-    expect(client.datacenters['fsn1-dc3']).to be nil
-  end
-
-  it '#[] -> filter by name, handle invalid format' do
-    expect { client.datacenters['fsn1dc3'] }.to(
-      raise_error(Hcloud::Error::InvalidInput)
-    )
-  end
-
-  it '#find_by -> filter by name, handle invalid format' do
-    expect { client.datacenters.find_by(name: 'fsn1dc3') }.to(
-      raise_error(Hcloud::Error::InvalidInput)
-    )
+    expect(client.datacenters.recommended).to be_a Hcloud::Datacenter
+    expect(client.datacenters.recommended.id).to eq(datacenter[:id])
   end
 end
