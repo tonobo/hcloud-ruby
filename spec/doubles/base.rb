@@ -179,4 +179,25 @@ RSpec.shared_context 'test doubles' do
       }
     end
   end
+
+  def stub_action(resource, resource_id, action_name)
+    stub("#{resource}/#{resource_id}/actions/#{action_name}", :post) do |req, info|
+      {
+        body: yield(req, info),
+        code: 201
+      }
+    end
+  end
+
+  def build_action_resp(command, status, **kwargs)
+    {
+      id: Faker::Number.number,
+      command: command,
+      status: status,
+      progress: Faker::Number.within(range: 0..100),
+      started: Faker::Time.backward,
+      finished: status == :running ? nil : Faker::Time.backward,
+      error: nil
+    }.merge(kwargs)
+  end
 end
