@@ -123,12 +123,6 @@ describe 'Firewall' do
     expect(actions[0].command).to eq('set_rules')
   end
 
-  it '#set_rules, missing rules' do
-    expect { client.firewalls['fw'].set_rules(rules: nil) }.to(
-      raise_error(Hcloud::Error::InvalidInput)
-    )
-  end
-
   it '#apply_to_resources' do
     apply_to = [{
       'server' => {
