@@ -37,10 +37,15 @@ module Hcloud
     end
 
     def rebuild(image:)
+      raise Hcloud::Error::InvalidInput, 'no image given' if image.blank?
+
       prepare_request('actions/rebuild', j: { image: image }) { |j| j[:root_password] }
     end
 
-    def change_type(server_type:, upgrade_disk: nil)
+    def change_type(server_type:, upgrade_disk:)
+      raise Hcloud::Error::InvalidInput, 'no server_type given' if server_type.blank?
+      raise Hcloud::Error::InvalidInput, 'no upgrade_disk given' if upgrade_disk.nil?
+
       prepare_request('actions/change_type', j: COLLECT_ARGS.call(__method__, binding))
     end
 
@@ -51,14 +56,20 @@ module Hcloud
     end
 
     def attach_iso(iso:)
+      raise Hcloud::Error::InvalidInput, 'no iso given' if iso.blank?
+
       prepare_request('actions/attach_iso', j: { iso: iso })
     end
 
     def attach_to_network(network:, ip: nil, alias_ips: nil)
+      raise Hcloud::Error::InvalidInput, 'no network given' if network.nil?
+
       prepare_request('actions/attach_to_network', j: COLLECT_ARGS.call(__method__, binding))
     end
 
     def detach_from_network(network:)
+      raise Hcloud::Error::InvalidInput, 'no network given' if network.nil?
+
       prepare_request('actions/detach_from_network', j: { network: network })
     end
 
