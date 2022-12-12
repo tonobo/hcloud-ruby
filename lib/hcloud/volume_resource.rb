@@ -12,6 +12,12 @@ module Hcloud
     end
 
     def create(size:, name:, automount: nil, format: nil, location: nil, server: nil, labels: {})
+      raise Hcloud::Error::InvalidInput, 'no name given' if name.blank?
+      raise Hcloud::Error::InvalidInput, 'invalid size given' unless size.to_i >= 10
+      if location.blank? && server.nil?
+        raise Hcloud::Error::InvalidInput, 'location or server must be given'
+      end
+
       prepare_request(
         'volumes', j: COLLECT_ARGS.call(__method__, binding),
                    expected_code: 201

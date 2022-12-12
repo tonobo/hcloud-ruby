@@ -20,7 +20,8 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions datacenters firewalls floating_ips images isos locations networks servers server_types ssh_keys placement_groups].each do |kind|
+  %w[actions datacenters firewalls floating_ips images isos locations
+     networks servers server_types ssh_keys placement_groups volumes].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end
@@ -76,7 +77,9 @@ RSpec.shared_context 'test doubles' do
     end
   end
 
-  def stub_create(resource_name, params, response_params: nil, action: nil, actions: nil)
+  def stub_create(
+    resource_name, params, response_params: nil, action: nil, actions: nil, next_actions: nil
+  )
     stub("#{resource_name}s", :post) do |req, _info|
       expect(req.options[:method]).to eq(:post)
       expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
@@ -89,8 +92,9 @@ RSpec.shared_context 'test doubles' do
         code: 201
       }
 
-      resp[:action] = action unless action.nil?
-      resp[:actions] = actions unless actions.nil?
+      resp[:body][:action] = action unless action.nil?
+      resp[:body][:actions] = actions unless actions.nil?
+      resp[:body][:next_actions] = next_actions unless next_actions.nil?
 
       resp
     end
