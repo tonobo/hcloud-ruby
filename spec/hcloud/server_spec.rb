@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'support/it_supports_fetch'
+require 'support/it_supports_find_by_id_and_name'
+require 'support/it_supports_update'
+require 'support/it_supports_destroy'
+require 'support/it_supports_labels_on_update'
 
 RSpec.describe Hcloud::Server, doubles: :server do
   include_context 'test doubles'
@@ -9,9 +14,17 @@ RSpec.describe Hcloud::Server, doubles: :server do
     Array.new(Faker::Number.within(range: 20..150)).map { new_server }
   end
 
+  let(:server) { servers.sample }
+
   let :volumes do
     Array.new(Faker::Number.within(range: 2..10)).map { new_volume }
   end
+
+  include_examples 'it_supports_fetch', described_class
+  include_examples 'it_supports_find_by_id_and_name', described_class
+  include_examples 'it_supports_update', described_class, { name: 'new_name' }
+  include_examples 'it_supports_destroy', described_class
+  include_examples 'it_supports_labels_on_update', described_class
 
   it 'fetch server' do
     stub_collection :servers, []
