@@ -59,6 +59,9 @@ module Hcloud
   autoload :LoadBalancerType, 'hcloud/load_balancer_type'
   autoload :LoadBalancerTypeResource, 'hcloud/load_balancer_type_resource'
 
+  autoload :LoadBalancer, 'hcloud/load_balancer'
+  autoload :LoadBalancerResource, 'hcloud/load_balancer_resource'
+
   COLLECT_ARGS = proc do |method_name, bind|
     query = bind.receiver.method(method_name).parameters.inject({}) do |hash, (_type, name)|
       hash.merge(name => bind.local_variable_get(name))

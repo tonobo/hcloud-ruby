@@ -68,6 +68,27 @@ module Hcloud
         end
       end
 
+      def has_metrics # rubocop:disable Naming/PredicateName
+        define_method(:metrics) do |**kwargs|
+          raise Hcloud::Error::InvalidInput, 'no type given' if kwargs[:type].blank?
+          raise Hcloud::Error::InvalidInput, 'no start given' if kwargs[:start].blank?
+          raise Hcloud::Error::InvalidInput, 'no end given' if kwargs[:end].blank?
+          if kwargs[:start] > kwargs[:end]
+            raise Hcloud::Error::InvalidInput, 'start time must be before end time'
+          end
+
+          params = {
+            type: kwargs[:type],
+            start: kwargs[:start].iso8601,
+            end: kwargs[:end].iso8601,
+            step: kwargs[:step].to_i
+          }
+          prepare_request('metrics', method: :get, params: params) do |response|
+            response.parsed_json[:metrics].with_indifferent_access
+          end
+        end
+      end
+
       def resource_class
         ancestors.reverse.find { |const| const.include?(Hcloud::EntryLoader) }
       end

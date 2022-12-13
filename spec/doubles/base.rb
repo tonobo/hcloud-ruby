@@ -20,7 +20,8 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions certificates datacenters firewalls floating_ips images isos load_balancer_types
+  %w[actions certificates datacenters firewalls floating_ips images isos
+     load_balancers load_balancer_types
      locations networks servers server_types ssh_keys placement_groups volumes].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
