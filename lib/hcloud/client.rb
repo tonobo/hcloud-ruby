@@ -110,6 +110,10 @@ module Hcloud
       PlacementGroupResource.new(client: self)
     end
 
+    def load_balancer_types
+      LoadBalancerTypeResource.new(client: self)
+    end
+
     class ResourceFuture < Delegator
       def initialize(request) # rubocop:disable Lint/MissingSuper
         @request = request
