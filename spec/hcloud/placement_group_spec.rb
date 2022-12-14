@@ -5,7 +5,7 @@ require 'support/it_supports_fetch'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
-require 'support/it_supports_labels'
+require 'support/it_supports_labels_on_update'
 
 describe Hcloud::PlacementGroup, doubles: :placement_group do
   include_context 'test doubles'
@@ -24,7 +24,7 @@ describe Hcloud::PlacementGroup, doubles: :placement_group do
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class
-  include_examples 'it_supports_labels', described_class, { name: 'moo', type: 'spread' }
+  include_examples 'it_supports_labels_on_update', described_class
 
   context '#create' do
     it 'handle missing name' do
@@ -46,27 +46,27 @@ describe Hcloud::PlacementGroup, doubles: :placement_group do
     end
 
     it 'works' do
-      params = { name: 'moo', type: 'spread' }
-      stub_create(:placement_group, params)
+      params = {
+        name: 'moo',
+        type: 'spread',
+        labels: { 'key' => 'value' }
+      }
+      expectation = stub_create(:placement_group, params)
 
       key = client.placement_groups.create(**params)
+      expect(expectation.times_called).to eq(1)
+
       expect(key).to be_a described_class
       expect(key.id).to be_a Integer
       expect(key.name).to eq('moo')
       expect(key.type).to eq('spread')
       expect(key.servers).to eq([])
       expect(key.created).to be_a Time
+      expect(key.labels).to eq(params[:labels])
     end
 
     it 'validates uniq name' do
-      stub(:placement_groups, :post) do |_req, _info|
-        {
-          body: {
-            error: { message: 'name is already used', code: 'uniqueness_error', details: nil }
-          },
-          code: 409
-        }
-      end
+      stub_error(:placement_groups, :post, 'uniqueness_error', 409)
 
       expect { client.placement_groups.create(name: 'moo', type: 'spread') }.to(
         raise_error(Hcloud::Error::UniquenessError)

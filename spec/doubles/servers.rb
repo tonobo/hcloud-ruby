@@ -147,28 +147,4 @@ RSpec.shared_context 'servers doubles' do
       volumes: []
     }.deep_merge(kwargs)
   end
-
-  def new_volume(**kwargs)
-    {
-      id: Faker::Number.number,
-      name: Faker::Internet.slug(glue: '-'),
-      created: Faker::Time.backward,
-      format: 'xfs',
-      linux_device: '/dev/disk/by-id/scsi-0HC_Volume_1234',
-      location: {
-        city: 'Falkenstein',
-        country: 'DE',
-        description: 'Falkenstein DC Park 1',
-        id: 1,
-        latitude: 50.47612,
-        longitude: 12.370071,
-        name: 'fsn1',
-        network_zone: 'eu-central'
-      },
-      protection: { delete: random_choice(true, false), rebuild: random_choice(true, false) },
-      server: nil,
-      size: Faker::Number.within(range: 25..1000),
-      status: 'available'
-    }.deep_merge(kwargs)
-  end
 end

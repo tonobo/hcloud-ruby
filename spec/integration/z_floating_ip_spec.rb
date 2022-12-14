@@ -82,10 +82,10 @@ describe 'FloatingIP' do
     expect(f.home_location.name).to eq('fsn1')
   end
 
-  it '#create(type: ipv4)' do
+  it '#create(type: ipv4, home_location: nbg1)' do
     a, f = nil
     expect do
-      a, f = client.floating_ips.create(type: 'ipv4')
+      a, f = client.floating_ips.create(type: 'ipv4', home_location: 'nbg1')
     end.not_to raise_error
     expect(a).to be nil
     expect(f).to be_a Hcloud::FloatingIP

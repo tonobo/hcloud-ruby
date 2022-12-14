@@ -20,7 +20,8 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions servers placement_groups].each do |kind|
+  %w[actions datacenters firewalls floating_ips images isos locations
+     networks servers server_types ssh_keys placement_groups volumes].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
   end
@@ -76,22 +77,33 @@ RSpec.shared_context 'test doubles' do
     end
   end
 
-  def stub_create(resource_name, params)
+  def stub_create(
+    resource_name, params, response_params: nil, action: nil, actions: nil, next_actions: nil
+  )
     stub("#{resource_name}s", :post) do |req, _info|
       expect(req.options[:method]).to eq(:post)
-      expect(req).to have_body_params(a_hash_including(params.stringify_keys))
+      expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
 
-      {
-        body: { resource_name => send("new_#{resource_name}", params) },
+      resp = {
+        # most resources have the same response and query params (e.g. "name"),
+        # but some parameters have a different name on requests ("apply_to") compared
+        # to the response ("applied_to")
+        body: { resource_name => send("new_#{resource_name}", (response_params || params)) },
         code: 201
       }
+
+      resp[:body][:action] = action unless action.nil?
+      resp[:body][:actions] = actions unless actions.nil?
+      resp[:body][:next_actions] = next_actions unless next_actions.nil?
+
+      resp
     end
   end
 
   def stub_update(resource_name, resource_data, params)
     stub(["#{resource_name}s", resource_data[:id]].join('/'), :put) do |req, _info|
       expect(req.options[:method]).to eq(:put)
-      expect(req).to have_body_params(a_hash_including(params.stringify_keys))
+      expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
 
       res = resource_data.dup
       params.each do |name, val|
@@ -161,5 +173,35 @@ RSpec.shared_context 'test doubles' do
         code: 200
       }
     end
+  end
+
+  def stub_error(resource, method, error_code, http_code)
+    stub(resource, method) do |_req, _info|
+      {
+        body: { error: { message: '', code: error_code, details: nil } },
+        code: http_code
+      }
+    end
+  end
+
+  def stub_action(resource, resource_id, action_name)
+    stub("#{resource}/#{resource_id}/actions/#{action_name}", :post) do |req, info|
+      {
+        body: yield(req, info),
+        code: 201
+      }
+    end
+  end
+
+  def build_action_resp(command, status, **kwargs)
+    {
+      id: Faker::Number.number,
+      command: command,
+      status: status,
+      progress: Faker::Number.within(range: 0..100),
+      started: Faker::Time.backward,
+      finished: status == :running ? nil : Faker::Time.backward,
+      error: nil
+    }.merge(kwargs)
   end
 end

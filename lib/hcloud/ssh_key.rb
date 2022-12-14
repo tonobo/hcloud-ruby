@@ -6,6 +6,10 @@ module Hcloud
 
     include EntryLoader
 
+    schema(
+      created: :time
+    )
+
     updatable :name
     destructible
   end
