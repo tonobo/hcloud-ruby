@@ -97,6 +97,29 @@ describe Hcloud::Firewall, doubles: :firewall do
         expect(firewall.applied_to).to eq(params[:apply_to].map(&:deep_stringify_keys))
         expect(firewall.labels).to eq(params[:labels])
       end
+
+      it 'with IPv6 ::/0' do
+        # IPv6 global address ::/0 can cause some problems, because if parsed from JSON with
+        # the wrong parser settings it gets interpreted as a Ruby symbol. This results
+        # in the deletion of the first : character.
+        params = {
+          name: 'moo',
+          rules: [{
+            protocol: 'tcp',
+            port: 443,
+            direction: 'in',
+            source_ips: ['::/0']
+          }]
+        }
+        stub_create(
+          :firewall,
+          params,
+          actions: [new_action(:running, command: 'set_firewall_rules')]
+        )
+
+        _actions, firewall = client.firewalls.create(**params)
+        expect(firewall.rules[0][:source_ips]).to eq(['::/0'])
+      end
     end
 
     it 'validates uniq name' do

@@ -16,7 +16,7 @@ RSpec::Matchers.define :have_body_params do |params|
   private
 
   def body_params(request)
-    Oj.load(request.encoded_body)
+    Oj.load(request.encoded_body, mode: :compat)
   end
 end
 

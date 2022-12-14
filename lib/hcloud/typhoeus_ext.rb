@@ -30,7 +30,7 @@ module Hcloud
     def parsed_json
       return {} if code == 204
 
-      @parsed_json ||= Oj.load(body, symbol_keys: true).tap do |json|
+      @parsed_json ||= Oj.load(body, symbol_keys: true, mode: :compat).tap do |json|
         next unless request.hydra
 
         check_for_error(
