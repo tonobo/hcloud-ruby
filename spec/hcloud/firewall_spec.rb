@@ -39,9 +39,10 @@ describe Hcloud::Firewall, doubles: :firewall do
         params = { name: 'moo' }
         expectation = stub_create(:firewall, params, actions: [])
 
-        # TODO: client.firewalls should return the actions array, too
-        firewall = client.firewalls.create(**params)
+        actions, firewall = client.firewalls.create(**params)
         expect(expectation.times_called).to eq(1)
+
+        expect(actions).to all be_a Hcloud::Action
 
         expect(firewall).to be_a described_class
         expect(firewall.id).to be_a Integer
@@ -81,8 +82,9 @@ describe Hcloud::Firewall, doubles: :firewall do
           ]
         )
 
-        # TODO: client.firewalls should return the actions array, too
-        firewall = client.firewalls.create(**params)
+        actions, firewall = client.firewalls.create(**params)
+        expect(actions).to all be_a Hcloud::Action
+
         expect(firewall).to be_a described_class
         expect(firewall.id).to be_a Integer
         expect(firewall.created).to be_a Time

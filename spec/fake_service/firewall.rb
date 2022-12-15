@@ -146,8 +146,19 @@ module Hcloud
             'rules' => params[:rules] || [],
             'labels' => params[:labels] || {}
           }
+
+          actions = []
+          unless params[:rules].to_a.empty?
+            actions << Action.add(command: 'set_rules', status: 'running',
+                                  resources: [{ id: firewall['id'], type: 'firewall' }])
+          end
+          unless params[:apply_to].to_a.empty?
+            actions << Action.add(command: 'apply_to_resources', status: 'running',
+                                  resources: [{ id: firewall['id'], type: 'firewall' }])
+          end
+
           $FIREWALLS['firewalls'] << firewall
-          { firewall: firewall }
+          { actions: actions, firewall: firewall }
         end
 
         params do
