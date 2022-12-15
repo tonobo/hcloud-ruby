@@ -22,6 +22,7 @@ module Hcloud
     destructible
 
     has_actions
+    has_metrics
 
     def enable_rescue(type: 'linux64', ssh_keys: [])
       query = COLLECT_ARGS.call(__method__, binding)
