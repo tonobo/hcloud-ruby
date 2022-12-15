@@ -40,5 +40,11 @@ module Hcloud
 
       prepare_request('actions/delete_route', j: COLLECT_ARGS.call(__method__, binding))
     end
+
+    def change_ip_range(ip_range:)
+      raise Hcloud::Error::InvalidInput, 'no ip_range given' if ip_range.blank?
+
+      prepare_request('actions/change_ip_range', j: COLLECT_ARGS.call(__method__, binding))
+    end
   end
 end

@@ -19,6 +19,8 @@ describe Hcloud::Network, doubles: :network do
     client.networks[network[:id]]
   end
 
+  # TODO: Also this spec could profit from a standardization mechanism for action tests like
+  #       server and load balancer
   context '#add_route' do
     it 'handles missing destination' do
       expect do
@@ -156,6 +158,49 @@ describe Hcloud::Network, doubles: :network do
       expect(expectation.times_called).to eq(1)
       expect(action).to be_a(Hcloud::Action)
       expect(action.resources[0]['id']).to eq(network[:id])
+    end
+  end
+
+  context '#change_ip_range' do
+    it 'handles missing ip_range' do
+      expect do
+        network_obj.change_ip_range(ip_range: nil)
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
+
+    it 'works' do
+      expectation = stub_action(:networks, network[:id], :change_ip_range) do |req, _info|
+        expect(req).to have_body_params(a_hash_including({ 'ip_range' => '10.0.0.0/24' }))
+
+        {
+          action: build_action_resp(
+            :change_ip_range, :running,
+            resources: [{ id: network[:id], type: 'network' }]
+          )
+        }
+      end
+
+      action = network_obj.change_ip_range(ip_range: '10.0.0.0/24')
+      expect(expectation.times_called).to eq(1)
+      expect(action).to be_a(Hcloud::Action)
+      expect(action.resources[0]['id']).to eq(network[:id])
+    end
+  end
+
+  context '#change_protection' do
+    it 'works' do
+      expectation = stub_action(:networks, network[:id], :change_protection) do |_req, _info|
+        {
+          action: build_action_resp(
+            :change_protection, :running,
+            resources: [{ id: network[:id], type: 'network' }]
+          )
+        }
+      end
+
+      action = network_obj.change_protection
+      expect(expectation.times_called).to eq(1)
+      expect(action).to be_a(Hcloud::Action)
     end
   end
 end
