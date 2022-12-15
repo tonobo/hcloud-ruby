@@ -7,6 +7,7 @@ require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
 require 'support/it_supports_labels_on_update'
+require 'support/it_supports_action_fetch'
 
 describe Hcloud::Image, doubles: :image do
   let :images do
@@ -26,6 +27,7 @@ describe Hcloud::Image, doubles: :image do
   include_examples 'it_supports_update', described_class, { description: 'new description' }
   include_examples 'it_supports_destroy', described_class
   include_examples 'it_supports_labels_on_update', described_class
+  include_examples 'it_supports_action_fetch', described_class
 
   it '#to_snapshot' do
     expectation = stub_update(:image, image, { type: 'snapshot' })
