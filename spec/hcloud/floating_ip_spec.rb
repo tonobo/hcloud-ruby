@@ -47,11 +47,13 @@ describe Hcloud::FloatingIP, doubles: :floating_ip do
     it 'works' do
       params = {
         type: 'ipv4',
+        name: 'moo',
         home_location: 'fsn1',
         labels: { 'key' => 'value', 'novalue' => '' }
       }
       response_params = {
         type: params[:type],
+        name: params[:name],
         home_location: floating_ip[:home_location],
         labels: params[:labels]
       }
@@ -64,14 +66,13 @@ describe Hcloud::FloatingIP, doubles: :floating_ip do
       expect(key.id).to be_a Integer
       expect(key.name).to be_a String
       expect(key.type).to eq('ipv4')
+      expect(key.name).to eq('moo')
       expect(key.home_location).to be_a Hcloud::Location
       expect(key.created).to be_a Time
       expect(key.labels).to eq(params[:labels])
     end
 
     it 'validates uniq name' do
-      pending 'Implementation of floating IP does not support name, yet'
-
       stub_error(:floating_ips, :post, 'uniqueness_error', 409)
 
       expect do

@@ -13,7 +13,7 @@ module Hcloud
       end
     end
 
-    def create(type:, server: nil, home_location: nil, description: nil, labels: {})
+    def create(type:, name: nil, server: nil, home_location: nil, description: nil, labels: {})
       raise Hcloud::Error::InvalidInput, 'no type given' if type.blank?
       if server.nil? && home_location.nil?
         raise Hcloud::Error::InvalidInput, 'either server or home_location must be given'
