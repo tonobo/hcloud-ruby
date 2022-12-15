@@ -4,6 +4,9 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Server, doubles: :server do
+  include_context 'test doubles'
+  include_context 'action tests'
+
   let :servers do
     Array.new(Faker::Number.within(range: 20..150)).map { new_server }
   end
@@ -17,23 +20,6 @@ describe Hcloud::Server, doubles: :server do
 
   let :client do
     Hcloud::Client.new(token: 'secure')
-  end
-
-  def test_parameterless_action(action_name, command_name)
-    expectation = stub_action(:servers, server[:id], action_name) do |_req, _info|
-      {
-        action: build_action_resp(
-          command_name, :running,
-          resources: [{ id: server[:id], type: 'server' }]
-        )
-      }
-    end
-
-    action = server_obj.send(action_name)
-    expect(expectation.times_called).to eq(1)
-
-    expect(action).to be_a(Hcloud::Action)
-    expect(action.command).to eq(command_name.to_s)
   end
 
   context '#enable_rescue' do
@@ -151,24 +137,10 @@ describe Hcloud::Server, doubles: :server do
     end
 
     it 'works' do
-      expectation = stub_action(:servers, server[:id], :change_type) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including({ 'server_type' => 'cx11', 'upgrade_disk' => true })
-        )
-
-        {
-          action: build_action_resp(
-            :change_server_type, :running,
-            resources: [{ id: server[:id], type: 'server' }]
-          )
-        }
-      end
-
-      action = server_obj.change_type(server_type: 'cx11', upgrade_disk: true)
-      expect(expectation.times_called).to eq(1)
-
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('change_server_type')
+      test_action(
+        :change_type, :change_server_type,
+        params: { server_type: 'cx11', upgrade_disk: true }
+      )
     end
   end
 
@@ -180,24 +152,7 @@ describe Hcloud::Server, doubles: :server do
     end
 
     it 'works' do
-      expectation = stub_action(:servers, server[:id], :attach_iso) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including({ 'iso' => 'FreeBSD-11.0-RELEASE-amd64-dvd1' })
-        )
-
-        {
-          action: build_action_resp(
-            :attach_iso, :running,
-            resources: [{ id: server[:id], type: 'server' }]
-          )
-        }
-      end
-
-      action = server_obj.attach_iso(iso: 'FreeBSD-11.0-RELEASE-amd64-dvd1')
-      expect(expectation.times_called).to eq(1)
-
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('attach_iso')
+      test_action(:attach_iso, params: { iso: 'FreeBSD-11.0-RELEASE-amd64-dvd1' })
     end
   end
 
@@ -209,24 +164,7 @@ describe Hcloud::Server, doubles: :server do
     end
 
     it 'works' do
-      expectation = stub_action(:servers, server[:id], :attach_to_network) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including({ 'network' => 1, 'ip' => '10.0.0.10' })
-        )
-
-        {
-          action: build_action_resp(
-            :attach_to_network, :running,
-            resources: [{ id: server[:id], type: 'server' }, { id: 1, type: 'network' }]
-          )
-        }
-      end
-
-      action = server_obj.attach_to_network(network: 1, ip: '10.0.0.10')
-      expect(expectation.times_called).to eq(1)
-
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('attach_to_network')
+      test_action(:attach_to_network, params: { network: 1, ip: '10.0.0.10' })
     end
   end
 
@@ -238,24 +176,61 @@ describe Hcloud::Server, doubles: :server do
     end
 
     it 'works' do
-      expectation = stub_action(:servers, server[:id], :detach_from_network) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including({ 'network' => 1 })
-        )
+      test_action(:detach_from_network, params: { network: 1 })
+    end
+  end
 
-        {
-          action: build_action_resp(
-            :detach_from_network, :running,
-            resources: [{ id: server[:id], type: 'server' }, { id: 1, type: 'network' }]
-          )
-        }
-      end
+  context '#add_to_placement_group' do
+    it 'handles missing placement_group' do
+      expect do
+        server_obj.add_to_placement_group(placement_group: nil)
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
 
-      action = server_obj.detach_from_network(network: 1)
-      expect(expectation.times_called).to eq(1)
+    it 'works' do
+      test_action(:add_to_placement_group, params: { placement_group: 42 })
+    end
+  end
 
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('detach_from_network')
+  context '#remove_from_placement_group' do
+    it 'works' do
+      test_action(:remove_from_placement_group)
+    end
+  end
+
+  context '#change_alias_ips' do
+    it 'handles missing alias_ips' do
+      expect do
+        server_obj.change_alias_ips(alias_ips: nil, network: 42)
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
+
+    it 'handles missing network' do
+      expect do
+        server_obj.change_alias_ips(alias_ips: ['10.0.10.2'], network: nil)
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
+
+    it 'works' do
+      test_action(:change_alias_ips, params: { alias_ips: ['10.0.10.2'], network: 42 })
+    end
+  end
+
+  context '#change_dns_ptr' do
+    it 'handles missing dns_ptr' do
+      expect do
+        server_obj.change_dns_ptr(ip: '192.0.2.0', dns_ptr: nil)
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
+
+    it 'handles missing ip' do
+      expect do
+        server_obj.change_dns_ptr(ip: nil, dns_ptr: 'example.com')
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
+
+    it 'works' do
+      test_action(:change_dns_ptr, params: { ip: '192.0.2.0', dns_ptr: 'example.com' })
     end
   end
 
@@ -284,38 +259,38 @@ describe Hcloud::Server, doubles: :server do
   end
 
   it '#enable_backup' do
-    test_parameterless_action(:enable_backup, :enable_backup)
+    test_action(:enable_backup)
   end
 
   it '#disable_backup' do
-    test_parameterless_action(:disable_backup, :disable_backup)
+    test_action(:disable_backup)
   end
 
   it '#poweron' do
-    test_parameterless_action(:poweron, :start_server)
+    test_action(:poweron, :start_server)
   end
 
   it '#poweroff' do
-    test_parameterless_action(:poweroff, :stop_server)
+    test_action(:poweroff, :stop_server)
   end
 
   it '#shutdown' do
-    test_parameterless_action(:shutdown, :shutdown_server)
+    test_action(:shutdown, :shutdown_server)
   end
 
   it '#reboot' do
-    test_parameterless_action(:reboot, :reboot_server)
+    test_action(:reboot, :reboot_server)
   end
 
   it '#reset' do
-    test_parameterless_action(:reset, :reset_server)
+    test_action(:reset, :reset_server)
   end
 
   it '#disable_rescue' do
-    test_parameterless_action(:disable_rescue, :disable_rescue)
+    test_action(:disable_rescue)
   end
 
   it '#detach_iso' do
-    test_parameterless_action(:detach_iso, :detach_iso)
+    test_action(:detach_iso)
   end
 end
