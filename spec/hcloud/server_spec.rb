@@ -38,6 +38,21 @@ RSpec.describe Hcloud::Server, doubles: :server do
   it 'has typed attributes' do
     stub_item(:servers, server)
 
+    # Several resources need to be stubbed, because server only includes the "id"
+    # and we create a future for that. When we try to access the future, we try to query its data
+    # from the API.
+    server[:public_net][:floating_ips].each do |floating_ip_id|
+      stub_item(:floating_ips, new_floating_ip(id: floating_ip_id))
+    end
+    server[:public_net][:firewalls].map { |firewall| firewall[:id] }.each do |firewall_id|
+      stub_item(:firewalls, new_firewall(id: firewall_id))
+    end
+    server[:load_balancers].each do |load_balancer_id|
+      stub_item(:load_balancers, new_load_balancer(id: load_balancer_id))
+    end
+    stub_item(:primary_ips, new_primary_ip(**server[:public_net][:ipv4]))
+    stub_item(:primary_ips, new_primary_ip(**server[:public_net][:ipv6]))
+
     obj = client.servers[server[:id]]
 
     expect(obj.created).to be_a Time
@@ -47,6 +62,24 @@ RSpec.describe Hcloud::Server, doubles: :server do
     expect(obj.placement_group).to be_a Hcloud::PlacementGroup unless obj.placement_group.nil?
     expect(obj.server_type).to be_a Hcloud::ServerType
     expect(obj.volumes).to all be_a Hcloud::Volume
+
+    # Floating IP is a future object which gets lazily loaded when required
+    expect(obj.public_net[:floating_ips]).to all be_a Hcloud::Future
+    expect(obj.public_net[:floating_ips].map(&:__getobj__)).to all be_a Hcloud::FloatingIP
+
+    expect(obj.load_balancers).to all be_a Hcloud::Future
+    expect(obj.load_balancers.map(&:__getobj__)).to all be_a Hcloud::LoadBalancer
+
+    expect(obj.public_net[:ipv4]).to be_a Hcloud::Future
+    expect(obj.public_net[:ipv4].__getobj__).to be_a Hcloud::PrimaryIP
+    expect(obj.public_net[:ipv6]).to be_a Hcloud::Future
+    expect(obj.public_net[:ipv6].__getobj__).to be_a Hcloud::PrimaryIP
+
+    # TODO: "firewalls" has a bit an inconvenient structure for us, I guess we do NOT want to
+    #       have the loaded Firewall under the "id" key?
+    firewalls = obj.public_net[:firewalls].map { |firewall| firewall[:id] }
+    expect(firewalls).to all be_a Hcloud::Future
+    expect(firewalls.map(&:__getobj__)).to all be_a Hcloud::Firewall
   end
 
   it 'create new server, handle missing name' do
@@ -163,6 +196,10 @@ RSpec.describe Hcloud::Server, doubles: :server do
     end
 
     it 'with public_net' do
+      # need to stub primary IPs, because public net info will fetch it
+      stub_item(:primary_ips, new_primary_ip(id: 1, ip: '192.0.2.0'))
+      stub_item(:primary_ips, new_primary_ip(id: 2, ip: '2001:db8::10'))
+
       server = test_create_with_attribute(
         {
           public_net: {
@@ -175,11 +212,13 @@ RSpec.describe Hcloud::Server, doubles: :server do
         {
           public_net: {
             ipv4: {
+              id: 1,
               blocked: false,
               dns_ptr: 'server01.example.com',
               ip: '192.0.2.0'
             },
             ipv6: {
+              id: 2,
               blocked: false,
               dns_ptr: 'server01.example.com',
               ip: '2001:db8::10'
@@ -187,8 +226,8 @@ RSpec.describe Hcloud::Server, doubles: :server do
           }
         }
       )
-      expect(server.public_net.dig(:ipv4, :ip)).to eq('192.0.2.0')
-      expect(server.public_net.dig(:ipv6, :ip)).to eq('2001:db8::10')
+      expect(server.public_net[:ipv4].ip).to eq('192.0.2.0')
+      expect(server.public_net[:ipv6].ip).to eq('2001:db8::10')
     end
 
     it 'with volumes' do

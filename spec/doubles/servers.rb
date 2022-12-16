@@ -129,6 +129,7 @@ RSpec.shared_context 'servers doubles' do
       included_traffic: Faker::Number.number,
       protection: { delete: random_choice(true, false), rebuild: random_choice(true, false) },
       placement_group: random_choice(nil, new_placement_group),
+      load_balancers: Array.new(Faker::Number.within(range: 0..3)).map { Faker::Number.number },
       labels: {},
       volumes: Array.new(Faker::Number.within(range: 0..2)).map { new_volume }
     }.deep_merge(kwargs)
@@ -139,11 +140,13 @@ RSpec.shared_context 'servers doubles' do
   def new_server_public_net
     {
       ipv4: {
+        id: Faker::Number.number,
         ip: Faker::Internet.ip_v4_address,
         blocked: random_choice(true, false),
         dns_ptr: Faker::Internet.domain_name
       },
       ipv6: {
+        id: Faker::Number.number,
         ip: Faker::Internet.ip_v6_cidr,
         blocked: random_choice(true, false),
         dns_ptr: random_choice(
@@ -151,7 +154,10 @@ RSpec.shared_context 'servers doubles' do
           [{ ip: Faker::Internet.ip_v6_address, dns_ptr: Faker::Internet.domain_name }]
         )
       },
-      floating_ips: []
+      firewalls: Array.new(Faker::Number.within(range: 0..5)).map do
+        { id: Faker::Number.number, status: 'applied' }
+      end,
+      floating_ips: Array.new(Faker::Number.within(range: 0..3)).map { Faker::Number.number }
     }
   end
 end

@@ -12,8 +12,19 @@ module Hcloud
       datacenter: Datacenter,
       image: Image,
       iso: Iso,
+      load_balancers: [LoadBalancer],
       placement_group: PlacementGroup,
       private_net: [Network],
+      public_net: {
+        ipv4: lambda do |data, client|
+          Future.new(client, PrimaryIP, data[:id]) if data.to_h[:id].is_a?(Integer)
+        end,
+        ipv6: lambda do |data, client|
+          Future.new(client, PrimaryIP, data[:id]) if data.to_h[:id].is_a?(Integer)
+        end,
+        floating_ips: [FloatingIP],
+        firewalls: [{ id: Firewall }]
+      },
       volumes: [Volume]
     )
 
