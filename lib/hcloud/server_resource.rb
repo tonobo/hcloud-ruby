@@ -12,9 +12,13 @@ module Hcloud
                location: nil,
                start_after_create: nil,
                ssh_keys: [],
+               public_net: nil,
+               firewalls: nil,
                networks: [],
                placement_group: nil,
                user_data: nil,
+               volumes: nil,
+               automount: nil,
                labels: {})
       prepare_request('servers', j: COLLECT_ARGS.call(__method__, binding),
                                  expected_code: 201) do |response|

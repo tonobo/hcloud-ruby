@@ -113,17 +113,17 @@ RSpec.describe Hcloud::Server, doubles: :server do
       expect(server.private_net).to_not be_empty
     end
 
-    it 'with placement_group' do
-      params = { name: 'moo', server_type: 'cx11', image: 1, placement_group: 42 }
+    def test_create_with_attribute(attribute, response_attribute)
+      params = { name: 'moo', server_type: 'cx11', image: 1 }.merge(attribute)
 
       expectation = stub('servers', :post) do |request, _page_info|
-        expect(request).to have_body_params(a_hash_including({ 'placement_group' => 42 }))
+        expect(request).to have_body_params(a_hash_including(attribute.deep_stringify_keys))
 
         {
           body: {
             # make sure that even though we create a new random server, the placement group
             # has the right ID in the response
-            server: new_server(placement_group: { id: 42 }),
+            server: new_server(**response_attribute),
             action: new_action.merge(action_status(:running)),
             root_password: :moo
           },
@@ -133,7 +133,71 @@ RSpec.describe Hcloud::Server, doubles: :server do
 
       _action, server, _pass, _next_actions = client.servers.create(**params)
       expect(expectation.times_called).to eq(1)
+
+      server
+    end
+
+    it 'with automount' do
+      # automount only modifies the behaviour of volumes in this create request,
+      # it is not a server attribute and thus is not contained in the returned server JSON
+      test_create_with_attribute(
+        { automount: true, volumes: [42] },
+        { volumes: [new_volume({ id: 42 })] }
+      )
+    end
+
+    it 'with firewalls' do
+      server = test_create_with_attribute(
+        { firewalls: [{ firewall: 42 }] },
+        { public_net: { firewalls: [{ id: 42, status: 'applied' }] } }
+      )
+      expect(server.public_net[:firewalls].count).to eq(1)
+    end
+
+    it 'with placement_group' do
+      server = test_create_with_attribute(
+        { placement_group: 42 },
+        { placement_group: new_placement_group({ id: 42 }) }
+      )
       expect(server.placement_group.id).to eq(42)
+    end
+
+    it 'with public_net' do
+      server = test_create_with_attribute(
+        {
+          public_net: {
+            enable_ipv4: true,
+            enable_ipv6: true,
+            ipv4: 1,
+            ipv6: 2
+          }
+        },
+        {
+          public_net: {
+            ipv4: {
+              blocked: false,
+              dns_ptr: 'server01.example.com',
+              ip: '192.0.2.0'
+            },
+            ipv6: {
+              blocked: false,
+              dns_ptr: 'server01.example.com',
+              ip: '2001:db8::10'
+            }
+          }
+        }
+      )
+      expect(server.public_net.dig(:ipv4, :ip)).to eq('192.0.2.0')
+      expect(server.public_net.dig(:ipv6, :ip)).to eq('2001:db8::10')
+    end
+
+    it 'with volumes' do
+      server = test_create_with_attribute(
+        { volumes: [42, 43] },
+        { volumes: [new_volume({ id: 42 }), new_volume({ id: 43 })] }
+      )
+      expect(server.volumes.count).to eq(2)
+      expect(server.volumes.map(&:id)).to contain_exactly(42, 43)
     end
   end
 
