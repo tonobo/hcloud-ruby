@@ -86,6 +86,10 @@ module Hcloud
       SSHKeyResource.new(client: self)
     end
 
+    def certificates
+      CertificateResource.new(client: self)
+    end
+
     def floating_ips
       FloatingIPResource.new(client: self)
     end
