@@ -12,6 +12,9 @@ module Hcloud
   autoload :AbstractResource, 'hcloud/abstract_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
 
+  autoload :Pricing, 'hcloud/pricing'
+  autoload :PricingResource, 'hcloud/pricing_resource'
+
   autoload :Server, 'hcloud/server'
   autoload :ServerResource, 'hcloud/server_resource'
 
