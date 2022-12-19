@@ -3,10 +3,12 @@
 require 'active_support/all'
 require 'spec_helper'
 require 'support/it_supports_fetch'
+require 'support/it_supports_search'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
 require 'support/it_supports_labels_on_update'
+require 'support/it_supports_action_fetch'
 
 describe Hcloud::Network, doubles: :network do
   include_context 'test doubles'
@@ -22,10 +24,12 @@ describe Hcloud::Network, doubles: :network do
   end
 
   include_examples 'it_supports_fetch', described_class
+  include_examples 'it_supports_search', described_class, %i[name label_selector]
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class
   include_examples 'it_supports_labels_on_update', described_class
+  include_examples 'it_supports_action_fetch', described_class
 
   context '#create' do
     it 'handle missing name' do

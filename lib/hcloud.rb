@@ -24,6 +24,9 @@ module Hcloud
   autoload :SSHKey, 'hcloud/ssh_key'
   autoload :SSHKeyResource, 'hcloud/ssh_key_resource'
 
+  autoload :Certificate, 'hcloud/certificate'
+  autoload :CertificateResource, 'hcloud/certificate_resource'
+
   autoload :Datacenter, 'hcloud/datacenter'
   autoload :DatacenterResource, 'hcloud/datacenter_resource'
 

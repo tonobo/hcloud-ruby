@@ -20,7 +20,7 @@ RSpec.shared_context 'test doubles' do
     Hcloud::Client.connection = nil
   end
 
-  %w[actions datacenters firewalls floating_ips images isos locations
+  %w[actions certificates datacenters firewalls floating_ips images isos locations
      networks servers server_types ssh_keys placement_groups volumes].each do |kind|
     require_relative "./#{kind}"
     include_context "#{kind} doubles"
@@ -70,7 +70,7 @@ RSpec.shared_context 'test doubles' do
   def stub(path, method = nil)
     options = method.nil? ? {} : { method: method }
 
-    Typhoeus.stub(%r{^https://api\.hetzner\.cloud/v1/#{path}}, options) do |request|
+    Typhoeus.stub(%r{^https://api\.hetzner\.cloud/v1/#{path}(\?.*)?$}, options) do |request|
       args = yield(request, page_info(request))
       args[:body] = Oj.dump(args[:body], mode: :compat) if args.key?(:body)
       Typhoeus::Response.new(args)
@@ -130,7 +130,9 @@ RSpec.shared_context 'test doubles' do
     end
   end
 
-  def stub_item(resource_name, item)
+  def stub_item(key, item, resource_name: nil)
+    resource_name ||= key
+
     stub([resource_name, item[:id]].join('/')) do |_request, _page|
       {
         body: {

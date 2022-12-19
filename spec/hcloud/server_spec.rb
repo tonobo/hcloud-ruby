@@ -2,10 +2,12 @@
 
 require 'spec_helper'
 require 'support/it_supports_fetch'
+require 'support/it_supports_search'
 require 'support/it_supports_find_by_id_and_name'
 require 'support/it_supports_update'
 require 'support/it_supports_destroy'
 require 'support/it_supports_labels_on_update'
+require 'support/it_supports_action_fetch'
 
 RSpec.describe Hcloud::Server, doubles: :server do
   include_context 'test doubles'
@@ -21,10 +23,12 @@ RSpec.describe Hcloud::Server, doubles: :server do
   end
 
   include_examples 'it_supports_fetch', described_class
+  include_examples 'it_supports_search', described_class, %i[name label_selector status]
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class
   include_examples 'it_supports_labels_on_update', described_class
+  include_examples 'it_supports_action_fetch', described_class
 
   it 'fetch server' do
     stub_collection :servers, []
@@ -89,7 +93,7 @@ RSpec.describe Hcloud::Server, doubles: :server do
   it 'get server with volumes' do
     related_action = new_action.merge(action_status(:running))
     stub_collection("servers/#{servers[1][:id]}/actions", [related_action], resource_name: :actions)
-    stub('servers') do |_request, _page_info|
+    stub('servers', :post) do |_request, _page_info|
       {
         body: { server: servers[1], action: related_action, root_password: :moo },
         code: 201
@@ -111,8 +115,8 @@ RSpec.describe Hcloud::Server, doubles: :server do
     servers[1][:volumes] = volumes.map { |volume| volume[:id] }
 
     # reload server with volume
+    stub_item(:servers, servers[1])
     server = client.servers.find(servers[1][:id])
-    p server.client
     expect(server.volumes).to be_a Array
     expect(server.volumes).to_not be_empty
 

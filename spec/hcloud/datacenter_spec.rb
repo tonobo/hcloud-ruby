@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'support/it_supports_fetch'
+require 'support/it_supports_search'
 require 'support/it_supports_find_by_id_and_name'
 
 describe Hcloud::Datacenter, doubles: :datacenter do
@@ -18,6 +19,7 @@ describe Hcloud::Datacenter, doubles: :datacenter do
   end
 
   include_examples 'it_supports_fetch', described_class
+  include_examples 'it_supports_search', described_class, %i[name]
   include_examples 'it_supports_find_by_id_and_name', described_class
 
   it '#recommended' do
