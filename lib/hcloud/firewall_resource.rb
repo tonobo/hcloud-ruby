@@ -18,7 +18,12 @@ module Hcloud
         'firewalls', j: COLLECT_ARGS.call(__method__, binding),
                      expected_code: 201
       ) do |response|
-        Firewall.new(client, response.parsed_json[:firewall])
+        [
+          response.parsed_json[:actions].map do |action|
+            Action.new(client, action)
+          end,
+          Firewall.new(client, response.parsed_json[:firewall])
+        ]
       end
     end
   end

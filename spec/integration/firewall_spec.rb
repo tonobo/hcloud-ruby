@@ -18,7 +18,8 @@ describe 'Firewall' do
   end
 
   it 'create new firewall, only name' do
-    firewall = client.firewalls.create(name: 'fw')
+    actions, firewall = client.firewalls.create(name: 'fw')
+    expect(actions).to all be_a Hcloud::Action
     expect(firewall).to be_a Hcloud::Firewall
     expect(firewall.id).to be_a Integer
     expect(firewall.name).to eq('fw')
@@ -44,12 +45,13 @@ describe 'Firewall' do
       },
       'type' => 'server'
     }]
-    firewall = client.firewalls.create(
+    actions, firewall = client.firewalls.create(
       name: 'fw-rules',
       rules: rules,
       apply_to: apply_to,
       labels: { 'source' => 'unittest' }
     )
+    expect(actions).to all be_a Hcloud::Action
     expect(firewall).to be_a Hcloud::Firewall
     expect(firewall.id).to be_a Integer
     expect(firewall.name).to eq('fw-rules')
@@ -109,7 +111,11 @@ describe 'Firewall' do
       'direction' => 'in',
       'description' => 'FTP access'
     }]
-    actions = client.firewalls['fw'].set_rules(rules: rules)
+
+    expect do
+      actions = client.firewalls['fw'].set_rules(rules: rules)
+      expect(actions[0].command).to eq('set_rules')
+    end.to change { client.actions.count }.by(1)
 
     expect(client.firewalls['fw'].rules.length).to eq(1)
     expect(client.firewalls['fw'].rules[0][:protocol]).to eq('tcp')
@@ -118,9 +124,7 @@ describe 'Firewall' do
     expect(client.firewalls['fw'].rules[0][:direction]).to eq('in')
     expect(client.firewalls['fw'].rules[0][:description]).to eq('FTP access')
 
-    expect(client.actions.count).to eq(1)
     expect(client.firewalls['fw'].actions.count).to eq(1)
-    expect(actions[0].command).to eq('set_rules')
   end
 
   it '#apply_to_resources' do
@@ -135,14 +139,15 @@ describe 'Firewall' do
       },
       'type' => 'server'
     }]
-    actions = client.firewalls['fw'].apply_to_resources(apply_to: apply_to)
+
+    expect do
+      actions = client.firewalls['fw'].apply_to_resources(apply_to: apply_to)
+      expect(actions[0].command).to eq('apply_to_resources')
+    end.to change { client.actions.count }.by(1)
 
     expect(client.firewalls['fw'].applied_to.length).to eq(2)
     expect(client.firewalls['fw'].applied_to.map { |res| res[:server][:id] }).to eq([42, 1])
-
-    expect(client.actions.count).to eq(2)
     expect(client.firewalls['fw'].actions.count).to eq(2)
-    expect(actions[0].command).to eq('apply_to_resources')
   end
 
   it '#apply_to_resources, missing apply_to' do
@@ -158,14 +163,15 @@ describe 'Firewall' do
       },
       'type' => 'server'
     }]
-    actions = client.firewalls['fw'].remove_from_resources(remove_from: remove_from)
+
+    expect do
+      actions = client.firewalls['fw'].remove_from_resources(remove_from: remove_from)
+      expect(actions[0].command).to eq('remove_from_resources')
+    end.to change { client.actions.count }.by(1)
 
     expect(client.firewalls['fw'].applied_to.length).to eq(1)
     expect(client.firewalls['fw'].applied_to[0][:server][:id]).to eq(42)
-
-    expect(client.actions.count).to eq(3)
     expect(client.firewalls['fw'].actions.count).to eq(3)
-    expect(actions[0].command).to eq('remove_from_resources')
   end
 
   it '#remove_from_resources, missing remove_from' do
