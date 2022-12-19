@@ -6,8 +6,6 @@ require 'support/it_supports_search'
 require 'support/it_supports_find_by_id_and_name'
 
 describe Hcloud::ServerType, doubles: :server_type do
-  include_context 'test doubles'
-
   let :server_types do
     Array.new(Faker::Number.within(range: 20..150)).map { new_server_type }
   end

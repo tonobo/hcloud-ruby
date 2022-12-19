@@ -4,7 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::PrimaryIP, doubles: :primary_ip do
-  include_context 'test doubles'
   include_context 'action tests'
 
   let :primary_ips do

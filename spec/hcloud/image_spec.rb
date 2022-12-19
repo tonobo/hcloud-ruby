@@ -9,8 +9,6 @@ require 'support/it_supports_destroy'
 require 'support/it_supports_labels_on_update'
 
 describe Hcloud::Image, doubles: :image do
-  include_context 'test doubles'
-
   let :images do
     Array.new(Faker::Number.within(range: 20..150)).map { new_image }
   end

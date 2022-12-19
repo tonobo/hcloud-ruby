@@ -4,8 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Server, doubles: :server do
-  include_context 'test doubles'
-
   let :servers do
     Array.new(Faker::Number.within(range: 20..150)).map { new_server }
   end

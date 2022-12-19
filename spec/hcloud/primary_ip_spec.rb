@@ -11,8 +11,6 @@ require 'support/it_supports_labels_on_update'
 require 'support/it_supports_action_fetch'
 
 describe Hcloud::PrimaryIP, doubles: :primary_ip do
-  include_context 'test doubles'
-
   let :primary_ips do
     Array.new(Faker::Number.within(range: 20..150)).map { new_primary_ip }
   end

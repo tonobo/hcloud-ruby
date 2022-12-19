@@ -9,8 +9,6 @@ require 'support/it_supports_destroy'
 require 'support/it_supports_labels_on_update'
 
 describe Hcloud::PlacementGroup, doubles: :placement_group do
-  include_context 'test doubles'
-
   let :placement_groups do
     Array.new(Faker::Number.within(range: 20..150)).map { new_placement_group }
   end

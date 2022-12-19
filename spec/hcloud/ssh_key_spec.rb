@@ -11,8 +11,6 @@ require 'support/it_supports_labels_on_update'
 SSH_KEY = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILh8GHJkJRgf3wuuUUQYG3UfqtVK56+FEXAOFaNZ659C m@x.com'
 
 describe Hcloud::SSHKey, doubles: :ssh_key do
-  include_context 'test doubles'
-
   let :ssh_keys do
     Array.new(Faker::Number.within(range: 20..150)).map { new_ssh_key }
   end

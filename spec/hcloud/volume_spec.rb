@@ -11,8 +11,6 @@ require 'support/it_supports_labels_on_update'
 require 'support/it_supports_action_fetch'
 
 describe Hcloud::Volume, doubles: :volume do
-  include_context 'test doubles'
-
   let :volumes do
     Array.new(Faker::Number.within(range: 20..150)).map { new_volume }
   end

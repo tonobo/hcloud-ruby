@@ -4,7 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::LoadBalancer, doubles: :load_balancer do
-  include_context 'test doubles'
   include_context 'action tests'
 
   let :load_balancers do
