@@ -4,6 +4,9 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Firewall, doubles: :firewall do
+  include_context 'test doubles'
+  include_context 'action tests'
+
   let :firewalls do
     Array.new(Faker::Number.within(range: 20..150)).map { new_firewall }
   end
@@ -49,25 +52,12 @@ describe Hcloud::Firewall, doubles: :firewall do
         { 'server' => { 'id' => 42 }, 'type' => 'server' },
         { 'server' => { 'id' => 1 }, 'type' => 'server' }
       ]
-      stub_action(:firewalls, firewall[:id], :apply_to_resources) do |_req, _info|
-        {
-          actions: [
-            build_action_resp(
-              :apply_firewall, :running,
-              resources: [{ id: 42, type: 'server' }, { id: firewall[:id], type: 'firewall' }]
-            ),
-            build_action_resp(
-              :apply_firewall, :running,
-              resources: [{ id: 1, type: 'server' }, { id: firewall[:id], type: 'firewall' }]
-            )
-          ]
-        }
-      end
-
-      actions = firewall_obj.apply_to_resources(apply_to: apply_to)
-      expect(actions.length).to eq(2)
-      expect(actions[0]).to be_a(Hcloud::Action)
-      expect(actions_resource_ids(actions)).to include(1, 42, firewall[:id])
+      test_action(
+        :apply_to_resources,
+        :apply_firewall,
+        params: { apply_to: apply_to },
+        additional_resources: %i[server]
+      )
     end
   end
 
@@ -98,25 +88,12 @@ describe Hcloud::Firewall, doubles: :firewall do
         { 'server' => { 'id' => 42 }, 'type' => 'server' },
         { 'server' => { 'id' => 1 }, 'type' => 'server' }
       ]
-      stub_action(:firewalls, firewall[:id], :remove_from_resources) do |_req, _info|
-        {
-          actions: [
-            build_action_resp(
-              :remove_firewall, :running,
-              resources: [{ id: 42, type: 'server' }, { id: firewall[:id], type: 'firewall' }]
-            ),
-            build_action_resp(
-              :remove_firewall, :running,
-              resources: [{ id: 1, type: 'server' }, { id: firewall[:id], type: 'firewall' }]
-            )
-          ]
-        }
-      end
-
-      actions = firewall_obj.remove_from_resources(remove_from: remove_from)
-      expect(actions.length).to eq(2)
-      expect(actions[0]).to be_a(Hcloud::Action)
-      expect(actions_resource_ids(actions)).to include(1, 42, firewall[:id])
+      test_action(
+        :remove_from_resources,
+        :remove_firewall,
+        params: { remove_from: remove_from },
+        additional_resources: %i[server]
+      )
     end
   end
 
@@ -146,24 +123,12 @@ describe Hcloud::Firewall, doubles: :firewall do
       rules = [
         { protocol: 'tcp', port: 80, direction: 'in', source_ips: '0.0.0.0/0' }
       ]
-      expectation = stub_action(:firewalls, firewall[:id], :set_rules) do |req, _info|
-        expect(req).to have_body_params(a_hash_including({ 'rules' => rules }.deep_stringify_keys))
-
-        {
-          actions: [
-            build_action_resp(
-              :set_firewall_rules, :running,
-              resources: [{ id: firewall[:id], type: 'firewall' }]
-            )
-          ]
-        }
-      end
-
-      actions = firewall_obj.set_rules(rules: rules)
-      expect(actions.length).to eq(1)
-      expect(actions[0]).to be_a(Hcloud::Action)
-      expect(actions_resource_ids(actions)).to eq([firewall[:id]])
-      expect(expectation.times_called).to eq(1)
+      test_action(
+        :set_rules,
+        :set_firewall_rules,
+        params: { rules: rules },
+        additional_resources: %i[server]
+      )
     end
   end
 end

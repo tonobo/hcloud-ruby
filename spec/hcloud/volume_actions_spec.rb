@@ -4,6 +4,9 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Volume, doubles: :volume do
+  include_context 'test doubles'
+  include_context 'action tests'
+
   let :volumes do
     Array.new(Faker::Number.within(range: 20..150)).map { new_volume }
   end
@@ -21,22 +24,7 @@ describe Hcloud::Volume, doubles: :volume do
 
   context '#change_protection' do
     it 'works' do
-      expectation = stub_action(:volumes, volume[:id], :change_protection) do |req, _info|
-        expect(req).to have_body_params(a_hash_including({ 'delete' => true }))
-
-        {
-          action: build_action_resp(
-            :change_protection, :success,
-            resources: [{ id: volume[:id], type: 'volume' }]
-          )
-        }
-      end
-
-      action = volume_obj.change_protection(delete: true)
-      expect(expectation.times_called).to eq(1)
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('change_protection')
-      expect(action.resources[0]['id']).to eq(volume[:id])
+      test_action(:change_protection, params: { delete: true })
     end
   end
 
@@ -48,45 +36,22 @@ describe Hcloud::Volume, doubles: :volume do
     end
 
     it 'works' do
-      expectation = stub_action(:volumes, volume[:id], :attach) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including(
-            { 'server' => 42, 'automount' => true }
-          )
-        )
-
-        {
-          action: build_action_resp(
-            :attach_volume, :success,
-            resources: [{ id: volume[:id], type: 'volume' }, { id: 42, type: 'server' }]
-          )
-        }
-      end
-
-      action = volume_obj.attach(server: 42, automount: true)
-      expect(expectation.times_called).to eq(1)
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('attach_volume')
-      expect(action.resources.map { |res| res['id'] }).to include(42, volume[:id])
+      test_action(
+        :attach,
+        :attach_volume,
+        params: { server: 42, automount: true },
+        additional_resources: %i[server]
+      )
     end
   end
 
   context '#detach' do
     it 'works' do
-      expectation = stub_action(:volumes, volume[:id], :detach) do |_req, _info|
-        {
-          action: build_action_resp(
-            :detach_volume, :success,
-            resources: [{ id: 42, type: 'server' }]
-          )
-        }
-      end
-
-      action = volume_obj.detach
-      expect(expectation.times_called).to eq(1)
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('detach_volume')
-      expect(action.resources[0]['id']).to eq(42)
+      test_action(
+        :detach,
+        :detach_volume,
+        additional_resources: %i[server]
+      )
     end
   end
 
@@ -107,22 +72,7 @@ describe Hcloud::Volume, doubles: :volume do
       # make sure the new size is larger than old size
       new_size = volume[:size] + 10
 
-      expectation = stub_action(:volumes, volume[:id], :resize) do |req, _info|
-        expect(req).to have_body_params(a_hash_including({ 'size' => new_size }))
-
-        {
-          action: build_action_resp(
-            :resize_volume, :success,
-            resources: [{ id: volume[:id], type: 'volume' }]
-          )
-        }
-      end
-
-      action = volume_obj.resize(size: new_size)
-      expect(expectation.times_called).to eq(1)
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.command).to eq('resize_volume')
-      expect(action.resources[0]['id']).to eq(volume[:id])
+      test_action(:resize, :resize_volume, params: { size: new_size })
     end
   end
 end
