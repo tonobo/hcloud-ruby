@@ -22,7 +22,7 @@ describe Hcloud::Volume, doubles: :volume do
   end
 
   include_examples 'it_supports_fetch', described_class
-  include_examples 'it_supports_search', described_class, %i[name label_selector]
+  include_examples 'it_supports_search', described_class, %i[status name label_selector]
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class

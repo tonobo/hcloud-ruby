@@ -22,7 +22,7 @@ describe Hcloud::Image, doubles: :image do
 
   include_examples 'it_supports_fetch', described_class
   include_examples 'it_supports_search', described_class, \
-                   %i[type bound_to name label_selector]
+                   %i[type status bound_to include_deprecated name label_selector]
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { description: 'new description' }
   include_examples 'it_supports_destroy', described_class

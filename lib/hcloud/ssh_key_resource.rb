@@ -2,7 +2,7 @@
 
 module Hcloud
   class SSHKeyResource < AbstractResource
-    filter_attributes :name, :label_selector
+    filter_attributes :name, :label_selector, :fingerprint
 
     def [](arg)
       case arg

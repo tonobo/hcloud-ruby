@@ -2,7 +2,7 @@
 
 module Hcloud
   class VolumeResource < AbstractResource
-    filter_attributes :name, :label_selector
+    filter_attributes :name, :label_selector, :status
 
     def [](arg)
       case arg
