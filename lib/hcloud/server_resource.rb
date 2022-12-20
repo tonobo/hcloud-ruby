@@ -13,6 +13,7 @@ module Hcloud
                start_after_create: nil,
                ssh_keys: [],
                networks: [],
+               placement_group: nil,
                user_data: nil,
                labels: {})
       prepare_request('servers', j: COLLECT_ARGS.call(__method__, binding),

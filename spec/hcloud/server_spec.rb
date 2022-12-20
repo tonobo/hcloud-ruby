@@ -33,6 +33,20 @@ RSpec.describe Hcloud::Server, doubles: :server do
     expect(client.servers.count).to eq(0)
   end
 
+  it 'has typed attributes' do
+    stub_item(:servers, server)
+
+    obj = client.servers[server[:id]]
+
+    expect(obj.created).to be_a Time
+    expect(obj.datacenter).to be_a Hcloud::Datacenter
+    expect(obj.image).to be_a Hcloud::Image unless obj.image.nil?
+    expect(obj.iso).to be_a Hcloud::Iso unless obj.iso.nil?
+    expect(obj.placement_group).to be_a Hcloud::PlacementGroup unless obj.placement_group.nil?
+    expect(obj.server_type).to be_a Hcloud::ServerType
+    expect(obj.volumes).to all be_a Hcloud::Volume
+  end
+
   it 'create new server, handle missing name' do
     expect { client.servers.create(server_type: 'cx11', image: 1) }.to(
       raise_error(ArgumentError)
@@ -62,38 +76,63 @@ RSpec.describe Hcloud::Server, doubles: :server do
     )
   end
 
-  it 'create new server' do
-    related_action = new_action.merge(action_status(:running))
-    stub_collection("servers/#{servers[0][:id]}/actions", [related_action], resource_name: :actions)
-    stub('servers') do |_request, _page_info|
-      {
-        body: {
-          server: servers[0],
-          action: related_action,
-          root_password: :moo,
-          next_actions: [new_action(:running, command: 'start_server')]
-        },
-        code: 201
-      }
+  context '#create' do
+    it 'with required parameters' do
+      related_action = new_action.merge(action_status(:running))
+      stub_collection("servers/#{servers[0][:id]}/actions", [related_action], resource_name: :actions)
+      stub('servers') do |_request, _page_info|
+        {
+          body: {
+            server: servers[0],
+            action: related_action,
+            root_password: :moo,
+            next_actions: [new_action(:running, command: 'start_server')]
+          },
+          code: 201
+        }
+      end
+      action, server, pass, next_actions = nil
+      expect do
+        action, server, pass, next_actions = client.servers.create(
+          name: 'moo', server_type: 'cx11', image: 1
+        )
+      end.not_to(raise_error)
+      expect(action).to be_a Hcloud::Action
+      expect(next_actions).to all be_a Hcloud::Action
+
+      expect(server.actions.count).to eq(1)
+      expect(server.id).to be_a Integer
+      expect(server.rescue_enabled).to be servers[0][:rescue_enabled]
+      expect(server.datacenter.id).to eq(servers[0].dig(:datacenter, :id))
+      expect(server.created).to be_a Time
+      expect(action.status).to eq('running')
+      expect(pass).to eq('moo')
+      expect(server.volumes).to be_a Array
+      expect(server.private_net).to_not be_empty
     end
-    action, server, pass, next_actions = nil
-    expect do
-      action, server, pass, next_actions = client.servers.create(name: 'moo', server_type: 'cx11', image: 1)
-    end.not_to(raise_error)
-    expect(action).to be_a Hcloud::Action
-    expect(next_actions).to all be_a Hcloud::Action
 
-    expect(server.actions.count).to eq(1)
-    expect(server.id).to be_a Integer
-    expect(server.rescue_enabled).to be servers[0][:rescue_enabled]
-    expect(server.datacenter.id).to eq(servers[0].dig(:datacenter, :id))
-    expect(server.created).to be_a Time
-    expect(action.status).to eq('running')
-    expect(pass).to eq('moo')
-    expect(server.volumes).to be_a Array
-    expect(server.volumes).to be_empty
+    it 'with placement_group' do
+      params = { name: 'moo', server_type: 'cx11', image: 1, placement_group: 42 }
 
-    expect(server.private_net).to_not be_empty
+      expectation = stub('servers', :post) do |request, _page_info|
+        expect(request).to have_body_params(a_hash_including({ 'placement_group' => 42 }))
+
+        {
+          body: {
+            # make sure that even though we create a new random server, the placement group
+            # has the right ID in the response
+            server: new_server(placement_group: { id: 42 }),
+            action: new_action.merge(action_status(:running)),
+            root_password: :moo
+          },
+          code: 201
+        }
+      end
+
+      _action, server, _pass, _next_actions = client.servers.create(**params)
+      expect(expectation.times_called).to eq(1)
+      expect(server.placement_group.id).to eq(42)
+    end
   end
 
   it 'get server with volumes' do

@@ -110,22 +110,7 @@ RSpec.shared_context 'servers doubles' do
         :running, :initializing, :starting, :stopping, :off, :deleting, :migrating, :rebuilding, :unknown
       ),
       created: Faker::Time.backward,
-      public_net: {
-        ipv4: {
-          ip: Faker::Internet.ip_v4_address,
-          blocked: random_choice(true, false),
-          dns_ptr: Faker::Internet.domain_name
-        },
-        ipv6: {
-          ip: Faker::Internet.ip_v6_cidr,
-          blocked: random_choice(true, false),
-          dns_ptr: random_choice(
-            [],
-            [{ ip: Faker::Internet.ip_v6_address, dns_ptr: Faker::Internet.domain_name }]
-          )
-        },
-        floating_ips: []
-      },
+      public_net: new_server_public_net,
       private_net: [{
         alias_ips: [],
         ip: '10.0.0.2',
@@ -143,8 +128,30 @@ RSpec.shared_context 'servers doubles' do
       ingoing_traffic: Faker::Number.number,
       included_traffic: Faker::Number.number,
       protection: { delete: random_choice(true, false), rebuild: random_choice(true, false) },
+      placement_group: random_choice(nil, new_placement_group),
       labels: {},
-      volumes: []
+      volumes: Array.new(Faker::Number.within(range: 0..2)).map { new_volume }
     }.deep_merge(kwargs)
+  end
+
+  private
+
+  def new_server_public_net
+    {
+      ipv4: {
+        ip: Faker::Internet.ip_v4_address,
+        blocked: random_choice(true, false),
+        dns_ptr: Faker::Internet.domain_name
+      },
+      ipv6: {
+        ip: Faker::Internet.ip_v6_cidr,
+        blocked: random_choice(true, false),
+        dns_ptr: random_choice(
+          [],
+          [{ ip: Faker::Internet.ip_v6_address, dns_ptr: Faker::Internet.domain_name }]
+        )
+      },
+      floating_ips: []
+    }
   end
 end

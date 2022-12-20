@@ -12,6 +12,7 @@ module Hcloud
       datacenter: Datacenter,
       image: Image,
       iso: Iso,
+      placement_group: PlacementGroup,
       private_net: [Network],
       volumes: [Volume]
     )
