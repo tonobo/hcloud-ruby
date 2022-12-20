@@ -5,6 +5,7 @@ require 'spec_helper'
 
 describe Hcloud::LoadBalancer, doubles: :load_balancer do
   include_context 'test doubles'
+  include_context 'action tests'
 
   let :load_balancers do
     Array.new(Faker::Number.within(range: 5..30)).map { new_load_balancer }
@@ -19,34 +20,6 @@ describe Hcloud::LoadBalancer, doubles: :load_balancer do
 
   let :client do
     Hcloud::Client.new(token: 'secure')
-  end
-
-  def test_action(action_name, command_name = nil, params: nil)
-    command_name = action_name if command_name.nil?
-
-    expectation = stub_action(:load_balancers, load_balancer[:id], action_name) do |req, _info|
-      unless params.nil?
-        expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
-      end
-
-      {
-        action: build_action_resp(
-          command_name, :running,
-          resources: [{ id: load_balancer[:id], type: 'load_balancer' }]
-        )
-      }
-    end
-
-    action = if params.nil?
-               load_balancer_obj.send(action_name)
-             else
-               load_balancer_obj.send(action_name, **params)
-             end
-
-    expect(expectation.times_called).to eq(1)
-
-    expect(action).to be_a(Hcloud::Action)
-    expect(action.command).to eq(command_name.to_s)
   end
 
   it '#disable_public_interface' do

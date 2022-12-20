@@ -21,6 +21,9 @@ module Hcloud
   autoload :FloatingIP, 'hcloud/floating_ip'
   autoload :FloatingIPResource, 'hcloud/floating_ip_resource'
 
+  autoload :PrimaryIP, 'hcloud/primary_ip'
+  autoload :PrimaryIPResource, 'hcloud/primary_ip_resource'
+
   autoload :SSHKey, 'hcloud/ssh_key'
   autoload :SSHKeyResource, 'hcloud/ssh_key_resource'
 
