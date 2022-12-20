@@ -5,6 +5,7 @@ require 'spec_helper'
 
 describe Hcloud::PrimaryIP, doubles: :primary_ip do
   include_context 'test doubles'
+  include_context 'action tests'
 
   let :primary_ips do
     Array.new(Faker::Number.within(range: 20..150)).map { new_primary_ip }
@@ -19,39 +20,6 @@ describe Hcloud::PrimaryIP, doubles: :primary_ip do
   let :primary_ip_obj do
     stub_item(:primary_ips, primary_ip)
     client.primary_ips[primary_ip[:id]]
-  end
-
-  def generate_resources(other_resources)
-    resources = other_resources.to_a.map do |resource_name|
-      { id: 42, type: resource_name.to_s }
-    end
-    resources << { id: primary_ip[:id], type: 'primary_ip' }
-
-    resources
-  end
-
-  def test_action(action, command = nil, params: nil, additional_resources: nil)
-    command ||= action
-
-    stub = stub_action(:primary_ips, primary_ip[:id], action) do |req, _info|
-      unless params.nil?
-        expect(req).to have_body_params(a_hash_including(params.deep_stringify_keys))
-      end
-
-      {
-        action: build_action_resp(
-          command,
-          :running,
-          resources: generate_resources(additional_resources)
-        )
-      }
-    end
-
-    action = primary_ip_obj.send(action, **params.to_h)
-
-    expect(stub.times_called).to eq(1)
-    expect(action).to be_a(Hcloud::Action)
-    expect(action.command).to eq(command.to_s)
   end
 
   context '#assign' do
