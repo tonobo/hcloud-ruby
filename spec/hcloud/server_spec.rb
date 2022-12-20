@@ -44,7 +44,7 @@ RSpec.describe Hcloud::Server, doubles: :server do
   it 'create new server, handle invalid name' do
     stub('servers') do |request, _page_info|
       expect(request.options[:method]).to eq(:post)
-      expect(Oj.load(request.options[:body], symbol_keys: true)).to include(
+      expect(Oj.load(request.options[:body], symbol_keys: true, mode: :compat)).to include(
         server_type: 'cx11',
         image: 1,
         name: 'moo_moo'
