@@ -94,6 +94,10 @@ module Hcloud
       FloatingIPResource.new(client: self)
     end
 
+    def primary_ips
+      PrimaryIPResource.new(client: self)
+    end
+
     def networks
       NetworkResource.new(client: self)
     end
