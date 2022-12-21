@@ -13,7 +13,7 @@ module Hcloud
   autoload :EntryLoader, 'hcloud/entry_loader'
 
   autoload :Pricing, 'hcloud/pricing'
-  autoload :PricingResource, 'hcloud/pricing_resource'
+  autoload :PriceMatrix, 'hcloud/price_matrix'
 
   autoload :Server, 'hcloud/server'
   autoload :ServerResource, 'hcloud/server_resource'

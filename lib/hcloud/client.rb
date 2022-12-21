@@ -54,8 +54,8 @@ module Hcloud
       false
     end
 
-    def pricings
-      PricingResource.new(client: self)
+    def pricing
+      @pricing ||= Pricing.new(self)
     end
 
     def servers
