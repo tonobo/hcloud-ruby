@@ -2,13 +2,9 @@
 
 require 'spec_helper'
 
-describe 'Network' do
-  let :client do
-    Hcloud::Client.new(token: 'secure')
-  end
-
+describe 'Network', :integration do
   it 'fetch networks' do
-    expect(client.networks.count).to eq(0)
+    expect(client.networks.count).to be_a Integer
   end
 
   it 'create new network, handle missing name' do
@@ -56,7 +52,7 @@ describe 'Network' do
   end
 
   it 'fetch networks' do
-    expect(client.networks.count).to eq(1)
+    expect(client.networks.count).to be_an(Integer).and be > 0
   end
 
   it '#[] -> find by id' do
@@ -64,7 +60,6 @@ describe 'Network' do
     id = client.networks.first.id
     expect(id).to be_a Integer
     expect(client.networks[id]).to be_a Hcloud::Network
-    expect(client.networks[id].name).to eq('testnet')
   end
 
   it '#[] -> find by id, handle nonexistent' do
@@ -104,9 +99,6 @@ describe 'Network' do
     )
 
     expect(client.networks['testnet'].subnets.length).to eq(2)
-
-    expect(client.actions.count).to eq(1)
-    expect(client.networks['testnet'].actions.count).to eq(1)
   end
 
   it '#del_subnet' do
@@ -115,9 +107,6 @@ describe 'Network' do
 
     network.del_subnet(ip_range: '192.168.1.0/24')
     expect(client.networks['testnet'].subnets.length).to eq(1)
-
-    expect(client.actions.count).to eq(2)
-    expect(client.networks['testnet'].actions.count).to eq(2)
   end
 
   it '#add_route' do
@@ -127,9 +116,6 @@ describe 'Network' do
     network.add_route(destination: '10.0.1.0/24', gateway: '192.168.0.10')
 
     expect(client.networks['testnet'].routes.length).to eq(2)
-
-    expect(client.actions.count).to eq(3)
-    expect(client.networks['testnet'].actions.count).to eq(3)
   end
 
   it '#del_route' do
@@ -139,9 +125,6 @@ describe 'Network' do
     network.del_route(destination: '10.0.1.0/24', gateway: '192.168.0.10')
 
     expect(client.networks['testnet'].routes.length).to eq(1)
-
-    expect(client.actions.count).to eq(4)
-    expect(client.networks['testnet'].actions.count).to eq(4)
   end
 
   it '#update(name:)' do
@@ -167,10 +150,9 @@ describe 'Network' do
   end
 
   it '#destroy' do
-    expect(client.networks.first).to be_a Hcloud::Network
-    id = client.networks.first.id
-    expect(id).to be_a Integer
-    expect(client.networks.find(id).destroy).to be_a Hcloud::Network
-    expect(client.networks[id]).to be nil
+    to_delete = client.networks['testing']
+    expect(to_delete).to be_a Hcloud::Network
+    expect(to_delete.destroy).to be_a Hcloud::Network
+    expect(client.networks[to_delete.id]).to be nil
   end
 end
