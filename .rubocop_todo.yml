@@ -6,13 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 3
-Lint/ShadowingOuterLocalVariable:
-  Exclude:
-    - 'spec/fake_service/datacenter.rb'
-    - 'spec/fake_service/location.rb'
-    - 'spec/fake_service/server_type.rb'
-
 # Offense count: 1
 # Configuration parameters: AllowKeywordBlockArguments.
 Lint/UnderscorePrefixedVariableName:
@@ -42,4 +35,3 @@ Metrics/PerceivedComplexity:
 Naming/MethodParameterName:
   Exclude:
     - 'lib/hcloud/abstract_resource.rb'
-    - 'spec/fake_service/action.rb'
