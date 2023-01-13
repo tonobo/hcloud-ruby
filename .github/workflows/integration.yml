@@ -1,5 +1,5 @@
 name: hcloud-ruby integration tests
-on: [workflow_dispatch]
+on: [push]
 
 jobs:
   test:
@@ -17,3 +17,5 @@ jobs:
           bundler-cache: true
       - name: Run integration tests
         run: bundle exec rspec -t integration
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
