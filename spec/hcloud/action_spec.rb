@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Hcloud::Action, doubles: :action do
-  include_context 'test doubles'
-
   let :actions do
     Array.new(Faker::Number.within(range: 20..150)).map { new_action }
   end

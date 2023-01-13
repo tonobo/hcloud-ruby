@@ -10,8 +10,6 @@ require 'support/it_supports_labels_on_update'
 require 'support/it_supports_action_fetch'
 
 RSpec.describe Hcloud::Server, doubles: :server do
-  include_context 'test doubles'
-
   let :servers do
     Array.new(Faker::Number.within(range: 20..150)).map { new_server }
   end

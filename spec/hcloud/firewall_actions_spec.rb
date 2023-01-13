@@ -4,8 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Firewall, doubles: :firewall do
-  include_context 'test doubles'
-
   let :firewalls do
     Array.new(Faker::Number.within(range: 20..150)).map { new_firewall }
   end

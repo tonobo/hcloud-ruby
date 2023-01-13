@@ -4,8 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Image, doubles: :image do
-  include_context 'test doubles'
-
   let :images do
     Array.new(Faker::Number.within(range: 20..150)).map { new_image }
   end

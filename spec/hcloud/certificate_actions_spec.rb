@@ -4,8 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Certificate, doubles: :certificate do
-  include_context 'test doubles'
-
   let :certificates do
     Array.new(Faker::Number.within(range: 10..50)).map { new_certificate }
   end

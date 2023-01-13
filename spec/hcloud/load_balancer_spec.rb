@@ -10,8 +10,6 @@ require 'support/it_supports_labels_on_update'
 require 'support/it_supports_metrics'
 
 describe Hcloud::LoadBalancer, doubles: :load_balancer do
-  include_context 'test doubles'
-
   let :load_balancers do
     Array.new(Faker::Number.within(range: 10..50)).map { new_load_balancer }
   end

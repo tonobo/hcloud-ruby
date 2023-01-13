@@ -4,8 +4,6 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Volume, doubles: :volume do
-  include_context 'test doubles'
-
   let :volumes do
     Array.new(Faker::Number.within(range: 20..150)).map { new_volume }
   end
