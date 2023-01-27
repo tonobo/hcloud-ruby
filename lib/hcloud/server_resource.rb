@@ -20,7 +20,10 @@ module Hcloud
         [
           Action.new(client, response.parsed_json[:action]),
           Server.new(client, response.parsed_json[:server]),
-          response.parsed_json[:root_password]
+          response.parsed_json[:root_password],
+          response.parsed_json[:next_actions].to_a.map do |action|
+            Action.new(client, action)
+          end
         ]
       end
     end
