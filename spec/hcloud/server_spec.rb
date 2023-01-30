@@ -67,14 +67,22 @@ RSpec.describe Hcloud::Server, doubles: :server do
     stub_collection("servers/#{servers[0][:id]}/actions", [related_action], resource_name: :actions)
     stub('servers') do |_request, _page_info|
       {
-        body: { server: servers[0], action: related_action, root_password: :moo },
+        body: {
+          server: servers[0],
+          action: related_action,
+          root_password: :moo,
+          next_actions: [new_action(:running, command: 'start_server')]
+        },
         code: 201
       }
     end
-    action, server, pass = nil
+    action, server, pass, next_actions = nil
     expect do
-      action, server, pass = client.servers.create(name: 'moo', server_type: 'cx11', image: 1)
+      action, server, pass, next_actions = client.servers.create(name: 'moo', server_type: 'cx11', image: 1)
     end.not_to(raise_error)
+    expect(action).to be_a Hcloud::Action
+    expect(next_actions).to all be_a Hcloud::Action
+
     expect(server.actions.count).to eq(1)
     expect(server.id).to be_a Integer
     expect(server.rescue_enabled).to be servers[0][:rescue_enabled]
