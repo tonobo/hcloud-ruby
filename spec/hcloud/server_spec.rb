@@ -75,11 +75,25 @@ RSpec.describe Hcloud::Server, doubles: :server do
     expect(obj.public_net[:ipv6]).to be_a Hcloud::Future
     expect(obj.public_net[:ipv6].__getobj__).to be_a Hcloud::PrimaryIP
 
-    # TODO: "firewalls" has a bit an inconvenient structure for us, I guess we do NOT want to
-    #       have the loaded Firewall under the "id" key?
-    firewalls = obj.public_net[:firewalls].map { |firewall| firewall[:id] }
-    expect(firewalls).to all be_a Hcloud::Future
-    expect(firewalls.map(&:__getobj__)).to all be_a Hcloud::Firewall
+    expect(obj.public_net[:firewalls]).to all be_a Hcloud::Future
+    expect(obj.public_net[:firewalls].map(&:__getobj__)).to all be_a Hcloud::Firewall
+  end
+
+  it 'can access raw values for typed attributes' do
+    # "firewalls" info of a server contains an additional field "status" that we hide by
+    # presenting a Firewall object to the user
+    stub_item(:servers, server)
+
+    firewall_id = Faker::Number.number
+    server[:public_net][:firewalls] = [{ id: firewall_id, status: 'applied' }]
+
+    server[:public_net][:firewalls].map { |firewall| firewall[:id] }.each do |fwid|
+      stub_item(:firewalls, new_firewall(id: fwid))
+    end
+
+    obj = client.servers[server[:id]]
+
+    expect(obj.public_net[:firewalls][0].raw_data).to eq({ id: firewall_id, status: 'applied' })
   end
 
   it 'create new server, handle missing name' do

@@ -4,10 +4,13 @@ require 'active_support/core_ext/string/inflections'
 
 module Hcloud
   class Future < Delegator
+    attr_reader :raw_data
+
     # rubocop: disable Lint/MissingSuper
-    def initialize(client, target_class, id)
+    def initialize(client, target_class, id, raw_data: nil)
       @target_class = target_class
       @id = id
+      @raw_data = raw_data
       @__client = client
     end
     # rubocop: enable Lint/MissingSuper

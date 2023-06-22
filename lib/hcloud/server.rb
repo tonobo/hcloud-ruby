@@ -23,7 +23,12 @@ module Hcloud
           Future.new(client, PrimaryIP, data[:id]) if data.to_h[:id].is_a?(Integer)
         end,
         floating_ips: [FloatingIP],
-        firewalls: [{ id: Firewall }]
+        firewalls: [
+          lambda do |data, client|
+            Future.new(client, Firewall, data[:id], raw_data: data) if data.to_h[:id].is_a?(Integer)
+          end
+        ]
+        # firewalls: [{ id: Firewall }]
       },
       volumes: [Volume]
     )
