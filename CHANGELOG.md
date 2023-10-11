@@ -1,5 +1,35 @@
 # Changelog
 
+## [v1.2.0](https://github.com/tonobo/hcloud-ruby/tree/v1.2.0) (2023-10-10)
+
+[Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v1.1.0...v1.2.0)
+
+**Closed issues:**
+
+- \[Feature\] Add Primary IPs [\#57](https://github.com/tonobo/hcloud-ruby/issues/57)
+- \[Feature\] Add Primary IPs [\#56](https://github.com/tonobo/hcloud-ruby/issues/56)
+- \[Bug\] Firewalls do not expose actions [\#54](https://github.com/tonobo/hcloud-ruby/issues/54)
+- \[Bug\] IPv6 global address is not parsed correctly [\#49](https://github.com/tonobo/hcloud-ruby/issues/49)
+- \[Feature\] Add LoadBalancers and -Types [\#29](https://github.com/tonobo/hcloud-ruby/issues/29)
+- \[Feature\] Add PlacementGroups [\#27](https://github.com/tonobo/hcloud-ruby/issues/27)
+- \[Feature\] Add Certificates [\#26](https://github.com/tonobo/hcloud-ruby/issues/26)
+- \[Feature\] Add Firewalls [\#25](https://github.com/tonobo/hcloud-ruby/issues/25)
+
+**Merged pull requests:**
+
+- lib: import active\_support before cherry-picking imports [\#77](https://github.com/tonobo/hcloud-ruby/pull/77) ([aufziehvogel](https://github.com/aufziehvogel))
+- Dependencies: Drop rake, as it's unnecessary [\#74](https://github.com/tonobo/hcloud-ruby/pull/74) ([Kjarrigan](https://github.com/Kjarrigan))
+- server: return `next_actions` data on create [\#72](https://github.com/tonobo/hcloud-ruby/pull/72) ([aufziehvogel](https://github.com/aufziehvogel))
+- lib: implement primary IPs [\#65](https://github.com/tonobo/hcloud-ruby/pull/65) ([aufziehvogel](https://github.com/aufziehvogel))
+- lib: implement certificates [\#64](https://github.com/tonobo/hcloud-ruby/pull/64) ([aufziehvogel](https://github.com/aufziehvogel))
+- spec: include context doubles for doubles tests [\#63](https://github.com/tonobo/hcloud-ruby/pull/63) ([aufziehvogel](https://github.com/aufziehvogel))
+- fix: return actions info on firewall create [\#59](https://github.com/tonobo/hcloud-ruby/pull/59) ([aufziehvogel](https://github.com/aufziehvogel))
+- fix: do not interpret leading : in JSON as symbol [\#58](https://github.com/tonobo/hcloud-ruby/pull/58) ([aufziehvogel](https://github.com/aufziehvogel))
+- lib: implement load balancer [\#55](https://github.com/tonobo/hcloud-ruby/pull/55) ([aufziehvogel](https://github.com/aufziehvogel))
+- implement double tests for existing resources [\#53](https://github.com/tonobo/hcloud-ruby/pull/53) ([aufziehvogel](https://github.com/aufziehvogel))
+- Add PlacementGroup [\#52](https://github.com/tonobo/hcloud-ruby/pull/52) ([aufziehvogel](https://github.com/aufziehvogel))
+- firewall: please linter [\#51](https://github.com/tonobo/hcloud-ruby/pull/51) ([RaphaelPour](https://github.com/RaphaelPour))
+
 ## [v1.1.0](https://github.com/tonobo/hcloud-ruby/tree/v1.1.0) (2022-11-29)
 
 [Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v1.0.3...v1.1.0)
@@ -12,6 +42,7 @@
 
 **Merged pull requests:**
 
+- version: bump to v1.1.0 [\#50](https://github.com/tonobo/hcloud-ruby/pull/50) ([aufziehvogel](https://github.com/aufziehvogel))
 - handle action array responses for firewall actions [\#48](https://github.com/tonobo/hcloud-ruby/pull/48) ([aufziehvogel](https://github.com/aufziehvogel))
 - fix auto pagination test to always use three pages [\#47](https://github.com/tonobo/hcloud-ruby/pull/47) ([aufziehvogel](https://github.com/aufziehvogel))
 - label support \(create, update, search\) [\#45](https://github.com/tonobo/hcloud-ruby/pull/45) ([aufziehvogel](https://github.com/aufziehvogel))
