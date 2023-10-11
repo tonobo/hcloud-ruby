@@ -25,6 +25,10 @@ RSpec.shared_examples 'it_supports_metrics' do |resource, metrics|
         end: params[:end],
         step: step,
         time_series: {
+          # In reality the time series name does not necessarily have to be the same
+          # as the queried type. E.g. server metrics for the type "network" returns multiple time
+          # series called "network.0.pps.in", "network.0.pps.out" and so on. But for our unit
+          # tests returning a single time series is enough at the moment.
           params[:type].to_sym => {
             # generate a random length list of a few random values
             values: Array.new(Faker::Number.within(range: 0..100)).map.with_index do |_, idx|

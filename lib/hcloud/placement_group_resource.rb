@@ -2,7 +2,7 @@
 
 module Hcloud
   class PlacementGroupResource < AbstractResource
-    filter_attributes :type, :name
+    filter_attributes :type, :name, :label_selector
 
     bind_to PlacementGroup
 

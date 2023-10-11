@@ -12,7 +12,24 @@ module Hcloud
       datacenter: Datacenter,
       image: Image,
       iso: Iso,
+      load_balancers: [LoadBalancer],
+      placement_group: PlacementGroup,
       private_net: [Network],
+      public_net: {
+        ipv4: lambda do |data, client|
+          Future.new(client, PrimaryIP, data[:id]) if data.to_h[:id].is_a?(Integer)
+        end,
+        ipv6: lambda do |data, client|
+          Future.new(client, PrimaryIP, data[:id]) if data.to_h[:id].is_a?(Integer)
+        end,
+        floating_ips: [FloatingIP],
+        firewalls: [
+          lambda do |data, client|
+            Future.new(client, Firewall, data[:id], raw_data: data) if data.to_h[:id].is_a?(Integer)
+          end
+        ]
+        # firewalls: [{ id: Firewall }]
+      },
       volumes: [Volume]
     )
 
@@ -21,6 +38,7 @@ module Hcloud
     destructible
 
     has_actions
+    has_metrics
 
     def enable_rescue(type: 'linux64', ssh_keys: [])
       query = COLLECT_ARGS.call(__method__, binding)
@@ -73,10 +91,30 @@ module Hcloud
       prepare_request('actions/detach_from_network', j: { network: network })
     end
 
+    def add_to_placement_group(placement_group:)
+      raise Hcloud::Error::InvalidInput, 'no placement_group given' if placement_group.nil?
+
+      prepare_request('actions/add_to_placement_group', j: COLLECT_ARGS.call(__method__, binding))
+    end
+
+    def change_alias_ips(alias_ips:, network:)
+      raise Hcloud::Error::InvalidInput, 'no alias_ips given' if alias_ips.to_a.count.zero?
+      raise Hcloud::Error::InvalidInput, 'no network given' if network.nil?
+
+      prepare_request('actions/change_alias_ips', j: COLLECT_ARGS.call(__method__, binding))
+    end
+
+    def change_dns_ptr(ip:, dns_ptr:)
+      raise Hcloud::Error::InvalidInput, 'no IP given' if ip.blank?
+      raise Hcloud::Error::InvalidInput, 'no dns_ptr given' if dns_ptr.blank?
+
+      prepare_request('actions/change_dns_ptr', j: COLLECT_ARGS.call(__method__, binding))
+    end
+
     %w[
       poweron poweroff shutdown reboot reset
       disable_rescue disable_backup detach_iso
-      request_console
+      request_console remove_from_placement_group
     ].each do |action|
       define_method(action) do
         prepare_request("actions/#{action}", method: :post)

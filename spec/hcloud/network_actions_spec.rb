@@ -4,6 +4,9 @@ require 'active_support/all'
 require 'spec_helper'
 
 describe Hcloud::Network, doubles: :network do
+  include_context 'test doubles'
+  include_context 'action tests'
+
   let :networks do
     Array.new(Faker::Number.within(range: 20..150)).map { new_network }
   end
@@ -33,25 +36,7 @@ describe Hcloud::Network, doubles: :network do
     end
 
     it 'works' do
-      expectation = stub_action(:networks, network[:id], :add_route) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including(
-            { 'destination' => '192.168.0.0/24', 'gateway' => '192.168.2.2' }
-          )
-        )
-
-        {
-          action: build_action_resp(
-            :add_route, :running,
-            resources: [{ id: network[:id], type: 'network' }]
-          )
-        }
-      end
-
-      action = network_obj.add_route(destination: '192.168.0.0/24', gateway: '192.168.2.2')
-      expect(expectation.times_called).to eq(1)
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.resources[0]['id']).to eq(network[:id])
+      test_action(:add_route, params: { destination: '192.168.0.0/24', gateway: '192.168.2.2' })
     end
   end
 
@@ -109,27 +94,10 @@ describe Hcloud::Network, doubles: :network do
     end
 
     it 'works' do
-      expectation = stub_action(:networks, network[:id], :add_subnet) do |req, _info|
-        expect(req).to have_body_params(
-          a_hash_including(
-            { 'ip_range' => '10.0.0.0/24', 'network_zone' => 'eu-central', 'type' => 'cloud' }
-          )
-        )
-
-        {
-          action: build_action_resp(
-            :add_subnet, :running,
-            resources: [{ id: network[:id], type: 'network' }]
-          )
-        }
-      end
-
-      action = network_obj.add_subnet(
-        ip_range: '10.0.0.0/24', network_zone: 'eu-central', type: 'cloud'
+      test_action(
+        :add_subnet,
+        params: { ip_range: '10.0.0.0/24', network_zone: 'eu-central', type: 'cloud' }
       )
-      expect(expectation.times_called).to eq(1)
-      expect(action).to be_a(Hcloud::Action)
-      expect(action.resources[0]['id']).to eq(network[:id])
     end
   end
 
@@ -156,6 +124,24 @@ describe Hcloud::Network, doubles: :network do
       expect(expectation.times_called).to eq(1)
       expect(action).to be_a(Hcloud::Action)
       expect(action.resources[0]['id']).to eq(network[:id])
+    end
+  end
+
+  context '#change_ip_range' do
+    it 'handles missing ip_range' do
+      expect do
+        network_obj.change_ip_range(ip_range: nil)
+      end.to raise_error Hcloud::Error::InvalidInput
+    end
+
+    it 'works' do
+      test_action(:change_ip_range, params: { ip_range: '10.0.0.0/24' })
+    end
+  end
+
+  context '#change_protection' do
+    it 'works' do
+      test_action(:change_protection, params: { delete: true })
     end
   end
 end

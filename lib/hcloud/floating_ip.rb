@@ -12,7 +12,7 @@ module Hcloud
     )
 
     protectable :delete
-    updatable :description
+    updatable :name, :description
     destructible
 
     has_actions

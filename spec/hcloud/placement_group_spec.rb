@@ -20,7 +20,7 @@ describe Hcloud::PlacementGroup, doubles: :placement_group do
   end
 
   include_examples 'it_supports_fetch', described_class
-  include_examples 'it_supports_search', described_class, %i[name type]
+  include_examples 'it_supports_search', described_class, %i[name label_selector type]
   include_examples 'it_supports_find_by_id_and_name', described_class
   include_examples 'it_supports_update', described_class, { name: 'new_name' }
   include_examples 'it_supports_destroy', described_class

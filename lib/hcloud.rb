@@ -12,6 +12,7 @@ module Hcloud
   autoload :TyphoeusExt, 'hcloud/typhoeus_ext'
   autoload :AbstractResource, 'hcloud/abstract_resource'
   autoload :EntryLoader, 'hcloud/entry_loader'
+  autoload :ResourceLoader, 'hcloud/resource_loader'
 
   autoload :Server, 'hcloud/server'
   autoload :ServerResource, 'hcloud/server_resource'

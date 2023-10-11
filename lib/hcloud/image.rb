@@ -15,6 +15,8 @@ module Hcloud
     updatable :description, :type
     destructible
 
+    has_actions
+
     def to_snapshot
       update(type: 'snapshot')
     end
