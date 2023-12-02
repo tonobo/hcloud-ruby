@@ -12,7 +12,7 @@ module Hcloud
       def bind_to(klass)
         resource = self
         %w[find find_by where all [] page limit per_page order
-           to_a count pagnation each].each do |method|
+           to_a count pagnation each delete].each do |method|
           klass.define_singleton_method(method) do |*args, &block|
             resource.new(client: Client.connection).public_send(method, *args, &block)
           end
@@ -147,6 +147,15 @@ module Hcloud
       return :auto if client.auto_pagination
 
       run.response.pagination
+    end
+
+    def delete(id)
+      prepare_request(
+        [self.class.resource_url, id].join('/'),
+        resource_path: resource_path.to_s.singularize,
+        resource_class: self.class.resource,
+        method: :delete
+      )
     end
 
     protected

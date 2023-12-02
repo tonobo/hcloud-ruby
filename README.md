@@ -142,3 +142,9 @@ Hcloud::Error::UniquenessError: server name is already used
 c.servers.first.destroy
 #=> #<Hcloud::Action>
 ```
+
+or 
+
+```ruby
+c.servers.delete(server_id)
+```
