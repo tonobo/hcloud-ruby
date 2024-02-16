@@ -12,7 +12,7 @@ module Hcloud
       def bind_to(klass)
         resource = self
         %w[find find_by where all [] page limit per_page order
-           to_a count pagination each].each do |method|
+           to_a count pagnation pagination each].each do |method|
           klass.define_singleton_method(method) do |*args, &block|
             resource.new(client: Client.connection).public_send(method, *args, &block)
           end
