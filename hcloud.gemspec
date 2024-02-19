@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'webmock'
   spec.add_runtime_dependency 'activemodel'
+  spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'oj'
   spec.add_runtime_dependency 'typhoeus'
 end
