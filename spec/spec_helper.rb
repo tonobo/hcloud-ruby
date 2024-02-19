@@ -5,14 +5,19 @@ require 'active_support/all'
 require 'pry'
 
 require 'simplecov'
-SimpleCov.start
+SimpleCov.start do
+  # integration tests are only run manually and thus these files will
+  # not be part of the automatic codecov report
+  add_filter 'spec/integration'
+  add_filter 'spec/support/integration.rb'
+end
 
 require 'codecov'
 SimpleCov.formatter = SimpleCov::Formatter::Codecov
 
-require_relative './fake_service/base'
 require_relative './doubles/base'
 require_relative './doubles/action_tests'
+require_relative './support/integration'
 require_relative './support/typhoeus_ext'
 require_relative './support/matchers'
 
@@ -35,17 +40,5 @@ RSpec.configure do |c|
   Faker::Config.random = Random.new(c.seed)
 
   c.include_context 'test doubles', :doubles
-
-  if ENV['LEGACY_TESTS']
-    require 'webmock/rspec'
-    c.before(:each) do
-      stub_request(:any, /api.hetzner.cloud/).to_rack(Hcloud::FakeService::Base)
-    end
-
-    c.after(:all) do
-      # Action holds the record of all executed actions (which can be queried
-      # on the API). We need to delete this record after each example.
-      Hcloud::FakeService::Action.reset
-    end
-  end
+  c.include_context 'integration auth', :integration
 end

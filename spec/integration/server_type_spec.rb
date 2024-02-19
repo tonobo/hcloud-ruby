@@ -2,13 +2,9 @@
 
 require 'spec_helper'
 
-describe 'ServerType' do
-  let :client do
-    Hcloud::Client.new(token: 'secure')
-  end
-
+describe 'ServerType', :integration do
   it 'fetch server_types' do
-    expect(client.server_types.count).to eq(1)
+    expect(client.server_types.count).to be_an(Integer).and be > 0
   end
 
   it '#[] -> find by id' do
@@ -25,7 +21,7 @@ describe 'ServerType' do
   end
 
   it '#[] -> find by id, handle nonexistent' do
-    expect(client.ssh_keys[0]).to be nil
+    expect(client.server_types[0]).to be nil
   end
 
   it '#find -> find by id' do
@@ -56,6 +52,6 @@ describe 'ServerType' do
   end
 
   it '#[] -> filter by name, handle nonexistent' do
-    expect(client.ssh_keys['mooo']).to be nil
+    expect(client.ssh_keys[nonexistent_name]).to be nil
   end
 end

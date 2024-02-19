@@ -2,29 +2,23 @@
 
 require 'spec_helper'
 
-describe 'ISO' do
-  let :client do
-    Hcloud::Client.new(token: 'secure')
-  end
-
+describe 'ISO', :integration do
   it 'fetchs isos' do
-    expect(client.isos.count).to eq(1)
+    expect(client.isos.count).to be_an(Integer).and be > 0
   end
 
   it '#[] -> find by id' do
-    expect(client.isos.first).to be_a Hcloud::Iso
     id = client.isos.first.id
-    expect(id).to be_a Integer
+    expect(id).to be_an Integer
     expect(client.isos[id]).to be_a Hcloud::Iso
     expect(client.isos[id].id).to eq(id)
   end
 
   it '#[] -> find by id, handle nonexistent' do
-    expect(client.isos[3]).to be nil
+    expect(client.isos[-1]).to be nil
   end
 
   it '#find -> find by id' do
-    expect(client.isos.first).to be_a Hcloud::Iso
     id = client.isos.first.id
     expect(id).to be_a Integer
     expect(client.isos.find(id)).to be_a Hcloud::Iso
@@ -32,11 +26,10 @@ describe 'ISO' do
   end
 
   it '#find -> find by id, handle nonexistent' do
-    expect { client.isos.find(3).id }.to raise_error(Hcloud::Error::NotFound)
+    expect { client.isos.find(-1).id }.to raise_error(Hcloud::Error::NotFound)
   end
 
   it '#[] -> filter by name' do
-    expect(client.isos.first).to be_a Hcloud::Iso
     name = client.isos.first.name
     expect(name).to be_a String
     expect(client.isos[name]).to be_a Hcloud::Iso
@@ -44,11 +37,10 @@ describe 'ISO' do
   end
 
   it '#[] -> filter by name, handle nonexistent' do
-    expect(client.isos['mooo']).to be nil
+    expect(client.isos[nonexistent_name]).to be nil
   end
 
   it '#find_by -> filter by name' do
-    expect(client.isos.first).to be_a Hcloud::Iso
     name = client.isos.first.name
     expect(name).to be_a String
     expect(client.isos.find_by(name: name)).to be_a Hcloud::Iso
@@ -56,6 +48,6 @@ describe 'ISO' do
   end
 
   it '#find_by -> filter by name, handle nonexistent' do
-    expect(client.isos.find_by(name: 'moo')).to be nil
+    expect(client.isos.find_by(name: nonexistent_name)).to be nil
   end
 end

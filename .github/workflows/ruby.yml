@@ -35,5 +35,3 @@ jobs:
           bundler-cache: true
       - name: Run double tests
         run: bundle exec rspec -t doubles --order rand
-      - name: Run legacy tests
-        run: LEGACY_TESTS=y bundle exec rspec -t ~doubles
