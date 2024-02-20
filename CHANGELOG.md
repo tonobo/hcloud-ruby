@@ -1,11 +1,31 @@
 # Changelog
 
-## [v1.2.0](https://github.com/tonobo/hcloud-ruby/tree/v1.2.0) (2023-10-10)
+## [v1.3.0](https://github.com/tonobo/hcloud-ruby/tree/v1.3.0) (2024-02-20)
+
+[Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v1.2.0...v1.3.0)
+
+**Closed issues:**
+
+- \[Enhancement\] Add missing fields / endpoints to Images + Servers [\#30](https://github.com/tonobo/hcloud-ruby/issues/30)
+
+**Merged pull requests:**
+
+- fix activemodel in Gemfile.lock [\#87](https://github.com/tonobo/hcloud-ruby/pull/87) ([skoch-hc](https://github.com/skoch-hc))
+- Fix typo for pagination method [\#85](https://github.com/tonobo/hcloud-ruby/pull/85) ([coorasse](https://github.com/coorasse))
+- \(\#82\) fix undefined method `.blank?` [\#84](https://github.com/tonobo/hcloud-ruby/pull/84) ([bastelfreak](https://github.com/bastelfreak))
+- CI: Run on PRs and pushes to master [\#83](https://github.com/tonobo/hcloud-ruby/pull/83) ([bastelfreak](https://github.com/bastelfreak))
+- Dont list activemodel as dev- and runtime dep [\#80](https://github.com/tonobo/hcloud-ruby/pull/80) ([bastelfreak](https://github.com/bastelfreak))
+- version: bump to v1.2.0 [\#79](https://github.com/tonobo/hcloud-ruby/pull/79) ([aufziehvogel](https://github.com/aufziehvogel))
+- build\(deps\): bump rack from 3.0.1 to 3.0.6.1 [\#75](https://github.com/tonobo/hcloud-ruby/pull/75) ([dependabot[bot]](https://github.com/apps/dependabot))
+- add missing features to existing resources [\#60](https://github.com/tonobo/hcloud-ruby/pull/60) ([aufziehvogel](https://github.com/aufziehvogel))
+
+## [v1.2.0](https://github.com/tonobo/hcloud-ruby/tree/v1.2.0) (2023-10-11)
 
 [Full Changelog](https://github.com/tonobo/hcloud-ruby/compare/v1.1.0...v1.2.0)
 
 **Closed issues:**
 
+- question: could you point out the differences to other hcloud gem? [\#71](https://github.com/tonobo/hcloud-ruby/issues/71)
 - \[Feature\] Add Primary IPs [\#57](https://github.com/tonobo/hcloud-ruby/issues/57)
 - \[Feature\] Add Primary IPs [\#56](https://github.com/tonobo/hcloud-ruby/issues/56)
 - \[Bug\] Firewalls do not expose actions [\#54](https://github.com/tonobo/hcloud-ruby/issues/54)
@@ -17,6 +37,7 @@
 
 **Merged pull requests:**
 
+- version: bump to v1.2.0 [\#78](https://github.com/tonobo/hcloud-ruby/pull/78) ([aufziehvogel](https://github.com/aufziehvogel))
 - lib: import active\_support before cherry-picking imports [\#77](https://github.com/tonobo/hcloud-ruby/pull/77) ([aufziehvogel](https://github.com/aufziehvogel))
 - Dependencies: Drop rake, as it's unnecessary [\#74](https://github.com/tonobo/hcloud-ruby/pull/74) ([Kjarrigan](https://github.com/Kjarrigan))
 - server: return `next_actions` data on create [\#72](https://github.com/tonobo/hcloud-ruby/pull/72) ([aufziehvogel](https://github.com/aufziehvogel))
